@@ -1,63 +1,518 @@
 {
-"talents": {
-    "TAL_1": "Fliegen",
-    "TAL_2": "Gaukeleien",
-    "TAL_3": "Klettern",
-    "TAL_4": "Körperbeherschung",
-    "TAL_5": "Kraftakt",
-    "TAL_6": "Reiten",
-    "TAL_7": "Schwimmen",
-    "TAL_8": "Selbstbeherschung",
-    "TAL_9": "Singen",
-    "TAL_10": "Sinnesschärfe",
-    "TAL_11": "Tanzen",
-    "TAL_12": "Taschendiebstahl",
-    "TAL_13": "Verbergen",
-    "TAL_14": "Zechen",
-    "TAL_15": "Bekehren & Überzeugen",
-    "TAL_16": "Betören",
-    "TAL_17": "Einschüchtern",
-    "TAL_18": "Etikette",
-    "TAL_19": "Gassenwissen",
-    "TAL_20": "Menschenkenntnis",
-    "TAL_21": "Überreden",
-    "TAL_22": "Verkleiden",
-    "TAL_23": "Willenskraft",
-    "TAL_24": "Fährtensuchen",
-    "TAL_25": "Fesseln",
-    "TAL_26": "Fischen & Angeln",
-    "TAL_27": "Orientierung",
-    "TAL_28": "Pflanzenkunde",
-    "TAL_29": "Tierkunde",
-    "TAL_30": "Wildnisleben",
-    "TAL_31": "Brett- & Glücksspiel",
-    "TAL_32": "Geographie",
-    "TAL_33": "Geschichtswissen",
-    "TAL_34": "Götter & Kulte",
-    "TAL_35": "Kriegskunst",
-    "TAL_36": "Magiekunde",
-    "TAL_37": "Mechanik",
-    "TAL_38": "Rechnen",
-    "TAL_39": "Rechtskunde",
-    "TAL_40": "Sagen & Legenden",
-    "TAL_41": "Sphärenkunde",
-    "TAL_42": "Sternenkunde",
-    "TAL_43": "Alchimie",
-    "TAL_44": "Boote & Schiffe",
-    "TAL_45": "Fahrzeuge",
-    "TAL_46": "Handel",
-    "TAL_47": "Heilkunde Gift",
-    "TAL_48": "Heilkunde Krankheiten",
-    "TAL_49": "Heilkunde Seele",
-    "TAL_50": "Heilkunde Wunden",
-    "TAL_51": "Holzbearbeitung",
-    "TAL_52": "Lebensmittebearbeitung",
-    "TAL_53": "Lederbearbeitung",
-    "TAL_54": "Malen & Zeichnen",
-    "TAL_55": "Metallbearbeitung",
-    "TAL_56": "Musizieren",
-    "TAL_57": "Schlösserknacken",
-    "TAL_58": "Steinbearbeitung",
-    "TAL_59": "Stoffbearbeitung"
+    "Attribute": {
+        "ATTR_1": {
+            "name": "Mut",
+            "test": ["MU"]
+        },
+        "ATTR_2": {
+            "name": "Klugheit",
+            "test": ["KL"]
+        },
+        "ATTR_3": {
+            "name": "Intuition",
+            "test": ["IN"]
+        },
+        "ATTR_4": {
+            "name": "Charisma",
+            "test": ["CH"]
+        },
+        "ATTR_5": {
+            "name": "Fingerfertigkeit",
+            "test": ["FF"]
+        },
+        "ATTR_6": {
+            "name": "Gewandheit",
+            "test": ["GE"]
+        },
+        "ATTR_7": {
+            "name": "Konstitution",
+            "test": ["KO"]
+        },
+        "ATTR_8": {
+            "name": "Körperkraft",
+            "test": ["KK"]
+        }
+    },
+    "Körper": {
+        "TAL_1": {
+            "name": "Fliegen",
+            "test": [
+                "MU",
+                "IN",
+                "GE"
+            ]
+        },
+        "TAL_2": {
+            "name": "Gaukeleien",
+            "test": [
+                "MU",
+                "IN",
+                "GE"
+            ]
+        },
+        "TAL_3": {
+            "name": "Klettern",
+            "test": [
+                "MU",
+                "IN",
+                "GE"
+            ]
+        },
+        "TAL_4": {
+            "name": "Körperbeherschung",
+            "test": [
+                "MU",
+                "IN",
+                "GE"
+            ]
+        },
+        "TAL_5": {
+            "name": "Kraftakt",
+            "test": [
+                "MU",
+                "IN",
+                "GE"
+            ]
+        },
+        "TAL_6": {
+            "name": "Reiten",
+            "test": [
+                "MU",
+                "IN",
+                "GE"
+            ]
+        },
+        "TAL_7": {
+            "name": "Schwimmen",
+            "test": [
+                "MU",
+                "IN",
+                "GE"
+            ]
+        },
+        "TAL_8": {
+            "name": "Selbstbeherschung",
+            "test": [
+                "MU",
+                "IN",
+                "GE"
+            ]
+        },
+        "TAL_9": {
+            "name": "Singen",
+            "test": [
+                "MU",
+                "IN",
+                "GE"
+            ]
+        },
+        "TAL_10": {
+            "name": "Sinnesschärfe",
+            "test": [
+                "MU",
+                "IN",
+                "GE"
+            ]
+        },
+        "TAL_11": {
+            "name": "Tanzen",
+            "test": [
+                "MU",
+                "IN",
+                "GE"
+            ]
+        },
+        "TAL_12": {
+            "name": "Taschendiebstahl",
+            "test": [
+                "MU",
+                "IN",
+                "GE"
+            ]
+        },
+        "TAL_13": {
+            "name": "Verbergen",
+            "test": [
+                "MU",
+                "IN",
+                "GE"
+            ]
+        },
+        "TAL_14": {
+            "name": "Zechen",
+            "test": [
+                "MU",
+                "IN",
+                "GE"
+            ]
+        }
+    },
+    "Gesellschaft": {
+        "TAL_15": {
+            "name": "Bekehren & Überzeugen",
+            "test": [
+                "MU",
+                "IN",
+                "GE"
+            ]
+        },
+        "TAL_16": {
+            "name": "Betören",
+            "test": [
+                "MU",
+                "IN",
+                "GE"
+            ]
+        },
+        "TAL_17": {
+            "name": "Einschüchtern",
+            "test": [
+                "MU",
+                "IN",
+                "GE"
+            ]
+        },
+        "TAL_18": {
+            "name": "Etikette",
+            "test": [
+                "MU",
+                "IN",
+                "GE"
+            ]
+        },
+        "TAL_19": {
+            "name": "Gassenwissen",
+            "test": [
+                "MU",
+                "IN",
+                "GE"
+            ]
+        },
+        "TAL_20": {
+            "name": "Menschenkenntnis",
+            "test": [
+                "MU",
+                "IN",
+                "GE"
+            ]
+        },
+        "TAL_21": {
+            "name": "Überreden",
+            "test": [
+                "MU",
+                "IN",
+                "GE"
+            ]
+        },
+        "TAL_22": {
+            "name": "Verkleiden",
+            "test": [
+                "MU",
+                "IN",
+                "GE"
+            ]
+        },
+        "TAL_23": {
+            "name": "Willenskraft",
+            "test": [
+                "MU",
+                "IN",
+                "GE"
+            ]
+        }
+    },
+    "Natur": {
+        "TAL_24": {
+            "name": "Fährtensuchen",
+            "test": [
+                "MU",
+                "IN",
+                "GE"
+            ]
+        },
+        "TAL_25": {
+            "name": "Fesseln",
+            "test": [
+                "KL",
+                "FF",
+                "KK"
+            ]
+        },
+        "TAL_26": {
+            "name": "Fischen & Angeln",
+            "test": [
+                "FF",
+                "GE",
+                "KO"
+            ]
+        },
+        "TAL_27": {
+            "name": "Orientierung",
+            "test": [
+                "KL",
+                "IN",
+                "IN"
+            ]
+        },
+        "TAL_28": {
+            "name": "Pflanzenkunde",
+            "test": [
+                "KL",
+                "FF",
+                "KO"
+            ]
+        },
+        "TAL_29": {
+            "name": "Tierkunde",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_30": {
+            "name": "Wildnisleben",
+            "test": [
+                "MU",
+                "GE",
+                "KO"
+            ]
+        }
+    },
+    "Wissen": {
+        "TAL_31": {
+            "name": "Brett- & Glücksspiel",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_32": {
+            "name": "Geographie",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_33": {
+            "name": "Geschichtswissen",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_34": {
+            "name": "Götter & Kulte",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_35": {
+            "name": "Kriegskunst",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_36": {
+            "name": "Magiekunde",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_37": {
+            "name": "Mechanik",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_38": {
+            "name": "Rechnen",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_39": {
+            "name": "Rechtskunde",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_40": {
+            "name": "Sagen & Legenden",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_41": {
+            "name": "Sphärenkunde",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_42": {
+            "name": "Sternenkunde",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        }
+    },
+    "Handwerk": {
+        "TAL_43": {
+            "name": "Alchimie",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_44": {
+            "name": "Boote & Schiffe",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_45": {
+            "name": "Fahrzeuge",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_46": {
+            "name": "Handel",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_47": {
+            "name": "Heilkunde Gift",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_48": {
+            "name": "Heilkunde Krankheiten",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_49": {
+            "name": "Heilkunde Seele",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_50": {
+            "name": "Heilkunde Wunden",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_51": {
+            "name": "Holzbearbeitung",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_52": {
+            "name": "Lebensmittebearbeitung",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_53": {
+            "name": "Lederbearbeitung",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_54": {
+            "name": "Malen & Zeichnen",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_55": {
+            "name": "Metallbearbeitung",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_56": {
+            "name": "Musizieren",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_57": {
+            "name": "Schlösserknacken",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_58": {
+            "name": "Steinbearbeitung",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        },
+        "TAL_59": {
+            "name": "Stoffbearbeitung",
+            "test": [
+                "MU",
+                "MU",
+                "CH"
+            ]
+        }
     }
 }
