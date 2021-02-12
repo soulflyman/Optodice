@@ -4,3 +4,4 @@ Cargo.lock
 config.json
 /src/config.json
 /src/config.toml
+heroes.json
