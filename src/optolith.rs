@@ -3,8 +3,10 @@ pub mod optolith {
     use json::JsonValue;
     use std::{fs, path::Path};
     use std::path::PathBuf;
-    use std::env::{var};
+    use std::env::var;
     
+    
+    #[derive(Debug, Clone)]
     pub struct OptolithHeroes {
         heroes: JsonValue,
     }
@@ -25,7 +27,7 @@ pub mod optolith {
             //todo rewrite, maybe use match
             if cfg!(unix) {                
                 let heroes_source_file_path = var("HOME").map(|home|format!("{}/.config/Optolith/heroes.json", home))
-                    .expect("ERROR: HOME environment variable not set.");
+                    .expect("Error: HOME environment variable not set.");
                 println!("copy {} -> {}", heroes_source_file_path, heroes_path.display());
                 match fs::copy(heroes_source_file_path, heroes_path.to_path_buf()) {
                     Err(e) => {
@@ -63,6 +65,67 @@ pub mod optolith {
                 });
             }
             return hero_list;
+        }
+
+        pub fn get_skill_value(&self, hero_id: &String, skill_id: &String) -> i32 {
+           
+            if skill_id.starts_with("TAL_") {
+                return self.get_talent_value(hero_id, skill_id);
+            }
+
+            if skill_id.starts_with("ATTR_") {
+                return self.get_attribute_value(hero_id, skill_id);
+            }
+
+            0
+        }
+
+        fn get_talent_value(&self, hero_id: &String, talent_id: &String) -> i32 {
+            let hero: &JsonValue = self.get_hero_by_id_as_ref(hero_id);
+            if !hero.has_key("talents") {
+                return 0;
+            }
+
+            if !hero["talents"].has_key(talent_id.as_str()) {
+                return 0;
+            }
+
+            return hero["talents"][talent_id].as_i32().unwrap_or(0);
+        }
+
+        fn get_attribute_value(&self, hero_id: &String, attribute_id: &String) -> i32 {
+            let hero: &JsonValue = self.get_hero_by_id_as_ref(hero_id);
+            if !hero.has_key("attr") {
+                return 0;
+            }
+
+            if !hero["attr"].has_key("values"){
+                return 0;
+            }
+
+            for attr in hero["attr"]["values"].members() {
+                if attr["id"].to_string() == attribute_id.to_owned() {
+                    return attr["value"].as_i32().unwrap_or(0);
+                }
+            }
+            return 0;
+        }
+
+        fn get_hero_by_id_as_ref(&self, hero_id: &String) -> &JsonValue {
+            if !self.heroes.has_key(hero_id.as_str()) {
+                panic!("Error: Hero not found in heroes.json");                
+            }
+
+            return &self.heroes[hero_id]
+        } 
+
+        pub fn get_hero_name_by_id(&self, hero_id: String) -> String {
+            let hero = self.get_hero_by_id_as_ref(&hero_id);
+            if !hero.has_key("name") {
+                return String::default();
+            }
+
+            return hero["name"].to_string();
         }
     }
 

@@ -1,35 +1,67 @@
 mod optolith;
-
-use discord_webhook::DiscordWebHook;
+use crate::optolith::optolith::*;
+mod config;
+use config::Config;
+mod test_result;
+use test_result::TestResult;
+use discord_webhook::{DiscordWebHook, Embed};
 use gio::prelude::*;
 use glib::{Cast, IsA, Object};
-use gtk::{
-    prelude::*, Application, Bin, ButtonsType, Container, DialogFlags, MessageDialog, MessageType,
-    Widget,
-};
+use gtk::{Application, Bin, ButtonsType, Container, Dialog, DialogFlags, MessageDialog, MessageType, ResponseType, Widget, prelude::*};
 use json::JsonValue;
-use std::{env, fs};
+use std::{cell::RefCell, env, fs, rc::Rc};
 
-use crate::optolith::optolith::*;
+macro_rules! clone {
+    (@param _) => ( _ );
+    (@param $x:ident) => ( $x );
+    ($($n:ident),+ => move || $body:expr) => (
+        {
+            $( let $n = $n.clone(); )+
+            move || $body
+        }
+    );
+    ($($n:ident),+ => move |$($p:tt),+| $body:expr) => (
+        {
+            $( let $n = $n.clone(); )+
+            move |$(clone!(@param $p),)+| $body
+        }
+    );
+}
+
+const COLOR_SUCCESS: u32 = 65280;
+const COLOR_FAILURE: u32 = 16711680;
+
 
 fn main() {
     //debug GTK ui: GTK_DEBUG=interactive cargo run
-
+    let mut conf: Rc<RefCell<Config>> = Rc::new(RefCell::new(Config::load()));
+    
     let path = "./src/talents.json";
     let json_data = fs::read_to_string(path).expect("Unable to read file");
     let talents: JsonValue = json::parse(&json_data).expect("Error: Parsing of json data failed.");
 
-    let heroes = OptolithHeroes::new();
+    let heroes: Rc<RefCell<OptolithHeroes>> = Rc::new(RefCell::new(OptolithHeroes::new()));
 
     let app = Application::new(
         Some("net.farting-unicorn.optodice"),
         gio::ApplicationFlags::FLAGS_NONE,
     )
     .expect("Failed to initialize GTK.");
-    app.connect_activate(move |app| {
+  
+    app.connect_activate(clone!(conf,heroes => move |app| {
+        if !conf.borrow().is_webhook_url_set() {
+            request_webhook_url_from_user(&mut conf.borrow_mut());
+        }
+
         let box_main = gtk::Box::new(gtk::Orientation::Vertical, 10);
 
-        let cbt_hero_select = build_hero_select(heroes.get_simple_hero_list());
+        let cbt_hero_select = build_hero_select(heroes.borrow().get_simple_hero_list(), conf.borrow().get_last_used_hero_id());
+        
+        cbt_hero_select.connect_changed(clone!(conf => move |hero_select| {            
+            let hero_id = hero_select.get_active_id().expect("Unknown hero selected, this should not happen.");            
+            conf.borrow_mut().set_last_used_hero_id(hero_id.to_string());
+        }));
+
         box_main.add(&cbt_hero_select);
 
         let nb_talents = gtk::Notebook::new();
@@ -63,7 +95,7 @@ fn main() {
                 let en_talent_test_difculty = build_dificulty_entry(&talent_id);
                 box_talent.add(&en_talent_test_difculty);
 
-                let btn_die = build_test_button(&talent_id);
+                let btn_die = build_test_button(&conf, &heroes.borrow_mut(), &talent_id);
                 box_talent.add(&btn_die);
 
                 lbo_talents.add(&box_talent);
@@ -77,9 +109,80 @@ fn main() {
         window.add(&box_main);
         window.set_application(Some(app));
         window.show_all();
-    });
+    }));
 
     app.run(&env::args().collect::<Vec<_>>());
+}
+
+fn fire_webhook(conf: &Config, heroes: OptolithHeroes, die_result: TestResult) {
+    let mut embed = Embed::default();
+    embed.description = Some(die_result.get_formated());
+    if die_result.is_success() {
+        embed.color = Some(COLOR_SUCCESS);
+    } else {
+        embed.color = Some(COLOR_FAILURE);
+    }
+    
+    let mut avatar_url = conf.get_avatar_base_url();
+    if !avatar_url.ends_with("/") {
+        avatar_url.push_str("/");
+    }
+    avatar_url.push_str(conf.get_last_used_hero_id().as_str());
+    avatar_url.push_str(".png");
+
+    let mut webhook = DiscordWebHook::new_with_embed(conf.get_webhook_url().as_str(), embed);
+    //let mut webhook = DiscordWebHook::new(conf.get_webhook_url().as_str(), avatar_url.as_str());
+    //webhook.add_embed(embed);
+    webhook.set_avatar_url(avatar_url.as_str());
+    webhook.set_username(heroes.get_hero_name_by_id(conf.get_last_used_hero_id()).as_str());
+    webhook.fire();
+}
+
+fn request_webhook_url_from_user(conf: &mut Config) {
+    let dialog = Dialog::with_buttons::<gtk::Window>(
+        Some("No webhook URL was found in the config.toml."),
+        None,
+        DialogFlags::MODAL,
+        &[("lala", ResponseType::Apply)]
+    );
+    dialog.set_modal(true);
+
+    let dialog_label = gtk::Label::new(Some("Please enter the URL of the Discord Webhook."));
+    dialog.get_content_area().add(&dialog_label);   
+    
+    let webhook_url_entry = gtk::Entry::new();              
+    webhook_url_entry.set_activates_default(true);
+    dialog.set_default_response(ResponseType::Apply);
+    dialog.get_content_area().add(&webhook_url_entry);     
+    dialog.show_all();         
+
+    let response_type = dialog.run();
+    if response_type == ResponseType::Apply {
+        let text = webhook_url_entry.get_text().to_string().trim().to_string();
+        if text.is_empty() {
+            abort_app();
+        }
+
+        conf.set_webhook_url(text);
+        return;
+
+    } else {
+        abort_app();
+    }
+    dialog.close();
+}
+
+fn abort_app() {
+    let msg_dialog = MessageDialog::new::<gtk::Window>(
+        None,
+        DialogFlags::MODAL,
+        MessageType::Error,
+        ButtonsType::Ok,
+        "No hook, no game.",
+    );
+    msg_dialog.set_title("We need more hooks!");
+    msg_dialog.connect_response(|_, _| std::process::exit(1));
+    msg_dialog.run();
 }
 
 fn build_talent_name_label(talent_id: &str, talent: &JsonValue) -> gtk::Label {
@@ -89,16 +192,18 @@ fn build_talent_name_label(talent_id: &str, talent: &JsonValue) -> gtk::Label {
     lbl_talent_name
 }
 
-fn build_test_button(talent_id: &str) -> gtk::Button {
+fn build_test_button(conf: &Rc<RefCell<Config>>, heroes: &OptolithHeroes, talent_id: &str) -> gtk::Button {
     let btn_die = gtk::Button::with_label("🎲");
     btn_die.set_widget_name(format!("{}#button", talent_id).as_str());
-    btn_die.connect_clicked(move |but| {
+    let local_heroes = heroes.clone();
+    let local_conf = conf.clone();
+    btn_die.connect_clicked(clone!(conf => move |but| {
         let hero_id = get_hero_id(&but);
         let talent_id = get_talent_id(&but);
         let dificulty = get_test_dificulty(&but);
-        role_test(hero_id, talent_id, dificulty);
-    });
-    btn_die
+        role_test(&conf.borrow_mut(), local_heroes.clone(), &hero_id, &talent_id, dificulty);
+    }));
+    return btn_die;
 }
 
 fn build_test_label(talent: &JsonValue) -> gtk::Label {
@@ -125,7 +230,7 @@ fn build_dificulty_entry(talent_id: &str) -> gtk::Entry {
     en_talent_test_difculty
 }
 
-fn build_hero_select(hero_list: Vec<SimpleHero>) -> gtk::ComboBoxText {
+fn build_hero_select(hero_list: Vec<SimpleHero>, last_used_hero_id: String) -> gtk::ComboBoxText {
     if hero_list.len() == 0 {
         let dialog = MessageDialog::new::<gtk::Window>(
             None,
@@ -142,9 +247,14 @@ fn build_hero_select(hero_list: Vec<SimpleHero>) -> gtk::ComboBoxText {
     for hero in hero_list.clone() {
         hero_select.append(Some(hero.id.as_str()), hero.name.as_str());
     }
-    hero_select.set_active(Some(0));
+    
     hero_select.set_widget_name("hero_select");
-    //hero_select.set_active_id(Some("H_1608428409833"));
+    if last_used_hero_id.is_empty() {
+        hero_select.set_active(Some(0));
+    } else {
+        hero_select.set_active_id(Some(last_used_hero_id.as_str()));
+    }
+    
     return hero_select;
 }
 
@@ -192,11 +302,23 @@ fn get_test_dificulty(button: &gtk::Button) -> i32 {
         .unwrap();
 }
 
-fn role_test(hero_id: String, id: String, dificulty: i32) {
+fn role_test(conf: &Config, heroes: OptolithHeroes, hero_id: &String, skill_id: &String, dificulty: i32) {
+    let tv = heroes.get_skill_value(hero_id, skill_id);
     println!(
-        "Hero {} roles test for {} with dificulty {}",
-        hero_id, id, dificulty
+        "Hero {} roles test for {} (TV {}) with dificulty {}",
+        hero_id, skill_id, tv, dificulty
     );
+    let die_result = TestResult {
+        test_name: "Rambolen".to_string(),
+        talent_value: None,
+        skills: vec!("KK".to_string(), "KL".to_string(), "KO".to_string()),
+        values: vec!(8,12,11),
+        results: vec!(6,1,10),
+        dificulty: 0,
+        qs: 2,
+        success: true,        
+    };
+    fire_webhook(&conf, heroes, die_result);
 }
 
 /// Returns the child element which has the given name.
