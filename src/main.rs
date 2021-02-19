@@ -34,7 +34,7 @@ const COLOR_FAILURE: u32 = 16711680;
 
 fn main() {
     //debug GTK ui: GTK_DEBUG=interactive cargo run
-    let mut conf: Rc<RefCell<Config>> = Rc::new(RefCell::new(Config::load()));
+    let conf: Rc<RefCell<Config>> = Rc::new(RefCell::new(Config::load()));
     
     let path = "./src/talents.json";
     let json_data = fs::read_to_string(path).expect("Unable to read file");
