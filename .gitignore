@@ -1,9 +1,6 @@
 /target
 /.vscode
 Cargo.lock
-config.json
-/src/config.json
-/src/config.toml
 heroes.json
 requests.http
 Shabra sunya Baklawa.json
