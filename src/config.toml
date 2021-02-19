@@ -1,0 +1,18 @@
+webhook_url = ""
+
+[avatar]
+use_proxy = false
+use_ftp = false
+url = ""
+
+[avatar.proxy]
+url = ""
+use_baseic_auth = false
+user = ""
+password = ""
+
+[avatar.ftp]
+host = ""
+user = ""
+password = ""
+direcotry = ""
