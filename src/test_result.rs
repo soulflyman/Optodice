@@ -4,7 +4,7 @@ pub struct TestResult {
     pub skills: Vec<String>,
     pub values: Vec<i32>,
     pub results: Vec<i32>,
-    pub dificulty: i32,
+    pub difficulty: i32,
     pub qs: i32,
     pub success: bool,
 }
