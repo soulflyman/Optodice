@@ -135,7 +135,7 @@ fn fire_webhook(conf: &Config, heroes: OptolithHeroes, die_result: TestResult) {
     //webhook.add_embed(embed);
     webhook.set_avatar_url(avatar_url.as_str());
     webhook.set_username(heroes.get_hero_name_by_id(conf.get_last_used_hero_id()).as_str());
-    webhook.fire();
+    dbg!(webhook.fire());
 }
 
 fn request_webhook_url_from_user(conf: &mut Config) {
@@ -207,7 +207,7 @@ fn build_test_button(conf: &Rc<RefCell<Config>>, heroes: &OptolithHeroes, talent
 }
 
 fn build_test_label(talent: &JsonValue) -> gtk::Label {
-    let mut talent_test_label_text = talent["test"][0].to_string();
+    let mut talent_test_label_text = String::default();
     if talent["test"].len() == 3 {
         talent_test_label_text = format!(
             "{} / {} / {}",
@@ -309,13 +309,13 @@ fn role_test(conf: &Config, heroes: OptolithHeroes, hero_id: &String, skill_id: 
         hero_id, skill_id, tv, dificulty
     );
     let die_result = TestResult {
-        test_name: "Rambolen".to_string(),
-        talent_value: None,
-        skills: vec!("KK".to_string(), "KL".to_string(), "KO".to_string()),
-        values: vec!(8,12,11),
-        results: vec!(6,1,10),
-        dificulty: 0,
-        qs: 2,
+        ability_name: "Rambolen".to_string(),
+        ability_score: None,
+        skill_names: vec!("KK".to_string(), "KL".to_string(), "KO".to_string()),
+        skill_values: vec!(8,12,11),
+        dice_values: vec!(6,1,10),
+        difficulty: 0,
+        quality: 2,
         success: true,        
     };
     fire_webhook(&conf, heroes, die_result);

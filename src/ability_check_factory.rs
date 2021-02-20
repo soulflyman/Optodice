@@ -4,7 +4,7 @@ mod optolith;
 #[derive(Debug)]
 pub struct AbilityCheckFactory {
     heroes :optolith::OptolithHeroes,
-    talent_mapping :String,
+    talent_mapping :JsonValue,
     abilites :HashMap<String, AbilityCheck>,
 }
 
@@ -24,9 +24,8 @@ impl AbilityCheckFactory {
 
     pub fn get_ability_check(&self, hero_id :String, skill_id :String) -> AbilityCheck {
         let ability_check = self.abilites.entry(skill_id);
-        let hero = self.heroes.get
-        if !ability_check.contains_key(skill_id)) {
-            let new_abilit_check = AbilityCheck::new(self.heroes, hero_id, self.talent_mapping, skill_id );
+        if !ability_check.contains_key(skill_id) {
+            let new_abilit_check = AbilityCheck::new(self.heroes, hero_id, self.talent_mapping, skill_id);
             self.abilites.insert(skill_id, new_abilit_check.clone());
             return new_abilit_check;
         }else{

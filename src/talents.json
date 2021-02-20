@@ -2,148 +2,148 @@
     "Attribute": {
         "ATTR_1": {
             "name": "Mut",
-            "test": ["MU"]
+            "token": ["MU"]
         },
         "ATTR_2": {
             "name": "Klugheit",
-            "test": ["KL"]
+            "token": ["KL"]
         },
         "ATTR_3": {
             "name": "Intuition",
-            "test": ["IN"]
+            "token": ["IN"]
         },
         "ATTR_4": {
             "name": "Charisma",
-            "test": ["CH"]
+            "token": ["CH"]
         },
         "ATTR_5": {
             "name": "Fingerfertigkeit",
-            "test": ["FF"]
+            "token": ["FF"]
         },
         "ATTR_6": {
             "name": "Gewandheit",
-            "test": ["GE"]
+            "token": ["GE"]
         },
         "ATTR_7": {
             "name": "Konstitution",
-            "test": ["KO"]
+            "token": ["KO"]
         },
         "ATTR_8": {
             "name": "Körperkraft",
-            "test": ["KK"]
+            "token": ["KK"]
         }
     },
     "Körper": {
         "TAL_1": {
             "name": "Fliegen",
             "test": [
-                "MU",
-                "IN",
-                "GE"
+                "ATTR_1",
+                "ATTR_3",
+                "ATTR_6"
             ]
         },
         "TAL_2": {
             "name": "Gaukeleien",
             "test": [
-                "MU",
-                "IN",
-                "GE"
+                "ATTR_1",
+                "ATTR_3",
+                "ATTR_6"
             ]
         },
         "TAL_3": {
             "name": "Klettern",
             "test": [
-                "MU",
-                "IN",
-                "GE"
+                "ATTR_1",
+                "ATTR_3",
+                "ATTR_6"
             ]
         },
         "TAL_4": {
             "name": "Körperbeherschung",
             "test": [
-                "MU",
-                "IN",
-                "GE"
+                "ATTR_1",
+                "ATTR_3",
+                "ATTR_6"
             ]
         },
         "TAL_5": {
             "name": "Kraftakt",
             "test": [
-                "MU",
-                "IN",
-                "GE"
+                "ATTR_1",
+                "ATTR_3",
+                "ATTR_6"
             ]
         },
         "TAL_6": {
             "name": "Reiten",
             "test": [
-                "MU",
-                "IN",
-                "GE"
+                "ATTR_1",
+                "ATTR_3",
+                "ATTR_6"
             ]
         },
         "TAL_7": {
             "name": "Schwimmen",
             "test": [
-                "MU",
-                "IN",
-                "GE"
+                "ATTR_1",
+                "ATTR_3",
+                "ATTR_6"
             ]
         },
         "TAL_8": {
             "name": "Selbstbeherschung",
             "test": [
-                "MU",
-                "IN",
-                "GE"
+                "ATTR_1",
+                "ATTR_3",
+                "ATTR_6"
             ]
         },
         "TAL_9": {
             "name": "Singen",
             "test": [
-                "MU",
-                "IN",
-                "GE"
+                "ATTR_1",
+                "ATTR_3",
+                "ATTR_6"
             ]
         },
         "TAL_10": {
             "name": "Sinnesschärfe",
             "test": [
-                "MU",
-                "IN",
-                "GE"
+                "ATTR_1",
+                "ATTR_3",
+                "ATTR_6"
             ]
         },
         "TAL_11": {
             "name": "Tanzen",
             "test": [
-                "MU",
-                "IN",
-                "GE"
+                "ATTR_1",
+                "ATTR_3",
+                "ATTR_6"
             ]
         },
         "TAL_12": {
             "name": "Taschendiebstahl",
             "test": [
-                "MU",
-                "IN",
-                "GE"
+                "ATTR_1",
+                "ATTR_3",
+                "ATTR_6"
             ]
         },
         "TAL_13": {
             "name": "Verbergen",
             "test": [
-                "MU",
-                "IN",
-                "GE"
+                "ATTR_1",
+                "ATTR_3",
+                "ATTR_6"
             ]
         },
         "TAL_14": {
             "name": "Zechen",
             "test": [
-                "MU",
-                "IN",
-                "GE"
+                "ATTR_1",
+                "ATTR_3",
+                "ATTR_6"
             ]
         }
     },
@@ -151,73 +151,73 @@
         "TAL_15": {
             "name": "Bekehren & Überzeugen",
             "test": [
-                "MU",
-                "IN",
-                "GE"
+                "ATTR_1",
+                "ATTR_3",
+                "ATTR_6"
             ]
         },
         "TAL_16": {
             "name": "Betören",
             "test": [
-                "MU",
-                "IN",
-                "GE"
+                "ATTR_1",
+                "ATTR_3",
+                "ATTR_6"
             ]
         },
         "TAL_17": {
             "name": "Einschüchtern",
             "test": [
-                "MU",
-                "IN",
-                "GE"
+                "ATTR_1",
+                "ATTR_3",
+                "ATTR_6"
             ]
         },
         "TAL_18": {
             "name": "Etikette",
             "test": [
-                "MU",
-                "IN",
-                "GE"
+                "ATTR_1",
+                "ATTR_3",
+                "ATTR_6"
             ]
         },
         "TAL_19": {
             "name": "Gassenwissen",
             "test": [
-                "MU",
-                "IN",
-                "GE"
+                "ATTR_1",
+                "ATTR_3",
+                "ATTR_6"
             ]
         },
         "TAL_20": {
             "name": "Menschenkenntnis",
             "test": [
-                "MU",
-                "IN",
-                "GE"
+                "ATTR_1",
+                "ATTR_3",
+                "ATTR_6"
             ]
         },
         "TAL_21": {
             "name": "Überreden",
             "test": [
-                "MU",
-                "IN",
-                "GE"
+                "ATTR_1",
+                "ATTR_3",
+                "ATTR_6"
             ]
         },
         "TAL_22": {
             "name": "Verkleiden",
             "test": [
-                "MU",
-                "IN",
-                "GE"
+                "ATTR_1",
+                "ATTR_3",
+                "ATTR_6"
             ]
         },
         "TAL_23": {
             "name": "Willenskraft",
             "test": [
-                "MU",
-                "IN",
-                "GE"
+                "ATTR_1",
+                "ATTR_3",
+                "ATTR_6"
             ]
         }
     },
@@ -225,57 +225,57 @@
         "TAL_24": {
             "name": "Fährtensuchen",
             "test": [
-                "MU",
-                "IN",
-                "GE"
+                "ATTR_1",
+                "ATTR_3",
+                "ATTR_6"
             ]
         },
         "TAL_25": {
             "name": "Fesseln",
             "test": [
-                "KL",
-                "FF",
-                "KK"
+                "ATTR_2",
+                "ATTR_5",
+                "ATTR_8"
             ]
         },
         "TAL_26": {
             "name": "Fischen & Angeln",
             "test": [
-                "FF",
-                "GE",
-                "KO"
+                "ATTR_5",
+                "ATTR_6",
+                "ATTR_7"
             ]
         },
         "TAL_27": {
             "name": "Orientierung",
             "test": [
-                "KL",
-                "IN",
-                "IN"
+                "ATTR_2",
+                "ATTR_3",
+                "ATTR_3"
             ]
         },
         "TAL_28": {
             "name": "Pflanzenkunde",
             "test": [
-                "KL",
-                "FF",
-                "KO"
+                "ATTR_2",
+                "ATTR_5",
+                "ATTR_7"
             ]
         },
         "TAL_29": {
             "name": "Tierkunde",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_30": {
             "name": "Wildnisleben",
             "test": [
-                "MU",
-                "GE",
-                "KO"
+                "ATTR_1",
+                "ATTR_6",
+                "ATTR_7"
             ]
         }
     },
@@ -283,97 +283,97 @@
         "TAL_31": {
             "name": "Brett- & Glücksspiel",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_32": {
             "name": "Geographie",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_33": {
             "name": "Geschichtswissen",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_34": {
             "name": "Götter & Kulte",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_35": {
             "name": "Kriegskunst",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_36": {
             "name": "Magiekunde",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_37": {
             "name": "Mechanik",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_38": {
             "name": "Rechnen",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_39": {
             "name": "Rechtskunde",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_40": {
             "name": "Sagen & Legenden",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_41": {
             "name": "Sphärenkunde",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_42": {
             "name": "Sternenkunde",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         }
     },
@@ -381,137 +381,137 @@
         "TAL_43": {
             "name": "Alchimie",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_44": {
             "name": "Boote & Schiffe",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_45": {
             "name": "Fahrzeuge",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_46": {
             "name": "Handel",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_47": {
             "name": "Heilkunde Gift",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_48": {
             "name": "Heilkunde Krankheiten",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_49": {
             "name": "Heilkunde Seele",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_50": {
             "name": "Heilkunde Wunden",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_51": {
             "name": "Holzbearbeitung",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_52": {
             "name": "Lebensmittebearbeitung",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_53": {
             "name": "Lederbearbeitung",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_54": {
             "name": "Malen & Zeichnen",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_55": {
             "name": "Metallbearbeitung",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_56": {
             "name": "Musizieren",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_57": {
             "name": "Schlösserknacken",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_58": {
             "name": "Steinbearbeitung",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         },
         "TAL_59": {
             "name": "Stoffbearbeitung",
             "test": [
-                "MU",
-                "MU",
-                "CH"
+                "ATTR_1",
+                "ATTR_1",
+                "ATTR_4"
             ]
         }
     }
