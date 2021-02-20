@@ -10,6 +10,9 @@ use glib::{Cast, IsA, Object};
 use gtk::{Application, Bin, ButtonsType, Container, Dialog, DialogFlags, MessageDialog, MessageType, ResponseType, Widget, prelude::*};
 use json::JsonValue;
 use std::{cell::RefCell, env, fs, rc::Rc};
+mod ability_check_factory;
+mod ability_check;
+use crate::ability_check_factory::AbilityCheckFactory;
 
 macro_rules! clone {
     (@param _) => ( _ );
@@ -92,7 +95,7 @@ fn main() {
                 box_talent.add(&lbl_talent_value);
                 */
 
-                let en_talent_test_difculty = build_dificulty_entry(&talent_id);
+                let en_talent_test_difculty = build_difficulty_entry(&talent_id);
                 box_talent.add(&en_talent_test_difculty);
 
                 let btn_die = build_test_button(&conf, &heroes.borrow_mut(), &talent_id);
@@ -135,7 +138,7 @@ fn fire_webhook(conf: &Config, heroes: OptolithHeroes, die_result: TestResult) {
     //webhook.add_embed(embed);
     webhook.set_avatar_url(avatar_url.as_str());
     webhook.set_username(heroes.get_hero_name_by_id(conf.get_last_used_hero_id()).as_str());
-    dbg!(webhook.fire());
+    webhook.fire();
 }
 
 fn request_webhook_url_from_user(conf: &mut Config) {
@@ -200,8 +203,8 @@ fn build_test_button(conf: &Rc<RefCell<Config>>, heroes: &OptolithHeroes, talent
     btn_die.connect_clicked(clone!(conf => move |but| {
         let hero_id = get_hero_id(&but);
         let talent_id = get_talent_id(&but);
-        let dificulty = get_test_dificulty(&but);
-        role_test(&conf.borrow_mut(), local_heroes.clone(), &hero_id, &talent_id, dificulty);
+        let difficulty = get_test_difficulty(&but);
+        role_test(&conf.borrow_mut(), local_heroes.clone(), &hero_id, &talent_id, difficulty);
     }));
     return btn_die;
 }
@@ -220,9 +223,9 @@ fn build_test_label(talent: &JsonValue) -> gtk::Label {
     lbl_talent_test
 }
 
-fn build_dificulty_entry(talent_id: &str) -> gtk::Entry {
+fn build_difficulty_entry(talent_id: &str) -> gtk::Entry {
     let en_talent_test_difculty = gtk::Entry::new();
-    en_talent_test_difculty.set_widget_name(format!("{}#dificulty", talent_id).as_str());
+    en_talent_test_difculty.set_widget_name(format!("{}#difficulty", talent_id).as_str());
     en_talent_test_difculty.set_alignment(0.5);
     en_talent_test_difculty.set_placeholder_text(Some("+/-"));
     en_talent_test_difculty.set_width_chars(4);
@@ -286,12 +289,12 @@ fn get_talent_id(button: &gtk::Button) -> String {
     return btn_name_split[0].to_string();
 }
 
-fn get_test_dificulty(button: &gtk::Button) -> i32 {
+fn get_test_difficulty(button: &gtk::Button) -> i32 {
     let talent_id = get_talent_id(button);
     let parent_widget = button
         .get_parent()
         .expect("Error: Failed to get parent widget of pressed button.");
-    let widget_search_name = format!("{}#dificulty", talent_id);
+    let widget_search_name = format!("{}#difficulty", talent_id);
     let talent_label: gtk::Entry = find_child_by_name(&parent_widget, widget_search_name.as_str())
         .expect("Error: Failed to find child");
     return talent_label
@@ -302,23 +305,29 @@ fn get_test_dificulty(button: &gtk::Button) -> i32 {
         .unwrap();
 }
 
-fn role_test(conf: &Config, heroes: OptolithHeroes, hero_id: &String, skill_id: &String, dificulty: i32) {
+fn role_test(conf: &Config, heroes: OptolithHeroes, hero_id: &String, skill_id: &String, difficulty: i32) {
     let tv = heroes.get_skill_value(hero_id, skill_id);
     println!(
-        "Hero {} roles test for {} (TV {}) with dificulty {}",
-        hero_id, skill_id, tv, dificulty
+        "Hero {} roles test for {} (TV {}) with difficulty {}",
+        hero_id, skill_id, tv, difficulty
     );
+
+    let mut factory = AbilityCheckFactory::new(heroes.clone());
+    let mut ability_check = factory.get_ability_check(hero_id.to_owned(), skill_id.to_owned());
+    let check_result = ability_check.check_ability(&difficulty);
+   
+    /*
     let die_result = TestResult {
         ability_name: "Rambolen".to_string(),
-        ability_score: None,
+        ability_score: 0,
         skill_names: vec!("KK".to_string(), "KL".to_string(), "KO".to_string()),
         skill_values: vec!(8,12,11),
         dice_values: vec!(6,1,10),
         difficulty: 0,
         quality: 2,
         success: true,        
-    };
-    fire_webhook(&conf, heroes, die_result);
+    };*/
+    fire_webhook(&conf, heroes, check_result);
 }
 
 /// Returns the child element which has the given name.
