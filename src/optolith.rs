@@ -17,50 +17,32 @@ pub mod optolith {
 
             let heroes_path = OptolithHeroes::get_heroes_path();
             let heroes_json =
-                fs::read_to_string(heroes_path.as_os_str()).expect("Unable to read file");
+                fs::read_to_string(heroes_path.as_os_str()).expect(format!("Unable to read file: {}", heroes_path.to_str().unwrap_or("")).as_str());
             OptolithHeroes {
                 heroes: json::parse(heroes_json.as_str())
                     .expect("Error: Failed to parse json data"),
             }
         }
-
-        fn copy_heroes(heroes_path: &PathBuf) {
-            //todo rewrite, maybe use match
-            if cfg!(unix) {
-                let heroes_source_file_path = var("HOME")
-                    .map(|home| format!("{}/.config/Optolith/heroes.json", home))
-                    .expect("Error: HOME environment variable not set.");
-                println!(
-                    "copy {} -> {}",
-                    heroes_source_file_path,
-                    heroes_path.display()
-                );
-                match fs::copy(heroes_source_file_path, heroes_path.to_path_buf()) {
-                    Err(e) => {
-                        println!(
-                            "Could not copy heroes.json from Optolith.\n{}",
-                            e.to_string()
-                        )
-                    }
-                    _ => return,
-                };
-            } else if cfg!(windows) {
-
-            } else {
-            };
-        }
-
+        
         fn get_heroes_path() -> PathBuf {
             //todo rewrite, maybe use match
             if cfg!(unix) {
-                let hero_path = var("HOME")
-                    .map(|home| format!("{}/.config/Optolith/heroes.json", home))
-                    .expect("ERROR: HOME environment variable not set.");
-                return Path::new(&hero_path).to_path_buf();
+                let hero_path_str = var("HOME").expect("Error: Unable to find AppData directory.");
+                let mut hero_path  = Path::new(&hero_path_str).to_path_buf();
+                hero_path.push(".config");
+                hero_path.push("Optolith");
+                hero_path.push("heroes.json");
+                return hero_path;
             } else if cfg!(windows) {
-                let hero_path = "C:/Users/micro/AppData/Roaming/Optolith/heroes.json";
-                return Path::new(&hero_path).to_path_buf();
-            } else if cfg!(osx) {
+                //let hero_path = "C:/Users/micro/AppData/Roaming/Optolith/heroes.json";
+                let hero_path_str = var("appdata").expect("Error: Unable to find AppData directory.");
+                let mut hero_path  = Path::new(&hero_path_str).to_path_buf();
+                hero_path.push("Optolith");
+                hero_path.push("heroes.json");
+
+                return hero_path;
+            } else if cfg!(macos) {
+                //check if this is the same as unix https://stackoverflow.com/questions/43292357/how-can-one-detect-the-os-type-using-rust
             };
             panic!("Error: Could not determin heroes.json path.");
         }
