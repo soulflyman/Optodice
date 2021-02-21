@@ -199,7 +199,6 @@ fn build_test_button(conf: &Rc<RefCell<Config>>, heroes: &OptolithHeroes, talent
     let btn_die = gtk::Button::with_label("🎲");
     btn_die.set_widget_name(format!("{}#button", talent_id).as_str());
     let local_heroes = heroes.clone();
-    let local_conf = conf.clone();
     btn_die.connect_clicked(clone!(conf => move |but| {
         let hero_id = get_hero_id(&but);
         let talent_id = get_talent_id(&but);
