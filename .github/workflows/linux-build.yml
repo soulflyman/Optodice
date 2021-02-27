@@ -20,15 +20,19 @@ jobs:
     - uses: actions/checkout@v2
     - name: Build
       run: cargo build --release --verbose
+    - name: Artifacts - Create collection folder
+      run: mkdir artifacts
+    - name: Artifacts - Collect optodice
+      run: mv target/release/optodice artifacts/
+    - name: Artifacts - Collect talents.json
+      run: mv src/talents.json artifacts/
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.2.2
       with: 
         # Artifact name
         #name: # optional, default is artifact
         # A file, directory or wildcard pattern that describes what to upload
-        path: |
-          target/release/optodice
-          src/talents.json
+        path: artifacts
         # The desired behavior if no files are found using the provided path.
         if-no-files-found: error # optional, default is warn
         #retention-days: # optional
