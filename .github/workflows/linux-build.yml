@@ -26,7 +26,9 @@ jobs:
         # Artifact name
         #name: # optional, default is artifact
         # A file, directory or wildcard pattern that describes what to upload
-        path: target/release/optodice
+        path: |
+          target/release/optodice
+          talents.json
         # The desired behavior if no files are found using the provided path.
         if-no-files-found: error # optional, default is warn
         #retention-days: # optional
