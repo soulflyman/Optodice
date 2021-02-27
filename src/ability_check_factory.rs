@@ -14,7 +14,7 @@ impl AbilityCheckFactory {
     pub fn new(heroes :OptolithHeroes) -> AbilityCheckFactory {
         let test = AbilityCheck::default();
 
-        let path = "./src/talents.json";
+        let path = "./talents.json";
         let json_data = fs::read_to_string(path).expect("Unable to read file");
         let talents: JsonValue = json::parse(&json_data).expect("Error: Parsing of json data failed.");
 

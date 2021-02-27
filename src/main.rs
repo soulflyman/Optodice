@@ -6,7 +6,7 @@ mod test_result;
 use test_result::TestResult;
 use discord_webhook::{DiscordWebHook, Embed};
 use gio::prelude::*;
-use glib::{Cast, IsA, Object};
+use glib::{Cast, IsA, Object, clone};
 use gtk::{Application, Bin, ButtonsType, Container, Dialog, DialogFlags, MessageDialog, MessageType, ResponseType, Widget, prelude::*};
 use json::JsonValue;
 use std::{cell::RefCell, env, fs, rc::Rc};
@@ -34,12 +34,11 @@ macro_rules! clone {
 const COLOR_SUCCESS: u32 = 65280;
 const COLOR_FAILURE: u32 = 16711680;
 
-
 fn main() {
     //debug GTK ui: GTK_DEBUG=interactive cargo run
     let conf: Rc<RefCell<Config>> = Rc::new(RefCell::new(Config::load()));
     
-    let path = "./src/talents.json";
+    let path = "./talents.json";
     let json_data = fs::read_to_string(path).expect("Unable to read file");
     let talents: JsonValue = json::parse(&json_data).expect("Error: Parsing of json data failed.");
 
@@ -58,8 +57,7 @@ fn main() {
 
         let box_main = gtk::Box::new(gtk::Orientation::Vertical, 10);
 
-        let cbt_hero_select = build_hero_select(heroes.borrow().get_simple_hero_list(), conf.borrow().get_last_used_hero_id());
-        
+        let cbt_hero_select = build_hero_select(heroes.borrow().get_simple_hero_list(), conf.borrow().get_last_used_hero_id());        
         cbt_hero_select.connect_changed(clone!(conf => move |hero_select| {            
             let hero_id = hero_select.get_active_id().expect("Unknown hero selected, this should not happen.");            
             conf.borrow_mut().set_last_used_hero_id(hero_id.to_string());
@@ -138,7 +136,10 @@ fn fire_webhook(conf: &Config, heroes: OptolithHeroes, die_result: TestResult) {
     //webhook.add_embed(embed);
     webhook.set_avatar_url(avatar_url.as_str());
     webhook.set_username(heroes.get_hero_name_by_id(conf.get_last_used_hero_id()).as_str());
-    webhook.fire();
+    let webhook_result = webhook.fire();
+   
+    dbg!(webhook);
+    dbg!(webhook_result);
 }
 
 fn request_webhook_url_from_user(conf: &mut Config) {
@@ -146,7 +147,7 @@ fn request_webhook_url_from_user(conf: &mut Config) {
         Some("No webhook URL was found in the config.toml."),
         None,
         DialogFlags::MODAL,
-        &[("lala", ResponseType::Apply)]
+        &[("Speichern", ResponseType::Apply)]
     );
     dialog.set_modal(true);
 
@@ -167,6 +168,7 @@ fn request_webhook_url_from_user(conf: &mut Config) {
         }
 
         conf.set_webhook_url(text);
+        dialog.close();
         return;
 
     } else {
