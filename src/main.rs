@@ -48,7 +48,7 @@ const COLOR_FAILURE: u32 = 16711680;
 
 fn main() {
     //debug GTK ui: GTK_DEBUG=interactive cargo run
-    let context = Rc::new(RefCell::new(Context {
+    let context: Rc<RefCell<Context>> = Rc::new(RefCell::new(Context {
         config: Config::load(),
         heroes: OptolithHeroes::new(),
         attributes: OptolithAttributes::new(),
@@ -80,6 +80,8 @@ fn main() {
         let cbt_hero_select = build_hero_select(&context.borrow());        
         cbt_hero_select.connect_changed(clone!(context => move |hero_select| {            
             let hero_id = hero_select.get_active_id().expect("Unknown hero selected, this should not happen.");            
+            let selected_hero = format!("{}\t{}", &hero_id, context.borrow().heroes.get_hero_name_by_id(hero_id.to_string()));
+            println!("{}", selected_hero);
             context.borrow_mut().config.set_last_used_hero_id(hero_id.to_string());
             context.borrow_mut().active_hero_id = hero_id.to_string();
         }));
@@ -89,8 +91,8 @@ fn main() {
         let notebook = gtk::Notebook::new();
         box_main.add(&notebook);
 
-        ui_add_tab_attributes(&notebook, &context.borrow());
-        ui_add_tabs_skills(&notebook, &context.borrow());
+        ui_add_tab_attributes(&notebook, &context);
+        ui_add_tabs_skills(&notebook, &context);
 
         //let window: gtk::Window = builder.get_object("window").unwrap();
         let window_builder = gtk::WindowBuilder::new();
@@ -105,7 +107,7 @@ fn main() {
     app.run(&env::args().collect::<Vec<_>>());
 }
 
-fn ui_add_tabs_skills(notebook: &gtk::Notebook, context: &Context) {
+fn ui_add_tabs_skills(notebook: &gtk::Notebook, context: &Rc<RefCell<Context>>) {
     //TODO get rid of json parsing, skills.json is in context.skills struct
     let path = "./skills.json";
     let json_data = fs::read_to_string(path).expect("Unable to read file");
@@ -126,10 +128,10 @@ fn ui_add_tabs_skills(notebook: &gtk::Notebook, context: &Context) {
             box_skill.add(&lbl_skill_name);
             box_skill.set_child_packing(&lbl_skill_name, true, true, 0, gtk::PackType::Start);
 
-            let lbl_checks = build_checks_label(&skill_id.to_string(), context);
+            let lbl_checks = build_checks_label(&skill_id.to_string(), &context.borrow());
             box_skill.add(&lbl_checks);
             
-            let lbl_skill_value = gtk::Label::new(Some(context.heroes.get_skill_value(&context.active_hero_id, &skill_id.to_string()).to_string().as_str()));
+            let lbl_skill_value = gtk::Label::new(Some(context.borrow().heroes.get_skill_value(&context.borrow().active_hero_id, &skill_id.to_string()).to_string().as_str()));
             lbl_skill_value.set_halign(gtk::Align::End);
             lbl_skill_value.set_justify(gtk::Justification::Right);
             lbl_skill_value.set_property_width_request(30);
@@ -146,7 +148,7 @@ fn ui_add_tabs_skills(notebook: &gtk::Notebook, context: &Context) {
     }
 }
 
-fn ui_add_tab_attributes(notebook: &gtk::Notebook, context: &Context) {
+fn ui_add_tab_attributes(notebook: &gtk::Notebook, context: &Rc<RefCell<Context>>) {
     //TODO get rid of json parsing, attributes.json is in context.attributes struct
     let path = "./attributes.json";
     let json_data = fs::read_to_string(path).expect("Unable to read file");
@@ -165,7 +167,7 @@ fn ui_add_tab_attributes(notebook: &gtk::Notebook, context: &Context) {
         box_attribute.add(&lbl_attribute_name);
         box_attribute.set_child_packing(&lbl_attribute_name, true, true, 0, gtk::PackType::Start);
         
-        let lbl_attribute_value = gtk::Label::new(Some(context.heroes.get_attribute_value(&context.active_hero_id, &attribute_id.to_string()).to_string().as_str()));
+        let lbl_attribute_value = gtk::Label::new(Some(context.borrow().heroes.get_attribute_value(&context.borrow().active_hero_id, &attribute_id.to_string()).to_string().as_str()));
         lbl_attribute_value.set_halign(gtk::Align::End);
         lbl_attribute_value.set_justify(gtk::Justification::Right);
         lbl_attribute_value.set_property_width_request(30);
@@ -189,18 +191,18 @@ fn fire_webhook(context: &Context, die_result: TestResult) {
     } else {
         embed.color = Some(COLOR_FAILURE);
     }
-    
-    let mut avatar_url = context.config.get_avatar_base_url();
-    if !avatar_url.ends_with("/") {
-        avatar_url.push_str("/");
-    }
-    avatar_url.push_str(context.active_hero_id.as_str());
-    avatar_url.push_str(".png");
 
     let mut webhook = DiscordWebHook::new_with_embed(context.config.get_webhook_url().as_str(), embed);
-    //let mut webhook = DiscordWebHook::new(conf.get_webhook_url().as_str(), avatar_url.as_str());
-    //webhook.add_embed(embed);
-    webhook.set_avatar_url(avatar_url.as_str());
+
+    if context.config.is_avatar_base_url_set() {
+        let mut avatar_url = context.config.get_avatar_base_url();
+        if !avatar_url.ends_with("/") {
+            avatar_url.push_str("/");
+        }
+        avatar_url.push_str(context.active_hero_id.as_str());
+        avatar_url.push_str(".png");
+        webhook.set_avatar_url(avatar_url.as_str());
+    }    
     webhook.set_username(context.heroes.get_hero_name_by_id(context.active_hero_id.clone()).as_str());
     let webhook_result = webhook.fire();
        
@@ -286,7 +288,7 @@ fn build_skill_name_label(skill_id: &str, skill: &JsonValue) -> gtk::Label {
     lbl_skill_name
 }
 
-fn build_test_button(context: &Context, skill_id: &str) -> gtk::Button {
+fn build_test_button(context: &Rc<RefCell<Context>>, skill_id: &str) -> gtk::Button {
     let btn_die = gtk::Button::with_label("🎲");
     btn_die.set_widget_name(format!("{}#button", skill_id).as_str());
     
@@ -294,7 +296,7 @@ fn build_test_button(context: &Context, skill_id: &str) -> gtk::Button {
         //let hero_id = get_hero_id(&but);
         let skill_id = get_skill_id(&but);
         let difficulty = get_test_difficulty(&but);
-        role_test(&context, &skill_id, difficulty);
+        role_test(&context.borrow(), &skill_id, difficulty);
     }));
     return btn_die;
 }

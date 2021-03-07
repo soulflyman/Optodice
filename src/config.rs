@@ -52,7 +52,11 @@ impl Config {
     }
 
     pub fn is_webhook_url_set(&self) -> bool {
-        self.webhook_url.is_some() && self.webhook_url.as_ref().unwrap().len() > 0
+        self.webhook_url.is_some() && !self.webhook_url.as_ref().unwrap().is_empty()
+    }
+
+    pub fn is_avatar_base_url_set(&self) -> bool {
+        self.avater_base_url.is_some() && !self.avater_base_url.as_ref().unwrap().is_empty() 
     }
 
     pub fn get_last_used_hero_id(&self) -> String {
