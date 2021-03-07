@@ -74,19 +74,19 @@ pub mod optolith {
         pub fn get_attribute_value(&self, hero_id: &String, attribute_id: &String) -> i32 {
             let hero: &JsonValue = self.get_hero_by_id_as_ref(hero_id);
             if !hero.has_key("attr") {
-                return 0;
+                return 8;
             }
 
             if !hero["attr"].has_key("values") {
-                return 0;
+                return 8;
             }
 
             for attr in hero["attr"]["values"].members() {
                 if attr["id"].to_string() == attribute_id.to_owned() {
-                    return attr["value"].as_i32().unwrap_or(0);
+                    return attr["value"].as_i32().unwrap_or(8);
                 }
             }
-            return 0;
+            return 8;
         }
 
         fn get_hero_by_id_as_ref(&self, hero_id: &String) -> &JsonValue {
