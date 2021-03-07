@@ -1,38 +1,4 @@
 {
-    "Attribute": {
-        "ATTR_1": {
-            "name": "Mut",
-            "token": ["MU"]
-        },
-        "ATTR_2": {
-            "name": "Klugheit",
-            "token": ["KL"]
-        },
-        "ATTR_3": {
-            "name": "Intuition",
-            "token": ["IN"]
-        },
-        "ATTR_4": {
-            "name": "Charisma",
-            "token": ["CH"]
-        },
-        "ATTR_5": {
-            "name": "Fingerfertigkeit",
-            "token": ["FF"]
-        },
-        "ATTR_6": {
-            "name": "Gewandheit",
-            "token": ["GE"]
-        },
-        "ATTR_7": {
-            "name": "Konstitution",
-            "token": ["KO"]
-        },
-        "ATTR_8": {
-            "name": "Körperkraft",
-            "token": ["KK"]
-        }
-    },
     "Körper": {
         "TAL_1": {
             "name": "Fliegen",
@@ -54,8 +20,8 @@
             "name": "Klettern",
             "test": [
                 "ATTR_1",
-                "ATTR_3",
-                "ATTR_6"
+                "ATTR_6",
+                "ATTR_8"
             ]
         },
         "TAL_4": {

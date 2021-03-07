@@ -51,10 +51,6 @@ impl Config {
         self.save();
     }
 
-    pub fn dump(&self) {
-        dbg!(self);
-    }
-
     pub fn is_webhook_url_set(&self) -> bool {
         self.webhook_url.is_some() && self.webhook_url.as_ref().unwrap().len() > 0
     }

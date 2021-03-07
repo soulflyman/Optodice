@@ -24,8 +24,10 @@ jobs:
       run: mkdir artifacts
     - name: Artifacts - Collect optodice
       run: mv target/release/optodice artifacts/
-    - name: Artifacts - Collect talents.json
-      run: mv src/talents.json artifacts/
+    - name: Artifacts - Collect skills.json
+      run: mv src/skills.json artifacts/
+    - name: Artifacts - Collect attributes.json
+      run: mv src/attributes.json artifacts/
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.2.2
       with: 

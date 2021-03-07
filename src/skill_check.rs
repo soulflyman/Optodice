@@ -1,51 +1,41 @@
-use crate::optolith::optolith::*;
+use crate::context::Context;
 use crate::test_result::TestResult;
-use json::JsonValue;
 use rand::prelude::*;
-
 #[derive(Debug, Default, Clone)]
-pub struct AbilityCheck {
+pub struct SkillCheck {
     ability_name: String,
     ability_score: i32,
-    skill_names: Vec<String>,
-    skill_keys: Vec<String>,
-    skill_values: Vec<i32>,
+    attribute_names: Vec<String>,
+    attribute_keys: Vec<String>,
+    attribute_values: Vec<i32>,
     dice_values: Vec<i32>,
     quality: i32,
 }
 
-
-impl AbilityCheck {
+impl SkillCheck {
     pub fn new(
-        heroes: OptolithHeroes,
-        hero_id: String,
-        mapping: JsonValue,
+        context: &Context,
+        hero_id: String,        
         skill_id: String,
-    ) -> AbilityCheck {
-        let mut ability_check = AbilityCheck::default();
+    ) -> SkillCheck {
+        let mut skill_check = SkillCheck::default();
 
-        for (_, map) in mapping.entries() {
-            if map.has_key(skill_id.as_str()) {
-                ability_check.ability_name = map[skill_id.clone()]["name"].to_string();
-                for skill in map[skill_id.clone()]["test"].members() {
-                    ability_check.skill_keys.push(skill.to_string());
-                }
-                break;
-            }
+        skill_check.ability_name = context.skills.by_id(&skill_id).get_name();
+        skill_check.attribute_keys = context.skills.by_id(&skill_id).get_check();
+        
+
+        for attrribute_id in skill_check.attribute_keys.iter() {
+            skill_check
+                .attribute_names
+                .push(context.attributes.by_id(attrribute_id).name_abbr);
+            skill_check
+                .attribute_values
+                .push(context.heroes.get_attribute_value(&hero_id, &attrribute_id));
         }
 
-        for skill_key in ability_check.skill_keys.iter() {
-            ability_check
-                .skill_names
-                .push(mapping["Attribute"][skill_key]["token"][0].to_string());
-            ability_check
-                .skill_values
-                .push(heroes.get_skill_value(&hero_id, &skill_key));
-        }
+        skill_check.ability_score = context.heroes.get_skill_value(&hero_id, &skill_id);
 
-        ability_check.ability_score = heroes.get_skill_value(&hero_id, &skill_id);
-
-        return ability_check;
+        return skill_check;
     }
 
     pub fn check_ability(&mut self, difficulty :&i32) -> TestResult {
@@ -55,8 +45,8 @@ impl AbilityCheck {
         test_result.difficulty = difficulty.clone();
         test_result.ability_score = self.ability_score;
         test_result.ability_name = self.ability_name.clone();
-        test_result.skill_values = self.skill_values.clone();
-        test_result.skill_names = self.skill_names.clone();
+        test_result.skill_values = self.attribute_values.clone();
+        test_result.skill_names = self.attribute_names.clone();
 
         let mut rng = rand::thread_rng();
         self.dice_values.push(rng.gen_range(1..21));
@@ -81,7 +71,7 @@ impl AbilityCheck {
         for i in 0..3 {
             running_ability_score = self.check_skill(
                 self.dice_values[i],
-                self.skill_values[i],
+                self.attribute_values[i],
                 running_ability_score,
                 difficulty.clone(),
             );
@@ -131,7 +121,7 @@ impl AbilityCheck {
         } else if running_ability_score.to_owned() > 16 {
             return 6;
         } else {
-            let mut quality = running_ability_score.to_owned() as f64 / 3.0;
+            let quality = running_ability_score.to_owned() as f64 / 3.0;
             println!("Running Score: {}",running_ability_score);
             println!("Quality: {}",quality);
             return quality.ceil() as i32;

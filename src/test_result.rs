@@ -30,7 +30,7 @@ impl TestResult {
         res.push_str(difficulty_str.as_str());
         res.push_str("**\n");        
                 
-        res.push_str("Talentwert ");
+        res.push_str("Skillwert ");
         res.push_str(self.ability_score.to_string().as_str());
         res.push_str("\n");
 

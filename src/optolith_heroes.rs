@@ -1,5 +1,5 @@
 pub mod optolith {
-
+    //TODO move everything hero relatet into own struct OptolithHero and let OptolithHeroes just return this struct. Just like in OptolithSkills
     use json::JsonValue;
     use std::env::var;
     use std::path::PathBuf;
@@ -59,31 +59,19 @@ pub mod optolith {
         }
 
         pub fn get_skill_value(&self, hero_id: &String, skill_id: &String) -> i32 {
-            if skill_id.starts_with("TAL_") {
-                return self.get_talent_value(hero_id, skill_id);
-            }
-
-            if skill_id.starts_with("ATTR_") {
-                return self.get_attribute_value(hero_id, skill_id);
-            }
-
-            0
-        }
-
-        fn get_talent_value(&self, hero_id: &String, talent_id: &String) -> i32 {
             let hero: &JsonValue = self.get_hero_by_id_as_ref(hero_id);
-            if !hero.has_key("talents") {
+            if !hero.has_key("skills") {
                 return 0;
             }
 
-            if !hero["talents"].has_key(talent_id.as_str()) {
+            if !hero["skills"].has_key(skill_id.as_str()) {
                 return 0;
             }
 
-            return hero["talents"][talent_id].as_i32().unwrap_or(0);
+            return hero["skills"][skill_id].as_i32().unwrap_or(0);
         }
 
-        fn get_attribute_value(&self, hero_id: &String, attribute_id: &String) -> i32 {
+        pub fn get_attribute_value(&self, hero_id: &String, attribute_id: &String) -> i32 {
             let hero: &JsonValue = self.get_hero_by_id_as_ref(hero_id);
             if !hero.has_key("attr") {
                 return 0;
