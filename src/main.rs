@@ -80,14 +80,13 @@ fn main() {
         cbt_hero_select.connect_changed(clone!(context => move |hero_select| {            
             let hero_id = hero_select.get_active_id().expect("Unknown hero selected, this should not happen.");            
             let selected_hero = format!("{}\t{}", &hero_id, context.borrow().heroes.active_hero().name());
-            println!("{}", selected_hero);
+            println!("{}", selected_hero);  //todo remove debug output
             context.borrow_mut().config.set_last_used_hero_id(hero_id.to_string());
             context.borrow_mut().heroes.set_active_hero(hero_id.to_string());
             
-            if context.borrow().config.is_avatar_uploader_url_set() {
-                context.borrow().heroes.active_hero().upload_avatar(context.borrow().config.get_avatar_uploader_url());            
-            }
+            upload_avatar(&context.borrow());            
         }));
+        upload_avatar(&context.borrow());
 
         box_main.add(&cbt_hero_select);
 
@@ -108,6 +107,12 @@ fn main() {
     }));
 
     app.run(&env::args().collect::<Vec<_>>());
+}
+
+fn upload_avatar(context: &Context) {
+    if context.config.is_avatar_uploader_url_set() {
+        context.heroes.active_hero().upload_avatar(context.config.get_avatar_uploader_url());            
+    }
 }
 
 fn ui_add_tabs_skills(notebook: &gtk::Notebook, context: &Rc<RefCell<Context>>) {
@@ -134,7 +139,7 @@ fn ui_add_tabs_skills(notebook: &gtk::Notebook, context: &Rc<RefCell<Context>>) 
             lbl_skill_value.set_property_width_request(30);
             box_skill.add(&lbl_skill_value);            
 
-            let en_skill_test_difculty = build_difficulty_entry(&skill.id);
+            let en_skill_test_difculty = build_difficulty_entry(&context, &skill.id);
             box_skill.add(&en_skill_test_difculty);
 
             let btn_die = build_test_button(&context, &skill.id);
@@ -152,7 +157,7 @@ fn ui_add_tab_attributes(notebook: &gtk::Notebook, context: &Rc<RefCell<Context>
     let nb_tab_name = gtk::Label::new(Some("Attribute"));
     notebook.append_page(&lbo_attributes, Some(&nb_tab_name));
 
-    for (attribute_id, attribute) in context.borrow_mut().attributes.all() {
+    for (attribute_id, attribute) in context.borrow().attributes.clone().all() {
         let box_attribute = gtk::Box::new(gtk::Orientation::Horizontal, 0);
 
         let lbl_attribute_name = build_skill_name_label(&attribute_id, &attribute.name);
@@ -163,9 +168,9 @@ fn ui_add_tab_attributes(notebook: &gtk::Notebook, context: &Rc<RefCell<Context>
         lbl_attribute_value.set_halign(gtk::Align::End);
         lbl_attribute_value.set_justify(gtk::Justification::Right);
         lbl_attribute_value.set_property_width_request(30);
-        box_attribute.add(&lbl_attribute_value);        
+        box_attribute.add(&lbl_attribute_value);
         
-        let en_atribute_test_difculty = build_difficulty_entry(&attribute_id);
+        let en_atribute_test_difculty = build_difficulty_entry(&context, &attribute_id);
         box_attribute.add(&en_atribute_test_difculty);
 
         let btn_die = build_test_button(&context, &attribute_id);
@@ -223,8 +228,7 @@ fn display_error(title: &str, error: &dyn Error) {
     let response_type = dialog.run();
     if response_type == ResponseType::Ok {
         dialog.close();
-    }
-      
+    }      
 }
 
 fn request_webhook_url_from_user() -> String {
@@ -259,6 +263,8 @@ fn request_webhook_url_from_user() -> String {
     return text;    
 }
 
+//todo rename or do a real app exit
+//todo add variable message
 fn abort_app() {
     let msg_dialog = MessageDialog::new::<gtk::Window>(
         None,
@@ -285,7 +291,7 @@ fn build_test_button(context: &Rc<RefCell<Context>>, skill_id: &str) -> gtk::But
     
     btn_die.connect_clicked(clone!(context => move |but| {
         //let hero_id = get_hero_id(&but);
-        let skill_id = get_skill_id(&but);
+        let skill_id = get_skill_id(&but.clone().upcast::<gtk::Widget>());
         let difficulty = get_test_difficulty(&but);
         role_test(&context.borrow(), &skill_id, difficulty);
     }));
@@ -310,16 +316,17 @@ fn build_difficulty_entry(context: &Rc<RefCell<Context>>, skill_id: &str) -> gtk
     en_skill_test_difculty.set_width_chars(4);
     en_skill_test_difculty.set_max_length(4);
     en_skill_test_difculty.connect_activate(clone!(context => move |entry| {
-        let skill_id = get_skill_id(&entry);
-        let difficulty = entry.get_text();
+        let skill_id = get_skill_id(&entry.clone().upcast::<gtk::Widget>());
+        let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
         role_test(&context.borrow(), &skill_id, difficulty);
-    });
+    }));
     en_skill_test_difculty
 }
 
 fn build_hero_select(context: &Context) -> gtk::ComboBoxText {
     let hero_list = context.heroes.simple_hero_list();
     if hero_list.len() == 0 {
+        //todo use abort_app()
         let dialog = MessageDialog::new::<gtk::Window>(
             None,
             DialogFlags::MODAL,
@@ -329,10 +336,10 @@ fn build_hero_select(context: &Context) -> gtk::ComboBoxText {
         );
         dialog.set_title("We need more hereos!");
         dialog.connect_response(|_, _| std::process::exit(1));
-        dialog.run();
+        dialog.run();        
     }
     let hero_select = gtk::ComboBoxText::new();
-    for hero in hero_list.clone() {
+    for hero in hero_list {
         hero_select.append(Some(hero.id.as_str()), hero.name.as_str());
     }
     
@@ -346,14 +353,14 @@ fn build_hero_select(context: &Context) -> gtk::ComboBoxText {
     return hero_select;
 }
 
-fn get_skill_id(button: &gtk::Button) -> String {
-    let btn_name = button.get_widget_name();
+fn get_skill_id(widget: &gtk::Widget) -> String {
+    let btn_name = widget.get_widget_name();
     let btn_name_split = btn_name.as_str().split('#').collect::<Vec<_>>();
     return btn_name_split[0].to_string();
 }
 
 fn get_test_difficulty(button: &gtk::Button) -> i32 {
-    let skill_id = get_skill_id(button);
+    let skill_id = get_skill_id(&button.clone().upcast::<gtk::Widget>());
     let parent_widget = button
         .get_parent()
         .expect("Error: Failed to get parent widget of pressed button.");
