@@ -5,7 +5,7 @@ use serde_derive::{Serialize, Deserialize};
 pub struct Config {
     webhook_url: Option<String>,
     last_used_hero_id: Option<String>,
-    avatar_proxy_url: Option<String>,
+    avatar_uploader_url: Option<String>,
     avater_base_url: Option<String>,
 }
 
@@ -63,13 +63,17 @@ impl Config {
         return self.last_used_hero_id.clone().unwrap_or_default();
     }
 
-    pub fn set_avatar_proxy_url(&mut self, avatar_proxy_url: String) {
-        self.avatar_proxy_url = Some(avatar_proxy_url);
+    pub fn set_avatar_uploader_url(&mut self, avatar_proxy_url: String) {
+        self.avatar_uploader_url = Some(avatar_proxy_url);
         self.save();
     }
 
-    pub fn get_avatar_proxy_url(&self) -> String {
-        return self.avatar_proxy_url.clone().unwrap_or_default();        
+    pub fn get_avatar_uploader_url(&self) -> String {
+        return self.avatar_uploader_url.clone().unwrap_or_default();        
+    }
+
+    pub fn is_avatar_uploader_url_set(&self) -> bool {
+        self.avatar_uploader_url.is_some() && !self.avatar_uploader_url.as_ref().unwrap().is_empty()
     }
 
     pub fn set_avatar_base_url(&mut self, avater_base_url: String) {

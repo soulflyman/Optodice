@@ -3,16 +3,17 @@ use json::JsonValue;
 
 #[derive(Debug, Default, Clone)]
 pub struct OptolithSkills {
-    by_id: HashMap<String, Skill>
+    by_id: HashMap<String, Skill>,
+    pub by_group: HashMap<String, Vec<Skill>>,
 }
 
 #[derive(Debug, Default, Clone)]
 pub struct Skill {    
-    id: String,
-    group_id: String,
-    name: String,
-    test: Vec<String>,
-    test_display: Vec<String>,
+    pub id: String,
+    pub group_id: String,
+    pub name: String,
+    pub test: Vec<String>,
+    pub test_display: Vec<String>,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -37,23 +38,28 @@ impl OptolithSkills {
                 ..SkillGroup::default()
             };
             
+            let mut grouped_skills: Vec<Skill> = Vec::new();
             for (skill_id, skill_values) in tmp_skills.entries() {
                 let mut test: Vec<String> = vec!();
                 for test_id in skill_values["test"].members() {
                     test.push(test_id.to_string());
                 }
 
-                skills.by_id.insert(skill_id.to_string(), Skill{
+                let skill = Skill{
                     id: skill_id.to_string(),
                     group_id: skill_group.id.clone(),
                     name: skill_values["name"].to_string(),
                     test_display: test.clone(),
                     test: test,
-                });
+                };
+                skills.by_id.insert(skill_id.to_string(), skill.clone());    
+                grouped_skills.push(skill);
             }
+
+            skills.by_group.insert(skill_group.id.clone(), grouped_skills);
         }
 
-        return skills;        
+        return skills;
     }
   
     pub fn by_id(&self, skill_id: &String) -> Skill {

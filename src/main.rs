@@ -13,7 +13,7 @@ use test_result::TestResult;
 use discord_webhook::{DiscordWebHook, Embed};
 use gio::prelude::*;
 use glib::{Cast, IsA, Object};
-use gtk::{Application, Bin, ButtonsType, Container, Dialog, DialogFlags, MessageDialog, MessageType, ResponseType, Widget, prelude::*};
+use gtk::{Application, Bin, ButtonsType, Container, Dialog, DialogFlags, EntryExt, MessageDialog, MessageType, ResponseType, Widget, prelude::*};
 use json::JsonValue;
 use std::{cell::RefCell, env, error::Error, fs, rc::Rc};
 use crate::skill_check_factory::SkillCheckFactory;
@@ -52,8 +52,7 @@ fn main() {
         config: Config::load(),
         heroes: OptolithHeroes::new(),
         attributes: OptolithAttributes::new(),
-        skills: OptolithSkills::new(),
-        active_hero_id: String::default(),
+        skills: OptolithSkills::new(),        
     }));
    
     //TODO use check_factories in button actions!
@@ -62,7 +61,7 @@ fn main() {
     //};    
 
     let last_used_hero_id = context.borrow().config.get_last_used_hero_id().clone();
-    context.borrow_mut().active_hero_id = last_used_hero_id;
+    context.borrow_mut().heroes.set_active_hero(last_used_hero_id);
     
     let app = Application::new(
         Some("net.farting-unicorn.optodice"),
@@ -80,10 +79,14 @@ fn main() {
         let cbt_hero_select = build_hero_select(&context.borrow());        
         cbt_hero_select.connect_changed(clone!(context => move |hero_select| {            
             let hero_id = hero_select.get_active_id().expect("Unknown hero selected, this should not happen.");            
-            let selected_hero = format!("{}\t{}", &hero_id, context.borrow().heroes.get_hero_name_by_id(hero_id.to_string()));
+            let selected_hero = format!("{}\t{}", &hero_id, context.borrow().heroes.active_hero().name());
             println!("{}", selected_hero);
             context.borrow_mut().config.set_last_used_hero_id(hero_id.to_string());
-            context.borrow_mut().active_hero_id = hero_id.to_string();
+            context.borrow_mut().heroes.set_active_hero(hero_id.to_string());
+            
+            if context.borrow().config.is_avatar_uploader_url_set() {
+                context.borrow().heroes.active_hero().upload_avatar(context.borrow().config.get_avatar_uploader_url());            
+            }
         }));
 
         box_main.add(&cbt_hero_select);
@@ -108,39 +111,33 @@ fn main() {
 }
 
 fn ui_add_tabs_skills(notebook: &gtk::Notebook, context: &Rc<RefCell<Context>>) {
-    //TODO get rid of json parsing, skills.json is in context.skills struct
-    let path = "./skills.json";
-    let json_data = fs::read_to_string(path).expect("Unable to read file");
-    let skills_json: JsonValue = json::parse(&json_data).expect("Error: Parsing of json data failed.");
-    //let skills = OptolithSkills::new("./skills.json");
-
-    for (skill_category, skill_sub) in skills_json.entries() {
+    for (skill_category, skills) in &context.borrow().skills.by_group {
         let lbo_skills = gtk::ListBox::new();
         lbo_skills.set_selection_mode(gtk::SelectionMode::None);
 
         let nb_tab_name = gtk::Label::new(Some(skill_category));
         notebook.append_page(&lbo_skills, Some(&nb_tab_name));
 
-        for (skill_id, skill) in skill_sub.entries() {
+        for skill in skills {
             let box_skill = gtk::Box::new(gtk::Orientation::Horizontal, 0);
 
-            let lbl_skill_name = build_skill_name_label(&skill_id, &skill);
+            let lbl_skill_name = build_skill_name_label(&skill.id, &skill.name);
             box_skill.add(&lbl_skill_name);
             box_skill.set_child_packing(&lbl_skill_name, true, true, 0, gtk::PackType::Start);
 
-            let lbl_checks = build_checks_label(&skill_id.to_string(), &context.borrow());
+            let lbl_checks = build_checks_label(&skill.id, &context.borrow());
             box_skill.add(&lbl_checks);
             
-            let lbl_skill_value = gtk::Label::new(Some(context.borrow().heroes.get_skill_value(&context.borrow().active_hero_id, &skill_id.to_string()).to_string().as_str()));
+            let lbl_skill_value = gtk::Label::new(Some(context.borrow().heroes.active_hero().skill_value(&skill.id).to_string().as_str()));
             lbl_skill_value.set_halign(gtk::Align::End);
             lbl_skill_value.set_justify(gtk::Justification::Right);
             lbl_skill_value.set_property_width_request(30);
             box_skill.add(&lbl_skill_value);            
 
-            let en_skill_test_difculty = build_difficulty_entry(&skill_id);
+            let en_skill_test_difculty = build_difficulty_entry(&skill.id);
             box_skill.add(&en_skill_test_difculty);
 
-            let btn_die = build_test_button(&context, &skill_id);
+            let btn_die = build_test_button(&context, &skill.id);
             box_skill.add(&btn_die);
 
             lbo_skills.add(&box_skill);
@@ -149,25 +146,20 @@ fn ui_add_tabs_skills(notebook: &gtk::Notebook, context: &Rc<RefCell<Context>>) 
 }
 
 fn ui_add_tab_attributes(notebook: &gtk::Notebook, context: &Rc<RefCell<Context>>) {
-    //TODO get rid of json parsing, attributes.json is in context.attributes struct
-    let path = "./attributes.json";
-    let json_data = fs::read_to_string(path).expect("Unable to read file");
-    let attributes_json: JsonValue = json::parse(&json_data).expect("Error: Parsing of json data failed.");
-
     let lbo_attributes = gtk::ListBox::new();
     lbo_attributes.set_selection_mode(gtk::SelectionMode::None);
 
     let nb_tab_name = gtk::Label::new(Some("Attribute"));
     notebook.append_page(&lbo_attributes, Some(&nb_tab_name));
 
-    for (attribute_id, attribute) in attributes_json.entries() {
+    for (attribute_id, attribute) in context.borrow_mut().attributes.all() {
         let box_attribute = gtk::Box::new(gtk::Orientation::Horizontal, 0);
 
-        let lbl_attribute_name = build_skill_name_label(&attribute_id, &attribute);
+        let lbl_attribute_name = build_skill_name_label(&attribute_id, &attribute.name);
         box_attribute.add(&lbl_attribute_name);
         box_attribute.set_child_packing(&lbl_attribute_name, true, true, 0, gtk::PackType::Start);
         
-        let lbl_attribute_value = gtk::Label::new(Some(context.borrow().heroes.get_attribute_value(&context.borrow().active_hero_id, &attribute_id.to_string()).to_string().as_str()));
+        let lbl_attribute_value = gtk::Label::new(Some(context.borrow().heroes.active_hero().attribute_value(&attribute_id.to_string()).to_string().as_str()));
         lbl_attribute_value.set_halign(gtk::Align::End);
         lbl_attribute_value.set_justify(gtk::Justification::Right);
         lbl_attribute_value.set_property_width_request(30);
@@ -199,11 +191,10 @@ fn fire_webhook(context: &Context, die_result: TestResult) {
         if !avatar_url.ends_with("/") {
             avatar_url.push_str("/");
         }
-        avatar_url.push_str(context.active_hero_id.as_str());
-        avatar_url.push_str(".png");
+        avatar_url.push_str(context.heroes.active_hero().get_avatar_file_name().as_str());       
         webhook.set_avatar_url(avatar_url.as_str());
     }    
-    webhook.set_username(context.heroes.get_hero_name_by_id(context.active_hero_id.clone()).as_str());
+    webhook.set_username(context.heroes.active_hero().name().as_str());
     let webhook_result = webhook.fire();
        
     if webhook_result.is_err() {
@@ -281,8 +272,8 @@ fn abort_app() {
     msg_dialog.run();
 }
 
-fn build_skill_name_label(skill_id: &str, skill: &JsonValue) -> gtk::Label {
-    let lbl_skill_name = gtk::Label::new(skill["name"].as_str());
+fn build_skill_name_label(skill_id: &str, skill_name: &String) -> gtk::Label {
+    let lbl_skill_name = gtk::Label::new(Some(skill_name.as_str()));
     lbl_skill_name.set_widget_name(format!("{}#label", skill_id).as_str());
     lbl_skill_name.set_halign(gtk::Align::Start);
     lbl_skill_name
@@ -311,18 +302,23 @@ fn build_checks_label(skill_id: &String, context: &Context) -> gtk::Label {
     lbl_skill_test
 }
 
-fn build_difficulty_entry(skill_id: &str) -> gtk::Entry {
+fn build_difficulty_entry(context: &Rc<RefCell<Context>>, skill_id: &str) -> gtk::Entry {
     let en_skill_test_difculty = gtk::Entry::new();
     en_skill_test_difculty.set_widget_name(format!("{}#difficulty", skill_id).as_str());
     en_skill_test_difculty.set_alignment(0.5);
     en_skill_test_difculty.set_placeholder_text(Some("+/-"));
     en_skill_test_difculty.set_width_chars(4);
     en_skill_test_difculty.set_max_length(4);
+    en_skill_test_difculty.connect_activate(clone!(context => move |entry| {
+        let skill_id = get_skill_id(&entry);
+        let difficulty = entry.get_text();
+        role_test(&context.borrow(), &skill_id, difficulty);
+    });
     en_skill_test_difculty
 }
 
 fn build_hero_select(context: &Context) -> gtk::ComboBoxText {
-    let hero_list = context.heroes.get_simple_hero_list();
+    let hero_list = context.heroes.simple_hero_list();
     if hero_list.len() == 0 {
         let dialog = MessageDialog::new::<gtk::Window>(
             None,
@@ -341,10 +337,10 @@ fn build_hero_select(context: &Context) -> gtk::ComboBoxText {
     }
     
     hero_select.set_widget_name("hero_select");
-    if context.active_hero_id.is_empty() {
+    if context.heroes.active_hero_id().is_empty() {
         hero_select.set_active(Some(0));
     } else {
-        hero_select.set_active_id(Some(context.active_hero_id.as_str()));
+        hero_select.set_active_id(Some(context.heroes.active_hero_id().as_str()));
     }
     
     return hero_select;
@@ -374,7 +370,7 @@ fn get_test_difficulty(button: &gtk::Button) -> i32 {
 
 fn role_test(context: &Context, skill_id: &String, difficulty: i32) {
     let mut factory = SkillCheckFactory::new(context);
-    let mut ability_check = factory.get_skill_check(context.active_hero_id.clone(), skill_id.to_owned());
+    let mut ability_check = factory.get_skill_check(context.heroes.active_hero_id().to_string(), skill_id.to_owned());
     let check_result = ability_check.check_ability(&difficulty);
    
     fire_webhook(&context, check_result);

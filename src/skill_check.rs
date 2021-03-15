@@ -14,8 +14,7 @@ pub struct SkillCheck {
 
 impl SkillCheck {
     pub fn new(
-        context: &Context,
-        hero_id: String,        
+        context: &Context,   
         skill_id: String,
     ) -> SkillCheck {
         let mut skill_check = SkillCheck::default();
@@ -30,10 +29,10 @@ impl SkillCheck {
                 .push(context.attributes.by_id(attrribute_id).name_abbr);
             skill_check
                 .attribute_values
-                .push(context.heroes.get_attribute_value(&hero_id, &attrribute_id));
+                .push(context.heroes.active_hero().attribute_value(&attrribute_id));
         }
 
-        skill_check.ability_score = context.heroes.get_skill_value(&hero_id, &skill_id);
+        skill_check.ability_score = context.heroes.active_hero().skill_value(&skill_id);
 
         return skill_check;
     }
