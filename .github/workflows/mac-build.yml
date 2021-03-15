@@ -35,14 +35,14 @@ jobs:
           RUSTFLAGS: "-C debuginfo=0 -D warnings"
         if: ${{ matrix.type == 'debug'}}
 
-      - name: Build GUI Release
+      - name: Build
         run: cargo build --release --bin optodice
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0 -D warnings"
         if: ${{ matrix.type == 'release'}}
 
-      - name: Store MacOS GUI
+      - name: Store MacOS Build
         uses: actions/upload-artifact@v2
         with:
           name: optodice-${{ runner.os }}-${{ matrix.toolchain }}
