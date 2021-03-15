@@ -142,20 +142,25 @@ pub mod optolith {
         }
 
         pub fn upload_avatar(&self, uploader_url: String) {
-            let params = [("hero_id", self.id()), ("image", self.avatar())];
-            let client = reqwest::Client::new();
+            let params = [("hero_id", self.id()), ("image", self.avatar()), ("checksum", self.avater_checksum())];
+            let client = reqwest::blocking::Client::new();
             let res = client.post(uploader_url.as_str())
                 .form(&params)
                 .send();
+            dbg!(res);
         }
 
         pub fn get_avatar_file_name(&self) -> String {
-            let checksum = crc32::checksum_ieee(self.avatar().as_bytes()).to_string();
-            let mut file_name = self.name();
+            let checksum = self.avater_checksum();
+            let mut file_name = self.id();
             file_name.push('_');
             file_name.push_str(checksum.as_str());
             file_name.push_str(".png");
             return file_name;
+        }
+
+        fn avater_checksum(&self) -> String {
+            crc32::checksum_ieee(self.avatar().as_bytes()).to_string()
         }
     }
 }
