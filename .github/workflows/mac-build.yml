@@ -38,6 +38,6 @@ jobs:
       - name: Store MacOS Build
         uses: actions/upload-artifact@v2
         with:
-          name: optodice-${{ runner.os }}-${{ matrix.toolchain }}
+          name: optodice-${{ runner.os }}
           path: target/release/optodice
         if: ${{ matrix.type == 'release' }}
