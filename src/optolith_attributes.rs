@@ -42,7 +42,7 @@ impl OptolithAttributes {
             name_abbrs.push(self.by_id(&attribute_id).name_abbr.clone());
         }
         return name_abbrs;
-    }
+    }    
 
     pub fn all(&mut self) -> &HashMap<String, Attribute> {
         &self.by_id

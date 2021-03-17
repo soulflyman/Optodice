@@ -1,10 +1,10 @@
 use crate::context::Context;
-use crate::test_result::TestResult;
+use crate::check_result::CheckResult;
 use rand::prelude::*;
 #[derive(Debug, Default, Clone)]
 pub struct SkillCheck {
-    ability_name: String,
-    ability_score: i32,
+    skill_name: String,
+    skill_points: i32,
     attribute_names: Vec<String>,
     attribute_keys: Vec<String>,
     attribute_values: Vec<i32>,
@@ -19,7 +19,7 @@ impl SkillCheck {
     ) -> SkillCheck {
         let mut skill_check = SkillCheck::default();
 
-        skill_check.ability_name = context.skills.by_id(&skill_id).get_name();
+        skill_check.skill_name = context.skills.by_id(&skill_id).get_name();
         skill_check.attribute_keys = context.skills.by_id(&skill_id).get_check();
         
 
@@ -32,39 +32,39 @@ impl SkillCheck {
                 .push(context.heroes.active_hero().attribute_value(&attrribute_id));
         }
 
-        skill_check.ability_score = context.heroes.active_hero().skill_value(&skill_id);
+        skill_check.skill_points = context.heroes.active_hero().skill_points(&skill_id);
 
         return skill_check;
     }
 
-    pub fn check_ability(&mut self, difficulty :&i32) -> TestResult {
-        let mut test_result = TestResult::default();
-        let mut running_ability_score = self.ability_score;
+    pub fn check_ability(&mut self, difficulty :&i32) -> CheckResult {
+        let mut check_result = CheckResult::default();
+        let mut running_ability_score = self.skill_points;
 
-        test_result.difficulty = difficulty.clone();
-        test_result.ability_score = self.ability_score;
-        test_result.ability_name = self.ability_name.clone();
-        test_result.skill_values = self.attribute_values.clone();
-        test_result.skill_names = self.attribute_names.clone();
+        check_result.difficulty = difficulty.clone();
+        check_result.skill_points = self.skill_points;
+        check_result.skill_name = self.skill_name.clone();
+        check_result.attribute_values = self.attribute_values.clone();
+        check_result.attribute_names = self.attribute_names.clone();
 
         let mut rng = rand::thread_rng();
         self.dice_values.push(rng.gen_range(1..21));
         self.dice_values.push(rng.gen_range(1..21));
         self.dice_values.push(rng.gen_range(1..21));
 
-        test_result.dice_values = self.dice_values.clone();
+        check_result.dice_values = self.dice_values.clone();
 
         if self.check_critical_roll(20) {
             // Kritischer Patzer
-            test_result.success = false;
-            return test_result;
+            check_result.success = false;
+            return check_result;
         }
 
         if self.check_critical_roll(1) {
             // Kritischer Erfolg
-            test_result.quality = self.calc_quality(&running_ability_score);
-            test_result.success = true;
-            return test_result;
+            check_result.quality = self.calc_quality(&running_ability_score);
+            check_result.success = true;
+            return check_result;
         }
 
         for i in 0..3 {
@@ -76,14 +76,14 @@ impl SkillCheck {
             );
 
             if running_ability_score < 0 {
-                test_result.success = false;
-                return test_result;
+                check_result.success = false;
+                return check_result;
             }
         }
 
-        test_result.quality = self.calc_quality(&running_ability_score);
-        test_result.success = true;
-        return test_result;
+        check_result.quality = self.calc_quality(&running_ability_score);
+        check_result.success = true;
+        return check_result;
     }
 
     fn check_critical_roll(&self, value: i32) -> bool {

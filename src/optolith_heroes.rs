@@ -103,7 +103,7 @@ pub mod optolith {
             self.hero["id"].to_string()
         }
 
-        pub fn skill_value(&self, skill_id: &String) -> i32 {
+        pub fn skill_points(&self, skill_id: &String) -> i32 {
             
             if !self.hero.has_key("skills") {
                 return 0;
@@ -147,7 +147,7 @@ pub mod optolith {
             let res = client.post(uploader_url.as_str())
                 .form(&params)
                 .send();
-            dbg!(res);
+            //dbg!(res);
         }
 
         pub fn get_avatar_file_name(&self) -> String {
