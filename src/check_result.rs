@@ -1,21 +1,21 @@
 
 #[derive(Default)]
-pub struct TestResult {
-    pub ability_name: String,
-    pub ability_score: i32,
-    pub skill_names: Vec<String>,
-    pub skill_values: Vec<i32>,
+pub struct CheckResult {
+    pub skill_name: String,
+    pub skill_points: i32,
+    pub attribute_names: Vec<String>,
+    pub attribute_values: Vec<i32>,
     pub dice_values: Vec<i32>,
     pub difficulty: i32,
     pub quality: i32,
     pub success: bool,
 }
 
-impl TestResult {    
+impl CheckResult {    
     pub fn get_formated(&self) -> String {
         let mut res = String::default();
         res.push_str("**");
-        res.push_str(self.ability_name.as_str());
+        res.push_str(self.skill_name.as_str());
         res.push_str("-Probe**\n");
 
         let mut difficulty_str :String = String::default();
@@ -31,16 +31,16 @@ impl TestResult {
         res.push_str("**\n");        
                 
         res.push_str("Skillwert ");
-        res.push_str(self.ability_score.to_string().as_str());
+        res.push_str(self.skill_points.to_string().as_str());
         res.push_str("\n");
 
         res.push_str("```\n");
-        for i in 0..self.skill_names.len() {
-            res.push_str(format!("{} {:>2} {:>2} = {:>2}\t[{:>2}]\n", self.skill_names[i], self.skill_values[i], difficulty_str, (self.skill_values[i] as i32 + difficulty_str.parse::<i32>().unwrap()), self.dice_values[i]).as_str());
+        for i in 0..self.attribute_names.len() {
+            res.push_str(format!("{} {:>2} {:>2} = {:>2}\t[{:>2}]\n", self.attribute_names[i], self.attribute_values[i], difficulty_str, (self.attribute_values[i] as i32 + difficulty_str.parse::<i32>().unwrap()), self.dice_values[i]).as_str());
         }
         res.push_str("```\n");
 
-        if self.skill_names.len() > 1 {
+        if self.attribute_names.len() > 1 {
             res.push_str("QS: ");
             res.push_str(self.quality.to_string().as_str());
         }
