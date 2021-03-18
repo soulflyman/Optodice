@@ -65,6 +65,10 @@ impl OptolithSkills {
     pub fn by_id(&self, skill_id: &String) -> Skill {
         return self.by_id.get(skill_id).unwrap().clone();
     }
+
+    pub fn all(&self) -> &HashMap<String, Skill> {
+        &self.by_id
+    }
 }
 
 impl Skill {

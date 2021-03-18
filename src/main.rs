@@ -123,6 +123,7 @@ fn change_hero(context: &mut Context, hero_select: &gtk::ComboBoxText) {
     
     upload_avatar(&context);
     change_avatar(&context, &hero_select);
+    reload_skill_points(&context, &hero_select);
 }
 
 fn change_avatar(context: &Context, hero_select: &gtk::ComboBoxText) {
@@ -132,8 +133,19 @@ fn change_avatar(context: &Context, hero_select: &gtk::ComboBoxText) {
     let avatar_row_stride = (avatar_tmp.get_width() * avatar_color_channels + 3) & !3;
     let avatar_pixbuf: gdk_pixbuf::Pixbuf = gdk_pixbuf::Pixbuf::from_mut_slice(avatar_tmp.get_raw_pixels(), Colorspace::Rgb, true, 8, avatar_tmp.get_width() as i32, avatar_tmp.get_height() as i32, avatar_row_stride as i32);
     //let hero_image = gtk::Image::from_pixbuf(Some(&hero_pixbuf));
-    let avatar: gtk::Image = find_child_by_name(&hero_select.get_parent().unwrap(), "optolith_avatar").expect("Error: Failed to find gtk::Image Widget");
+    let avatar: gtk::Image = find_child_by_name(&hero_select.get_parent().unwrap(), "optolith_avatar").expect("Error: Failed to find gtk::Image Widget.");
     avatar.set_from_pixbuf(Some(&avatar_pixbuf));
+}
+
+fn reload_skill_points(context: &Context, hero_select: &gtk::ComboBoxText) {
+    for (skill_id, skill) in context.skills.all() {
+        let widget_name = format!("skill_id#{}", skill_id);
+        let skill_point_label: gtk::Label = find_child_by_name(&hero_select.get_parent().unwrap().get_parent().unwrap(), &widget_name).expect("Error: Failed to find skill label.");
+        let d = context.heroes.active_hero().skill_points(skill_id).to_string();
+        dbg!(&skill_id);
+        dbg!(&d);
+        skill_point_label.set_text(d.as_str());
+    }
 }
 
 fn upload_avatar(context: &Context) {
@@ -164,6 +176,7 @@ fn ui_add_tabs_skills(notebook: &gtk::Notebook, context: &Rc<RefCell<Context>>) 
             lbl_skill_points.set_halign(gtk::Align::End);
             lbl_skill_points.set_justify(gtk::Justification::Right);
             lbl_skill_points.set_property_width_request(30);
+            lbl_skill_points.set_widget_name(&format!("skill_id#{}",&skill.id));
             box_skill.add(&lbl_skill_points);            
 
             let en_skill_test_difculty = build_skill_difficulty_entry(&context, &skill.id);
@@ -195,6 +208,7 @@ fn ui_add_tab_attributes(notebook: &gtk::Notebook, context: &Rc<RefCell<Context>
         lbl_attribute_value.set_halign(gtk::Align::End);
         lbl_attribute_value.set_justify(gtk::Justification::Right);
         lbl_attribute_value.set_property_width_request(30);
+        lbl_attribute_value.set_widget_name(&format!("skill_id#{}",&attribute_id));
         box_attribute.add(&lbl_attribute_value);
         
         let en_atribute_test_difculty = build_attribute_difficulty_entry(&context, &attribute_id);
