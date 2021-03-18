@@ -70,7 +70,7 @@ pub mod optolith {
         }
 
         pub fn set_active_hero(&mut self, hero_id: String) {
-            self.active_hero_id = hero_id;
+            self.active_hero_id = hero_id;            
         }
   
         pub fn active_hero(&self) -> &OptolithHero {
@@ -105,15 +105,15 @@ pub mod optolith {
 
         pub fn skill_points(&self, skill_id: &String) -> i32 {
             
-            if !self.hero.has_key("skills") {
+            if !self.hero.has_key("talents") {
                 return 0;
             }
 
-            if !self.hero["skills"].has_key(skill_id.as_str()) {
+            if !self.hero["talents"].has_key(skill_id.as_str()) {
                 return 0;
             }
 
-            return self.hero["skills"][skill_id].as_i32().unwrap_or(0);
+            return self.hero["talents"][skill_id].as_i32().unwrap_or(0);
         }
 
         pub fn attribute_value(&self, attribute_id: &String) -> i32 {
