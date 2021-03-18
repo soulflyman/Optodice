@@ -14,8 +14,8 @@ use discord_webhook::{DiscordWebHook, Embed};
 use gio::prelude::*;
 use glib::{Cast, IsA, Object};
 use gtk::{Application, Bin, ButtonsType, Container, Dialog, DialogFlags, EntryExt, MessageDialog, MessageType, PackType, ResponseType, Widget, prelude::*};
-use gdk_pixbuf::{Colorspace, Pixbuf};
-use photon_rs::{PhotonImage, transform::{self, SamplingFilter}};
+use gdk_pixbuf::Colorspace;
+use image::GenericImageView;
 use std::{cell::RefCell, env, error::Error, rc::Rc};
 use crate::skill_check_factory::SkillCheckFactory;
 use crate::optolith_skills::OptolithSkills;
@@ -127,12 +127,13 @@ fn change_hero(context: &mut Context, hero_select: &gtk::ComboBoxText) {
 }
 
 fn change_avatar(context: &Context, hero_select: &gtk::ComboBoxText) {
-    let mut avatar_tmp = PhotonImage::new_from_base64(&context.heroes.active_hero().avatar().split(',').collect::<Vec<&str>>()[1]);        
-    avatar_tmp = transform::resize(&mut avatar_tmp, 100, 100, SamplingFilter::Lanczos3);
-    let avatar_color_channels = 4;
-    let avatar_row_stride = (avatar_tmp.get_width() * avatar_color_channels + 3) & !3;
-    let avatar_pixbuf: gdk_pixbuf::Pixbuf = gdk_pixbuf::Pixbuf::from_mut_slice(avatar_tmp.get_raw_pixels(), Colorspace::Rgb, true, 8, avatar_tmp.get_width() as i32, avatar_tmp.get_height() as i32, avatar_row_stride as i32);
-    //let hero_image = gtk::Image::from_pixbuf(Some(&hero_pixbuf));
+    let avatar_raw = base64::decode(&context.heroes.active_hero().avatar().split(',').collect::<Vec<&str>>()[1]);
+    let mut avatar_buffer = image::load_from_memory(&avatar_raw.unwrap()).unwrap();
+    avatar_buffer = avatar_buffer.resize(100, 100, image::imageops::FilterType::Lanczos3);
+    let avatar_color_channels = 4; //(RGBA)
+    let pixels_row_stride = (avatar_buffer.width() * avatar_color_channels + 3) & !3;
+    let pixels = avatar_buffer.clone().into_rgba8().as_raw().to_owned();
+    let avatar_pixbuf: gdk_pixbuf::Pixbuf = gdk_pixbuf::Pixbuf::from_mut_slice(pixels, Colorspace::Rgb, true, 8, avatar_buffer.width() as i32, avatar_buffer.height() as i32, pixels_row_stride as i32);
     let avatar: gtk::Image = find_child_by_name(&hero_select.get_parent().unwrap(), "optolith_avatar").expect("Error: Failed to find gtk::Image Widget.");
     avatar.set_from_pixbuf(Some(&avatar_pixbuf));
 }
