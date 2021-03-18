@@ -15,14 +15,14 @@ Optodice does not modify your heroes, it operates in read only mode on your hero
 - [x] Role checks on skills
 - [ ] Role checks on attacks
 - [x] Display every check result in discord with the avatar of the hero
-- [ ] Support automatic uploads of avatars
+- [x] Support automatic uploads of avatars (upload via php script workds, ftp upload is missing)
 - [ ] Role custom dice/checks
-- [ ] Display avatar in Optodice
+- [x] Display avatar in Optodice
 - [ ] keep track of pain level
 - [ ] keep track of money
 - [x] Support Windows
 - [x] Support Linux
-- [ ] Support MacOS
+- [ ] Support MacOS (github action builds are compiling, still not testet)
 
 ## Screenshots
 Optodice UI  
