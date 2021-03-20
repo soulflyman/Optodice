@@ -44,7 +44,7 @@ impl OptolithAttributes {
         return name_abbrs;
     }    
 
-    pub fn all(&mut self) -> &HashMap<String, Attribute> {
+    pub fn all(&self) -> &HashMap<String, Attribute> {
         &self.by_id
     }
 }
