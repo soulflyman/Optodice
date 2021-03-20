@@ -63,9 +63,22 @@ impl Config {
         return self.last_used_hero_id.clone().unwrap_or_default();
     }
 
-    pub fn set_avatar_uploader_url(&mut self, avatar_proxy_url: String) {
-        self.avatar_uploader_url = Some(avatar_proxy_url);
+    pub fn set_avatar_uploader_url(&mut self, avatar_uploader_url: String) {
+        self.avatar_uploader_url = None;
+        if !avatar_uploader_url.is_empty() {
+            self.avatar_uploader_url = Some(avatar_uploader_url.clone());
+        }        
         self.save();
+
+        let pos = avatar_uploader_url.rfind('/');
+        if pos.is_none() {
+            return;
+        }
+        let avatar_base_url = avatar_uploader_url.get(..pos.unwrap());
+        if avatar_base_url.is_none() {
+            return;
+        }
+        self.set_avatar_base_url(avatar_base_url.unwrap().to_string());
     }
 
     pub fn get_avatar_uploader_url(&self) -> String {
@@ -83,5 +96,9 @@ impl Config {
 
     pub fn get_avatar_base_url(&self) -> String {
         return self.avater_base_url.clone().unwrap_or_default();        
+    }
+
+    pub fn use_avatars(&self) -> bool {        
+        self.is_avatar_uploader_url_set() && self.is_avatar_base_url_set()
     }
 }
