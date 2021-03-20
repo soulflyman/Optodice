@@ -1,5 +1,5 @@
 use crate::context::Context;
-use crate::check_result::CheckResult;
+use crate::skill_check_result::SkillCheckResult;
 use rand::prelude::*;
 #[derive(Debug, Default, Clone)]
 pub struct SkillCheck {
@@ -37,9 +37,9 @@ impl SkillCheck {
         return skill_check;
     }
 
-    pub fn check_ability(&mut self, difficulty :&i32) -> CheckResult {
-        let mut check_result = CheckResult::default();
-        let mut running_ability_score = self.skill_points;
+    pub fn check_skill(&mut self, difficulty :&i32) -> SkillCheckResult {
+        let mut check_result = SkillCheckResult::default();
+        let mut running_skill_score = self.skill_points;
 
         check_result.difficulty = difficulty.clone();
         check_result.skill_points = self.skill_points;
@@ -62,26 +62,26 @@ impl SkillCheck {
 
         if self.check_critical_roll(1) {
             // Kritischer Erfolg
-            check_result.quality = self.calc_quality(&running_ability_score);
+            check_result.quality = self.calc_quality(&running_skill_score);
             check_result.success = true;
             return check_result;
         }
 
         for i in 0..3 {
-            running_ability_score = self.check_skill(
+            running_skill_score = self.check_attribute(
                 self.dice_values[i],
                 self.attribute_values[i],
-                running_ability_score,
+                running_skill_score,
                 difficulty.clone(),
             );
 
-            if running_ability_score < 0 {
+            if running_skill_score < 0 {
                 check_result.success = false;
                 return check_result;
             }
         }
 
-        check_result.quality = self.calc_quality(&running_ability_score);
+        check_result.quality = self.calc_quality(&running_skill_score);
         check_result.success = true;
         return check_result;
     }
@@ -97,31 +97,31 @@ impl SkillCheck {
         return false;
     }
 
-    fn check_skill(&self,
+    fn check_attribute(&self,
         dice_value: i32,
         skill_value: i32,
-        running_ability_score: i32,
+        running_skill_score: i32,
         difficulty: i32,
     ) -> i32 {
-        let mut run_ability_score = running_ability_score;
+        let mut run_skill_score = running_skill_score;
         if dice_value > (skill_value + difficulty) {
-            run_ability_score =
-                run_ability_score - (dice_value - (skill_value + difficulty));    
+            run_skill_score =
+                run_skill_score - (dice_value - (skill_value + difficulty));    
         }
 
-        println!("Calc Score: {} - {} - {}",running_ability_score,dice_value,skill_value);
+        println!("Calc Score: {} - {} - {}",running_skill_score,dice_value,skill_value);
 
-        return run_ability_score;
+        return run_skill_score;
     }
 
-    fn calc_quality(&self, running_ability_score: &i32) -> i32 {
-        if running_ability_score.to_owned() == 0 {
+    fn calc_quality(&self, running_skill_score: &i32) -> i32 {
+        if running_skill_score.to_owned() == 0 {
             return 1;
-        } else if running_ability_score.to_owned() > 16 {
+        } else if running_skill_score.to_owned() > 16 {
             return 6;
         } else {
-            let quality = running_ability_score.to_owned() as f64 / 3.0;
-            println!("Running Score: {}",running_ability_score);
+            let quality = running_skill_score.to_owned() as f64 / 3.0;
+            println!("Running Score: {}",running_skill_score);
             println!("Quality: {}",quality);
             return quality.ceil() as i32;
         }
