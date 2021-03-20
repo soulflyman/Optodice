@@ -1,3 +1,5 @@
+use crate::check_result::CheckResult;
+
 
 #[derive(Default)]
 pub struct SkillCheckResult {
@@ -9,42 +11,11 @@ pub struct SkillCheckResult {
     pub difficulty: i32,
     pub quality: i32,
     pub success: bool,
+    pub critical: bool,
 }
 
 impl SkillCheckResult {    
     pub fn get_formated(&self) -> String {
-        /*
-        let mut res = String::default();
-        res.push_str("**");
-        res.push_str(self.skill_name.as_str());
-        res.push_str("-Probe**\n");
-
-        let mut difficulty_str :String = String::default();
-        if self.difficulty > 0 {
-            difficulty_str.push_str("+");
-            difficulty_str.push_str(self.difficulty.to_string().as_str());
-        }else{
-            difficulty_str = self.difficulty.to_string();
-        }
-
-        res.push_str("**Modifikation: ");
-        res.push_str(difficulty_str.as_str());
-        res.push_str("**\n");        
-                
-        res.push_str("Talentwert ");
-        res.push_str(self.skill_points.to_string().as_str());
-        res.push_str("\n");
-
-        res.push_str("```\n");
-        for i in 0..self.attribute_names.len() {
-            res.push_str(format!("{} {:>2} {:>2} = {:>2}\t[{:>2}]\n", self.attribute_names[i], self.attribute_values[i], difficulty_str, (self.attribute_values[i] as i32 + difficulty_str.parse::<i32>().unwrap()), self.dice_values[i]).as_str());
-        }
-        res.push_str("```\n");
-        
-        res.push_str("QS: ");
-        res.push_str(self.quality.to_string().as_str());
-        */
-
         let mut difficulty_str :String = String::default();
         if self.difficulty > 0 {
             difficulty_str.push_str("+");
@@ -75,6 +46,14 @@ impl SkillCheckResult {
 
     pub fn is_success(&self) -> bool {
         return self.success;
+    }
+
+    pub fn to_check_result(&self) -> CheckResult {
+        CheckResult {
+            message: self.get_formated(),    
+            success: self.success,
+            critical: self.critical,
+        }
     }
 }
 

@@ -1,18 +1,24 @@
 mod optolith_weapon;
 mod optolith_hero;
 mod optolith_heroes;
+mod check_result;
 mod config;
 mod skill_check_result;
 mod skill_check_factory;
 mod skill_check;
+mod attribute_check_result;
+mod attribute_check;
 mod optolith_attributes;
 mod optolith_skills;
 mod context;
 mod difficulty;
 
 use crate::optolith_heroes::optolith::*;
+use attribute_check::AttributeCheck;
 use config::Config;
+use check_result::CheckResult;
 use skill_check_result::SkillCheckResult;
+use attribute_check_result::AttributeCheckResult;
 use context::Context;
 use discord_webhook::{DiscordWebHook, Embed};
 use gio::prelude::*;
@@ -321,10 +327,10 @@ fn ui_add_tab_attributes(context: &Rc<RefCell<Context>>) {
     }
 }
 
-fn fire_webhook(context: &Context, die_result: SkillCheckResult) {
+fn fire_webhook(context: &Context, die_result: CheckResult) {
     let mut embed = Embed::default();
-    embed.description = Some(die_result.get_formated());
-    if die_result.is_success() {
+    embed.description = Some(die_result.message);
+    if die_result.success {
         embed.color = Some(COLOR_SUCCESS);
     } else {
         embed.color = Some(COLOR_FAILURE);
@@ -498,7 +504,7 @@ fn build_attribute_check_button(context: &Rc<RefCell<Context>>, attribute_id: &s
 
 fn build_checks_label(skill_id: &String, context: &Context) -> gtk::Label {
     let attribute_ids = context.skills.by_id(skill_id).get_check();
-    let check_name_abbr = context.attributes.get_name_abbrs(attribute_ids);
+    let check_name_abbr = context.attributes.name_abbrs(attribute_ids);
     
     let lbl_skill_test = gtk::Label::new(Some(check_name_abbr.join(" / ").as_str()));
     lbl_skill_test.set_justify(gtk::Justification::Right);
@@ -631,11 +637,15 @@ fn role_skill_check(context: &Context, skill_id: &String, difficulty: i32) {
     let mut skill_check = factory.get_skill_check(skill_id.to_owned());
     let check_result = skill_check.check_skill(&difficulty);
    
-    fire_webhook(&context, check_result);
+    fire_webhook(&context, check_result.to_check_result());
 }
 
 fn role_attribute_check(context: &Context, attribute_id: &String, difficulty: i32) {
     println!("Role {} {}", context.attributes.by_id(&attribute_id).name, difficulty);
+    let mut skill_check = AttributeCheck::new(context, attribute_id.to_owned());
+    let check_result = skill_check.check(&difficulty);
+
+    fire_webhook(&context, check_result.to_check_result());
 }
 
 /// Returns the child element which has the given name.

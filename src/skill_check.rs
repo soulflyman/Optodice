@@ -1,4 +1,4 @@
-use crate::context::Context;
+use crate::{attribute_check::AttributeCheck, context::Context};
 use crate::skill_check_result::SkillCheckResult;
 use rand::prelude::*;
 #[derive(Debug, Default, Clone)]
@@ -57,6 +57,7 @@ impl SkillCheck {
         if self.check_critical_roll(20) {
             // Kritischer Patzer
             check_result.success = false;
+            check_result.critical = true;
             return check_result;
         }
 
@@ -64,6 +65,7 @@ impl SkillCheck {
             // Kritischer Erfolg
             check_result.quality = self.calc_quality(&running_skill_score);
             check_result.success = true;
+            check_result.critical = true;
             return check_result;
         }
 

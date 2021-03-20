@@ -36,7 +36,7 @@ impl OptolithAttributes {
         return self.by_id.get(attribute_id).unwrap().clone();
     }
 
-    pub fn get_name_abbrs(&self, attribute_ids: Vec<String>) -> Vec<String> {
+    pub fn name_abbrs(&self, attribute_ids: Vec<String>) -> Vec<String> {
         let mut name_abbrs: Vec<String> = vec!();
         for attribute_id in attribute_ids {
             name_abbrs.push(self.by_id(&attribute_id).name_abbr.clone());
@@ -46,5 +46,15 @@ impl OptolithAttributes {
 
     pub fn all(&self) -> &HashMap<String, Attribute> {
         &self.by_id
+    }
+}
+
+impl Attribute {
+    pub fn get_name(&self) -> String {
+        return self.name.clone();
+    }
+
+    pub fn get_abbr(&self) -> String {
+        return self.name_abbr.clone();
     }
 }
