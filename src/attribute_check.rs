@@ -54,7 +54,7 @@ impl AttributeCheck {
             return check_result;
         }
 
-        check_result.success = self.dice_value >= self.attribute_value;
+        check_result.success = self.dice_value <= self.attribute_value;
         return check_result;
     }
 
