@@ -40,13 +40,9 @@ jobs:
           echo "linker = \"x86_64-w64-mingw32-gcc\"" >> ~/.cargo/config
           echo "ar = \"x86_64-w64-mingw32-gcc-ar\"" >> ~/.cargo/config
 
-          GTK_LIBRARY="artifacts/gtk_library"
-          GTK_APP="artifacts/gtk_app"
-          GTK_THEME="artifacts/gtk_theme"
-
-          mkdir -p $GTK_LIBRARY
-          mkdir -p $GTK_APP
-          mkdir -p $GTK_THEME
+          GTK_LIBRARY="$(pwd)/gtk_library"
+          GTK_APP="$(pwd)/gtk_app"
+          GTK_THEME="$(pwd)/gtk_theme"
 
           wget https://github.com/qarmin/gtk_library_store/releases/download/3.24.0/mingw64.zip
           unzip mingw64.zip -d $GTK_LIBRARY
@@ -89,5 +85,5 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: optodice-Windows
-          path: artifacts/gtk_app/*
+          path: gtk_app/*
         if: ${{ matrix.type == 'release' }}
