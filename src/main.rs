@@ -99,7 +99,6 @@ fn main() {
         cbt_hero_select.connect_changed(clone!(context => move |hero_select| {
             change_hero(&context, &hero_select);                   
         }));
-        
                 
         let box_hero = gtk::Box::new(gtk::Orientation::Horizontal, 0);
         box_hero.add(&cbt_hero_select);
@@ -112,20 +111,18 @@ fn main() {
 
         main_box.add(&box_hero);
         
-        upload_avatar(&context.borrow_mut());
-        change_avatar(&context.borrow_mut(), &cbt_hero_select);
-
+       
         let hero_status_box = build_hero_status_box(&context);
         main_box.add(&hero_status_box);
-
         
         context.borrow_mut().gtk_window.as_ref().unwrap().set_title("Optodice");
         context.borrow_mut().gtk_window.as_ref().unwrap().add(&main_box);
         context.borrow_mut().gtk_window.as_ref().unwrap().set_application(Some(app));
         context.borrow_mut().gtk_window.as_ref().unwrap().show_all();
 
-        context.borrow_mut().gtk_main_box = Some(main_box);        
-        reload_hero_stats(&context);
+        context.borrow_mut().gtk_main_box = Some(main_box);
+        
+        change_hero(&context, &cbt_hero_select);
     }));
 
     app.run(&env::args().collect::<Vec<_>>());
