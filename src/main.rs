@@ -14,6 +14,9 @@ mod optolith_attributes;
 mod optolith_skills;
 mod context;
 mod difficulty;
+mod optolith_combat_techniques;
+mod optolith_combat_technique;
+#[macro_use] extern crate serde_derive;
 
 use crate::optolith_heroes::optolith::*;
 use attribute_check::AttributeCheck;
@@ -33,6 +36,8 @@ use image::GenericImageView;
 use std::{cell::RefCell, env, error::Error, process, rc::Rc};
 use crate::skill_check_factory::SkillCheckFactory;
 use crate::optolith_skills::OptolithSkills;
+use crate::optolith_combat_technique::OptolithCombatTechnique;
+use crate::optolith_combat_techniques::OptolithCombatTechniques;
 use crate::optolith_attributes::OptolithAttributes;
 use crate::difficulty::Difficulty;
 
@@ -69,6 +74,7 @@ fn main() {
         attributes: OptolithAttributes::new(),
         skills: OptolithSkills::new(),
         difficulty: Difficulty::default(),
+        combat_techniques: OptolithCombatTechniques::new(),
         gtk_window: None,
         gtk_main_box: None,
         gtk_notebook: None,
@@ -160,15 +166,16 @@ fn ui_add_tab_battle(context: &Rc<RefCell<Context>>) {
         row.add(&weapon_name);
         row.set_child_packing(&weapon_name, true, true, 0, gtk::PackType::Start);
 
-        if weapon.can_parry() {
-            let parry_value = 8;
+        if !weapon.is_range_weapon() {
+            let ct_primary_attributes = context.borrow().combat_techniques.primary_attributes(weapon.combat_technique());
+            let parry_value = context.borrow().heroes.active_hero().parry_value(weapon.combat_technique(), ct_primary_attributes);
             let pa_label =  gtk::Label::new(Some("PA")); 
             row.add(&pa_label);
             let pa_value =  gtk::Label::new(Some(parry_value.to_string().as_str())); 
             row.add(&pa_value);
-            let en_parry_test_difculty = build_parry_difficulty_entry(&context, &weapon.id());
+            let en_parry_test_difculty = build_parry_difficulty_entry(&context, &weapon);
             row.add(&en_parry_test_difculty);
-            let btn_die = build_parry_check_button(&context, &weapon.id());
+            let btn_die = build_parry_check_button(&context, &weapon);
             row.add(&btn_die);
 
             let slash =  gtk::Label::new(Some(" / ")); 
@@ -479,15 +486,15 @@ fn build_skill_name_label(skill_name: &String) -> gtk::Label {
     lbl_skill_name
 }
 
-fn build_parry_check_button(context: &Rc<RefCell<Context>>, weapon_id: &str) -> gtk::Button {
+fn build_parry_check_button(context: &Rc<RefCell<Context>>, weapon: &OptolithWeapon) -> gtk::Button {
     let btn_die = gtk::Button::with_label("🎲");
-    let widget_name = format!("parry_check_button#{}", weapon_id);
-    let difficulty_widget_name = format!("parry_difficulty#{}", weapon_id);
+    let widget_name = format!("parry_check_button#{}", weapon.id());
+    let difficulty_widget_name = format!("parry_difficulty#{}", weapon.id());
     btn_die.set_widget_name(widget_name.as_str());
-    let attribute_id_tmp = weapon_id.to_string();
+    let aweapon_tmp = weapon.clone();
     btn_die.connect_clicked(clone!(context => move |but| {
         let difficulty = get_check_difficulty(&but, &difficulty_widget_name);
-        role_parry_check(&context.borrow(), &attribute_id_tmp, difficulty);
+        role_parry_check(&context.borrow(), &aweapon_tmp, difficulty);
     }));
     return btn_die;
 }
@@ -552,7 +559,7 @@ fn build_checks_label(skill_id: &String, context: &Context) -> gtk::Label {
     let lbl_skill_test = gtk::Label::new(Some(check_name_abbr.join(" / ").as_str()));
     lbl_skill_test.set_justify(gtk::Justification::Right);
     lbl_skill_test.set_property_width_request(100);
-    lbl_skill_test
+    return lbl_skill_test;
 }
 
 fn build_skill_difficulty_entry(context: &Rc<RefCell<Context>>, skill_id: &str) -> gtk::Entry {
@@ -614,17 +621,17 @@ fn build_dodge_difficulty_entry(context: &Rc<RefCell<Context>>, dodge_id: &str) 
     en_dodge_difculty
 }
 
-fn build_parry_difficulty_entry(context: &Rc<RefCell<Context>>, weapon_id: &str) -> gtk::Entry {
+fn build_parry_difficulty_entry(context: &Rc<RefCell<Context>>, weapon: &OptolithWeapon) -> gtk::Entry {
     let en_parry_difculty = gtk::Entry::new();
-    en_parry_difculty.set_widget_name(format!("parry_difficulty#{}", weapon_id).as_str());
+    en_parry_difculty.set_widget_name(format!("parry_difficulty#{}", weapon.id()).as_str());
     en_parry_difculty.set_alignment(0.5);
     en_parry_difculty.set_placeholder_text(Some("+/-"));
     en_parry_difculty.set_width_chars(4);
     en_parry_difculty.set_max_length(4);
-    let attribute_id_tmp = weapon_id.to_string();
+    let weapon_tmp = weapon.clone();
     en_parry_difculty.connect_activate(clone!(context => move |entry| {        
         let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
-        role_attribute_check(&context.borrow(), &attribute_id_tmp, difficulty);
+        role_parry_check(&context.borrow(), &weapon_tmp, difficulty);
     }));
     en_parry_difculty
 }
@@ -680,9 +687,9 @@ fn get_check_difficulty(button: &gtk::Button, difficulty_widget_name: &String) -
         .unwrap();
 }
 
-
-fn role_parry_check(context: &Context, skill_id: &String, difficulty: i32) {
-
+fn role_parry_check(context: &Context, weapon: &OptolithWeapon, difficulty: i32) {
+    let check_result = BattleCheck::parry(context, weapon, difficulty);
+    fire_webhook(&context, check_result.to_check_result());
 }
 
 fn role_attack_check(context: &Context, weapon: &OptolithWeapon, difficulty: i32) {
@@ -699,7 +706,6 @@ fn role_skill_check(context: &Context, skill_id: &String, difficulty: i32) {
 }
 
 fn role_attribute_check(context: &Context, attribute_id: &String, difficulty: i32) {
-    println!("Role {} {}", context.attributes.by_id(&attribute_id).name, difficulty);
     let mut skill_check = AttributeCheck::new(context, attribute_id.to_owned());
     let check_result = skill_check.check(&difficulty);
 

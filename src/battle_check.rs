@@ -7,7 +7,7 @@ pub struct BattleCheck;
 impl BattleCheck { 
     pub fn dodge(context: &Context, difficulty: i32) -> BattleCheckResult {        
         
-        let dodge_value = context.heroes.active_hero().dodge_value() as i32;
+        let dodge_value = context.heroes.active_hero().dodge_value();
 
         let mut rng = rand::thread_rng();
         let dice_value = rng.gen_range(1..21);
@@ -44,8 +44,7 @@ impl BattleCheck {
         let mut rng = rand::thread_rng();
         let dice_value = rng.gen_range(1..21);
         let mut success = dice_value <= ct_value;
-        let mut critical = false;
-        
+        let mut critical = false;        
         
         if dice_value == 20 {
             // critical fail
@@ -70,7 +69,35 @@ impl BattleCheck {
         }
     }
 
-    fn parry(context: &Context) {
+    pub fn parry(context: &Context, weapon: &OptolithWeapon, difficulty: i32) -> BattleCheckResult {    
+        let ct_primary_attributes = context.combat_techniques.primary_attributes(weapon.combat_technique());
+        let parry_value = context.heroes.active_hero().parry_value(weapon.combat_technique(), ct_primary_attributes);
+                  
+        let mut rng = rand::thread_rng();
+        let dice_value = rng.gen_range(1..21);
+        let mut success = dice_value <= parry_value;
+        let mut critical = false;        
+        
+        if dice_value == 20 {
+            // critical fail
+            success = false;
+            critical = true;
+        }
 
+        if dice_value == 1 {
+            // critical success
+            success = true;
+            critical = true;
+        }       
+
+        BattleCheckResult {
+            action_name: format!("{} Parade", weapon.name()),
+            action_name_abbr: "AT".to_string(),
+            action_value: parry_value,
+            dice_value,
+            difficulty,
+            success,
+            critical,
+        }
     }
 }

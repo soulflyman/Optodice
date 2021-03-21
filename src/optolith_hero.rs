@@ -130,4 +130,20 @@ impl OptolithHero {
 
         range_techniques.contains(&combat_technique_id.as_str())
     }
+
+    pub fn parry_value(&self, combat_technique_id: &String, primary_attributes: Vec<String>) -> i32 {
+        let mut primary_attribute_value = 0;
+        for attribute in primary_attributes {
+            let attribute_value = self.attribute_value(&attribute);
+            if attribute_value > primary_attribute_value {
+                primary_attribute_value = attribute_value;
+            }
+        }
+
+        let ct_base_value = self.combat_technique_base_value(combat_technique_id);
+        let ct_bonus = ((primary_attribute_value - 8) % 3) as i32 ;
+
+        let ct_base_value_half = (ct_base_value as f64 / 2.0).ceil() as i32;
+        ct_base_value_half + ct_bonus
+    }
 }

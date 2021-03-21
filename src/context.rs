@@ -6,14 +6,15 @@ use gtk::ContainerExt;
 use crate::{config::Config, optolith_attributes::OptolithAttributes, optolith_heroes::optolith::OptolithHeroes, optolith_skills::OptolithSkills, difficulty::Difficulty};
 #[derive(Debug, Clone)]
 pub struct Context {
-    pub config: Config,
-    pub heroes: OptolithHeroes,
-    pub attributes: OptolithAttributes,
-    pub skills: OptolithSkills,
-    pub difficulty: Difficulty,
-    pub gtk_window: Option<gtk::Window>,
-    pub gtk_main_box: Option<gtk::Box>,
-    pub gtk_notebook: Option<gtk::Notebook>,
+    pub(crate) config: Config,
+    pub(crate) heroes: OptolithHeroes,
+    pub(crate) attributes: OptolithAttributes,
+    pub(crate) skills: OptolithSkills,
+    pub(crate) difficulty: Difficulty,
+    pub(crate) gtk_window: Option<gtk::Window>,
+    pub(crate) gtk_main_box: Option<gtk::Box>,
+    pub(crate) gtk_notebook: Option<gtk::Notebook>,
+    pub(crate) combat_techniques: crate::optolith_combat_techniques::OptolithCombatTechniques,
 }
 impl Context {
     pub fn add_notebook(&mut self, notebook: gtk::Notebook) {

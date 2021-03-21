@@ -65,10 +65,10 @@ impl OptolithWeapon {
         &self.id
     }
 
-    pub fn can_parry(&self) -> bool {
-        let range_techniques = vec!("CT_1".to_string(), "CT_2".to_string(), "CT_11".to_string(), "CT_14".to_string(), "CT_18".to_string(), "CT_19".to_string());
+    pub fn is_range_weapon(&self) -> bool {
+        let range_techniques = vec!("CT_1", "CT_2", "CT_11", "CT_14", "CT_17", "CT_18", "CT_19");
 
-        return !range_techniques.contains(&self.combat_technique);
+        return range_techniques.contains(&self.combat_technique.as_str());
     }
 
     /// Get a reference to the optolith weapon's combat technique.
