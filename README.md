@@ -23,6 +23,7 @@ Optodice does not modify your heroes, it operates in read only mode on your hero
 - [x] Support Windows
 - [x] Support Linux
 - [ ] Support MacOS (github action builds are compiling, still not testet)
+- [ ] i18n
 
 ## Screenshots
 Optodice UI  
