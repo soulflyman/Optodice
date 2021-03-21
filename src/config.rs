@@ -30,10 +30,15 @@ impl Config {
     }
 
     fn get_config_file_path() -> PathBuf {
+        //TODO use os depending path for config file:
+        // linux: $XDG_CONFIG_HOME/Optodice
+        // windows: %appdata%/Optodice
+        // macos: $HOME/Library/Application Support/Optodice
         let mut optodice_path = std::env::current_exe().expect("Error: Unable to define Application path.");
         optodice_path.pop();
         let mut config_toml_path = Path::new(&optodice_path).to_path_buf();
         config_toml_path.push("config.toml");
+        dbg!(&config_toml_path);
         return config_toml_path;
     }
 

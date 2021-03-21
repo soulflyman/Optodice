@@ -257,13 +257,14 @@ fn upload_avatar(context: &Context) {
 }
 
 fn ui_add_tabs_skills(context: &Rc<RefCell<Context>>) {
-    let skills_by_group = &context.borrow().skills.by_group.clone();
+    let skills_by_group = &context.borrow().skills.by_group.clone(); //todo get rid of hashmap, because it does not keep the order!
     for (skill_category, skills) in skills_by_group {
         let lbo_skills = gtk::ListBox::new();
         lbo_skills.set_selection_mode(gtk::SelectionMode::None);
 
         let nb_tab_name = gtk::Label::new(Some(skill_category));
         context.borrow_mut().gtk_notebook.as_ref().unwrap().append_page(&lbo_skills, Some(&nb_tab_name));
+        dbg!(&skill_category); //todo remove
 
         for skill in skills {
             let box_skill = gtk::Box::new(gtk::Orientation::Horizontal, 0);
