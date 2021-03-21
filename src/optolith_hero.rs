@@ -94,4 +94,28 @@ impl OptolithHero {
         
         return weapons;
     }
+
+    pub fn dodge_value(&self) -> f64 {
+        let dodge_value = f64::from(self.attribute_value(&"ATTR_6".to_string())) / 2.0;
+        dodge_value.round()
+    }
+
+    fn combat_technique_base_value(&self, combat_technique_id: &String) -> i32 {
+        if !self.hero.has_key("ct") {
+            return 6;
+        }
+
+        if !self.hero["ct"].has_key(combat_technique_id) {
+            return 6;
+        }
+
+        return self.hero["ct"][combat_technique_id].as_i32().unwrap_or(6);
+    }
+
+    pub fn combat_technique_value(&self, combat_technique_id: &String) -> i32 {
+        let courage = self.attribute_value(&"ATTR_1".to_string());
+        let combat_technique_bonus = (courage - 8) % 3;
+
+        self.combat_technique_base_value(combat_technique_id) + combat_technique_bonus
+    }
 }

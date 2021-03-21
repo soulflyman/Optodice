@@ -16,7 +16,7 @@ impl AttributeCheck {
         context: &Context,   
         attribute_id: String,
     ) -> AttributeCheck {
-        let mut attribute_check = AttributeCheck {
+        let attribute_check = AttributeCheck {
             attribute_name: context.attributes.by_id(&attribute_id).get_name(),
             attribute_id: attribute_id.clone(),
             attribute_name_abbr: context.attributes.by_id(&attribute_id).get_abbr(),
@@ -34,6 +34,7 @@ impl AttributeCheck {
       
         check_result.attribute_value = self.attribute_value.clone();
         check_result.attribute_name = self.attribute_name.clone();
+        check_result.attribute_name_abbr = self.attribute_name_abbr.clone();
 
         let mut rng = rand::thread_rng();
         self.dice_value = rng.gen_range(1..21);

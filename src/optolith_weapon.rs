@@ -70,4 +70,9 @@ impl OptolithWeapon {
 
         return !range_techniques.contains(&self.combat_technique);
     }
+
+    /// Get a reference to the optolith weapon's combat technique.
+    pub fn combat_technique(&self) -> &String {
+        &self.combat_technique
+    }
 }

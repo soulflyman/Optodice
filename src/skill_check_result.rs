@@ -29,7 +29,7 @@ impl SkillCheckResult {
             check_results.push_str(format!("{} {:>2} {:>2} = {:>2}\t[{:>2}]\n", self.attribute_names[i], self.attribute_values[i], difficulty_str, (self.attribute_values[i] as i32 + difficulty_str.parse::<i32>().unwrap_or(0)), self.dice_values[i]).as_str());
         }
 
-        let res = format!("**{skill_name}-Probe** {difficulty}\n \
+        let res = format!("**{skill_name}** {difficulty}\n \
                                     Talentwert {skill_points}\n \
                                     ```\n\
                                     {check_results}\

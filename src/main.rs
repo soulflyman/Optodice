@@ -6,6 +6,8 @@ mod config;
 mod skill_check_result;
 mod skill_check_factory;
 mod skill_check;
+mod battle_check_result;
+mod battle_check;
 mod attribute_check_result;
 mod attribute_check;
 mod optolith_attributes;
@@ -15,8 +17,10 @@ mod difficulty;
 
 use crate::optolith_heroes::optolith::*;
 use attribute_check::AttributeCheck;
+use battle_check::BattleCheck;
 use config::Config;
 use check_result::CheckResult;
+use optolith_weapon::OptolithWeapon;
 use skill_check_result::SkillCheckResult;
 use attribute_check_result::AttributeCheckResult;
 use context::Context;
@@ -147,6 +151,8 @@ fn ui_add_tab_battle(context: &Rc<RefCell<Context>>) {
     let nb_tab_name = gtk::Label::new(Some("Kampf"));
     context.borrow_mut().gtk_notebook.as_ref().unwrap().append_page(&lbo_weapons, Some(&nb_tab_name));
 
+    ui_add_dodge_to_tab(context, &lbo_weapons);
+
     for weapon in context.borrow().heroes.active_hero().weapons() {
         let row = gtk::Box::new(gtk::Orientation::Horizontal, 5);
 
@@ -169,7 +175,7 @@ fn ui_add_tab_battle(context: &Rc<RefCell<Context>>) {
             row.add(&slash);
         }
 
-        let attack_value = 12;
+        let attack_value = context.borrow().heroes.active_hero().combat_technique_value(weapon.combat_technique());
 
         let at_label =  gtk::Label::new(Some("AT"));  
         row.add(&at_label);
@@ -178,11 +184,32 @@ fn ui_add_tab_battle(context: &Rc<RefCell<Context>>) {
 
         let en_attack_test_difculty = build_attack_difficulty_entry(&context, &weapon.id());
         row.add(&en_attack_test_difculty);
-        let btn_die = build_attack_check_button(&context, &weapon.id());
+        let btn_die = build_attack_check_button(&context, &weapon);
         row.add(&btn_die);
         
         lbo_weapons.add(&row);
     }
+}
+
+fn ui_add_dodge_to_tab(context: &Rc<RefCell<Context>>, tab: &gtk::ListBox) {
+    let row = gtk::Box::new(gtk::Orientation::Horizontal, 5);
+
+        let weapon_name = gtk::Label::new(Some("Ausweiche"));
+        row.add(&weapon_name);
+        row.set_child_packing(&weapon_name, true, true, 0, gtk::PackType::Start);
+        
+
+        let dodge_value = context.borrow().heroes.active_hero().dodge_value();
+
+        let at_value =  gtk::Label::new(Some(dodge_value.to_string().as_str()));  
+        row.add(&at_value);
+
+        let en_attack_test_difculty = build_dodge_difficulty_entry(&context, "dodge");
+        row.add(&en_attack_test_difculty);
+        let btn_die = build_dodge_check_button(&context, "dodge");
+        row.add(&btn_die);
+        
+        tab.add(&row);
 }
 
 fn ui_add_tab_custom(context: &Rc<RefCell<Context>>) {
@@ -321,7 +348,7 @@ fn ui_add_tab_attributes(context: &Rc<RefCell<Context>>) {
         lbl_attribute_value.set_halign(gtk::Align::End);
         lbl_attribute_value.set_justify(gtk::Justification::Right);
         lbl_attribute_value.set_property_width_request(30);
-        lbl_attribute_value.set_widget_name(&format!("skill_id#{}",&attribute_id));
+        lbl_attribute_value.set_widget_name(&format!("attribute_id#{}",&attribute_id));
         box_attribute.add(&lbl_attribute_value);
         
         let en_atribute_test_difculty = build_attribute_difficulty_entry(&context, &attribute_id);
@@ -465,15 +492,27 @@ fn build_parry_check_button(context: &Rc<RefCell<Context>>, weapon_id: &str) -> 
     return btn_die;
 }
 
-fn build_attack_check_button(context: &Rc<RefCell<Context>>, weapon_id: &str) -> gtk::Button {
+fn build_attack_check_button(context: &Rc<RefCell<Context>>, weapon: &OptolithWeapon) -> gtk::Button {
     let btn_die = gtk::Button::with_label("🎲");
-    let widget_name = format!("attack_check_button#{}", weapon_id);
-    let difficulty_widget_name = format!("attack_difficulty#{}", weapon_id);
+    let widget_name = format!("attack_check_button#{}", weapon.id());
+    let difficulty_widget_name = format!("attack_difficulty#{}", weapon.id());
     btn_die.set_widget_name(widget_name.as_str());
-    let attribute_id_tmp = weapon_id.to_string();
+    let weapon_tmp = weapon.clone();
     btn_die.connect_clicked(clone!(context => move |but| {
         let difficulty = get_check_difficulty(&but, &difficulty_widget_name);
-        role_attack_check(&context.borrow(), &attribute_id_tmp, difficulty);
+        role_attack_check(&context.borrow(), &weapon_tmp, difficulty);
+    }));
+    return btn_die;
+}
+
+fn build_dodge_check_button(context: &Rc<RefCell<Context>>, dodge_id: &str) -> gtk::Button {
+    let btn_die = gtk::Button::with_label("🎲");
+    let widget_name = format!("dodge_check_button#{}", dodge_id);
+    let difficulty_widget_name = format!("dodge_difficulty#{}", dodge_id);
+    btn_die.set_widget_name(widget_name.as_str());
+    btn_die.connect_clicked(clone!(context => move |but| {
+        let difficulty = get_check_difficulty(&but, &difficulty_widget_name);
+        role_dodge_check(&context.borrow(), difficulty);
     }));
     return btn_die;
 }
@@ -561,6 +600,20 @@ fn build_attack_difficulty_entry(context: &Rc<RefCell<Context>>, weapon_id: &str
     en_attack_difculty
 }
 
+fn build_dodge_difficulty_entry(context: &Rc<RefCell<Context>>, dodge_id: &str) -> gtk::Entry {
+    let en_dodge_difculty = gtk::Entry::new();
+    en_dodge_difculty.set_widget_name(format!("dodge_difficulty#{}", dodge_id).as_str());
+    en_dodge_difculty.set_alignment(0.5);
+    en_dodge_difculty.set_placeholder_text(Some("+/-"));
+    en_dodge_difculty.set_width_chars(4);
+    en_dodge_difculty.set_max_length(4);
+    en_dodge_difculty.connect_activate(clone!(context => move |entry| {        
+        let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
+        role_dodge_check(&context.borrow(), difficulty);
+    }));
+    en_dodge_difculty
+}
+
 fn build_parry_difficulty_entry(context: &Rc<RefCell<Context>>, weapon_id: &str) -> gtk::Entry {
     let en_parry_difculty = gtk::Entry::new();
     en_parry_difculty.set_widget_name(format!("parry_difficulty#{}", weapon_id).as_str());
@@ -632,8 +685,9 @@ fn role_parry_check(context: &Context, skill_id: &String, difficulty: i32) {
 
 }
 
-fn role_attack_check(context: &Context, skill_id: &String, difficulty: i32) {
-    
+fn role_attack_check(context: &Context, weapon: &OptolithWeapon, difficulty: i32) {
+    let check_result = BattleCheck::attack(context, weapon, difficulty);
+    fire_webhook(&context, check_result.to_check_result());
 }
 
 fn role_skill_check(context: &Context, skill_id: &String, difficulty: i32) {
@@ -649,6 +703,11 @@ fn role_attribute_check(context: &Context, attribute_id: &String, difficulty: i3
     let mut skill_check = AttributeCheck::new(context, attribute_id.to_owned());
     let check_result = skill_check.check(&difficulty);
 
+    fire_webhook(&context, check_result.to_check_result());
+}
+
+fn role_dodge_check(context: &Context, difficulty: i32) {
+    let check_result = BattleCheck::dodge(context, difficulty);
     fire_webhook(&context, check_result.to_check_result());
 }
 
