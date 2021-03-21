@@ -44,6 +44,10 @@ jobs:
           GTK_APP="artifacts/gtk_app"
           GTK_THEME="artifacts/gtk_theme"
 
+          mkdir -p $GTK_LIBRARY
+          mkdir -p $GTK_APP
+          mkdir -p $GTK_THEME
+
           wget https://github.com/qarmin/gtk_library_store/releases/download/3.24.0/mingw64.zip
           unzip mingw64.zip -d $GTK_LIBRARY
           GTK_LIBRARY="$GTK_LIBRARY/mingw64"
