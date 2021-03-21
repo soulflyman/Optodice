@@ -141,6 +141,7 @@ fn check_config(context: &mut Context) {
 
 fn ui_add_tab_battle(context: &Rc<RefCell<Context>>) {
     let lbo_weapons = gtk::ListBox::new();
+    
     lbo_weapons.set_selection_mode(gtk::SelectionMode::None);
 
     let nb_tab_name = gtk::Label::new(Some("Kampf"));
@@ -191,6 +192,13 @@ fn ui_add_tab_custom(context: &Rc<RefCell<Context>>) {
     context.borrow_mut().gtk_notebook.as_ref().unwrap().append_page(&lbo_dice, Some(&nb_tab_name));
 }
 
+fn ui_add_tab_magic(context: &Rc<RefCell<Context>>) {
+    let lbo_dice = gtk::ListBox::new();
+    lbo_dice.set_selection_mode(gtk::SelectionMode::None);
+    let nb_tab_name = gtk::Label::new(Some("Magie"));
+    context.borrow_mut().gtk_notebook.as_ref().unwrap().append_page(&lbo_dice, Some(&nb_tab_name));
+}
+
 fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
     let hero_status_box = gtk::Box::new(gtk::Orientation::Horizontal, 15);
     hero_status_box.set_margin_start(15);
@@ -223,6 +231,7 @@ fn reload_hero_stats(context: &Rc<RefCell<Context>>) {
     ui_add_tab_attributes(&context);
     ui_add_tabs_skills(&context);
     ui_add_tab_battle(&context);
+    ui_add_tab_magic(&context);
     ui_add_tab_custom(&context);
 
     context.borrow_mut().gtk_main_box.as_ref().unwrap().show_all();
@@ -258,8 +267,8 @@ fn upload_avatar(context: &Context) {
 
 fn ui_add_tabs_skills(context: &Rc<RefCell<Context>>) {
     let skills_by_group = &context.borrow().skills.by_group.clone(); //todo get rid of hashmap, because it does not keep the order!
-    for (skill_category, skills) in skills_by_group {
-        let lbo_skills = gtk::ListBox::new();
+    for (skill_category, skills) in skills_by_group {        
+        let lbo_skills = gtk::ListBox::new();        
         lbo_skills.set_selection_mode(gtk::SelectionMode::None);
 
         let nb_tab_name = gtk::Label::new(Some(skill_category));
