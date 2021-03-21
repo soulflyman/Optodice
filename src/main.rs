@@ -362,12 +362,9 @@ fn display_error(title: &str, error: &dyn Error) {
     dialog.set_modal(true);
 
     let dialog_label = gtk::Label::new(Some(error.to_string().as_str()));
-    dialog.get_content_area().add(&dialog_label);   
-    
-    let webhook_url_entry = gtk::Entry::new();              
-    webhook_url_entry.set_activates_default(true);
+    dialog.get_content_area().add(&dialog_label);
     dialog.set_default_response(ResponseType::Ok);
-    dialog.get_content_area().add(&webhook_url_entry);     
+
     dialog.show_all();  
 
     let response_type = dialog.run();
