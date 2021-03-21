@@ -95,9 +95,9 @@ impl OptolithHero {
         return weapons;
     }
 
-    pub fn dodge_value(&self) -> f64 {
+    pub fn dodge_value(&self) -> i32 {
         let dodge_value = f64::from(self.attribute_value(&"ATTR_6".to_string())) / 2.0;
-        dodge_value.round()
+        dodge_value.round() as i32
     }
 
     fn combat_technique_base_value(&self, combat_technique_id: &String) -> i32 {
@@ -113,9 +113,21 @@ impl OptolithHero {
     }
 
     pub fn combat_technique_value(&self, combat_technique_id: &String) -> i32 {
-        let courage = self.attribute_value(&"ATTR_1".to_string());
-        let combat_technique_bonus = (courage - 8) % 3;
+        let combat_technique_bonus: i32;
+        if self.is_ranged_combat_technique(combat_technique_id) {
+            let courage = self.attribute_value(&"ATTR_1".to_string());
+            combat_technique_bonus = (courage - 8) % 3;
+        } else {
+            let dexterity = self.attribute_value(&"ATTR_5".to_string());
+            combat_technique_bonus = (dexterity - 8) % 3
+        }
 
         self.combat_technique_base_value(combat_technique_id) + combat_technique_bonus
+    }
+
+    pub fn is_ranged_combat_technique(&self, combat_technique_id: &String) -> bool {
+        let range_techniques = vec!("CT_1", "CT_2", "CT_11", "CT_14", "CT_17", "CT_18", "CT_19");
+
+        range_techniques.contains(&combat_technique_id.as_str())
     }
 }

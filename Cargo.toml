@@ -10,6 +10,7 @@ edition = "2018"
 json = "*"
 serde = "1.0"
 serde_derive = { version = "1.0", feature = "serde_derive" }
+serde_yaml = "*"
 gio = "*"
 glib = "*"
 gdk = "0.13.2"
