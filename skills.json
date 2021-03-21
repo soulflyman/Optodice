@@ -1,5 +1,13 @@
 {
     "Körper": {
+        "TALG_0": {   
+            "name": "Körpertalente",
+            "test": [
+                "ATTR_1",
+                "ATTR_6",
+                "ATTR_8"
+            ]
+        },
         "TAL_1": {
             "name": "Fliegen",
             "test": [
@@ -114,6 +122,14 @@
         }
     },
     "Gesellschaft": {
+        "TALG_1": {   
+            "name": "Gesellschaftstalente",
+            "test": [
+                "ATTR_3",
+                "ATTR_4",
+                "ATTR_4"
+            ]
+        },
         "TAL_15": {
             "name": "Bekehren & Überzeugen",
             "test": [
@@ -188,6 +204,14 @@
         }
     },
     "Natur": {
+        "TALG_2": {   
+            "name": "Naturtalente",
+            "test": [
+                "ATTR_1",
+                "ATTR_6",
+                "ATTR_7"
+            ]
+        },
         "TAL_24": {
             "name": "Fährtensuchen",
             "test": [
@@ -246,6 +270,14 @@
         }
     },
     "Wissen": {
+        "TALG_3": {   
+            "name": "Wissenstalente",
+            "test": [
+                "ATTR_2",
+                "ATTR_2",
+                "ATTR_3"
+            ]
+        },
         "TAL_31": {
             "name": "Brett- & Glücksspiel",
             "test": [
@@ -344,6 +376,14 @@
         }
     },
     "Handwerk": {
+        "TALG_4": {   
+            "name": "Handwerkstalente",
+            "test": [
+                "ATTR_5",
+                "ATTR_5",
+                "ATTR_7"
+            ]
+        },
         "TAL_43": {
             "name": "Alchimie",
             "test": [
