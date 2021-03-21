@@ -40,20 +40,20 @@ pub mod optolith {
             if cfg!(unix) {
                 let hero_path_str = var("HOME").expect("Error: Unable to find AppData directory.");
                 let mut hero_path  = Path::new(&hero_path_str).to_path_buf();
-                hero_path.push(".config");
-                hero_path.push("Optolith");
-                hero_path.push("heroes.json");
+                hero_path.push(".config/Optolith/heroes.json");
+                //hero_path.push("Optolith");
+                //hero_path.push("heroes.json");
                 return hero_path;
             } else if cfg!(windows) {
                 //let hero_path = "C:/Users/micro/AppData/Roaming/Optolith/heroes.json";
                 let hero_path_str = var("appdata").expect("Error: Unable to find AppData directory.");
                 let mut hero_path  = Path::new(&hero_path_str).to_path_buf();
-                hero_path.push("Optolith");
-                hero_path.push("heroes.json");
-
+                hero_path.push("Optolith/heroes.json");
                 return hero_path;
             } else if cfg!(macos) {
-                //check if this is the same as unix https://stackoverflow.com/questions/43292357/how-can-one-detect-the-os-type-using-rust
+                let hero_path_str = var("HOME").expect("Error: Unable to find AppData directory.");
+                let mut hero_path  = Path::new(&hero_path_str).to_path_buf();
+                hero_path.push("Library/Application Support/Optolith/heroes.json");
             };
             panic!("Error: Could not determin heroes.json path.");
         }
