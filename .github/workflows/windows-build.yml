@@ -85,5 +85,5 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: optodice-Windows
-          path: gtk_app.zip
+          path: $GTK_APP/*
         if: ${{ matrix.type == 'release' }}
