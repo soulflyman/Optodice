@@ -11,7 +11,7 @@ Optodice does not modify your heroes, it operates in read only mode on your hero
 ## Some sort of a roadmap
 - [x] Select from multiple heroes
 - [x] Send data to a Discord Webhook
-- [ ] Role checks on attributes
+- [x] Role checks on attributes
 - [x] Role checks on skills
 - [ ] Role checks on attacks
 - [x] Display every check result in discord with the avatar of the hero
