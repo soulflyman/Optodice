@@ -168,7 +168,7 @@ fn ui_add_tab_battle(context: &Rc<RefCell<Context>>) {
 
         if !weapon.is_range_weapon() {
             let ct_primary_attributes = context.borrow().combat_techniques.primary_attributes(weapon.combat_technique());
-            let parry_value = context.borrow().heroes.active_hero().parry_value(weapon.combat_technique(), ct_primary_attributes);
+            let parry_value = context.borrow().heroes.active_hero().parry_value(&weapon, ct_primary_attributes);
             let pa_label =  gtk::Label::new(Some("PA")); 
             row.add(&pa_label);
             let pa_value =  gtk::Label::new(Some(parry_value.to_string().as_str())); 
@@ -182,7 +182,7 @@ fn ui_add_tab_battle(context: &Rc<RefCell<Context>>) {
             row.add(&slash);
         }
 
-        let attack_value = context.borrow().heroes.active_hero().combat_technique_value(weapon.combat_technique());
+        let attack_value = context.borrow().heroes.active_hero().attack_value(&weapon);
 
         let at_label =  gtk::Label::new(Some("AT"));  
         row.add(&at_label);

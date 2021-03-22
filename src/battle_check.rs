@@ -39,7 +39,7 @@ impl BattleCheck {
     }
 
     pub fn attack(context: &Context, weapon: &OptolithWeapon, difficulty: i32) -> BattleCheckResult{
-        let ct_value = context.heroes.active_hero().combat_technique_value(weapon.combat_technique());
+        let ct_value = context.heroes.active_hero().attack_value(&weapon);
         
         let mut rng = rand::thread_rng();
         let dice_value = rng.gen_range(1..21);
@@ -71,7 +71,7 @@ impl BattleCheck {
 
     pub fn parry(context: &Context, weapon: &OptolithWeapon, difficulty: i32) -> BattleCheckResult {    
         let ct_primary_attributes = context.combat_techniques.primary_attributes(weapon.combat_technique());
-        let parry_value = context.heroes.active_hero().parry_value(weapon.combat_technique(), ct_primary_attributes);
+        let parry_value = context.heroes.active_hero().parry_value(&weapon, ct_primary_attributes);
                   
         let mut rng = rand::thread_rng();
         let dice_value = rng.gen_range(1..21);

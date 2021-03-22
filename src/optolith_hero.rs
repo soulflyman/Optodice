@@ -112,17 +112,17 @@ impl OptolithHero {
         return self.hero["ct"][combat_technique_id].as_i32().unwrap_or(6);
     }
 
-    pub fn combat_technique_value(&self, combat_technique_id: &String) -> i32 {
+    pub fn attack_value(&self, weapon :&OptolithWeapon) -> i32 {
         let combat_technique_bonus: i32;
-        if self.is_ranged_combat_technique(combat_technique_id) {
-            let courage = self.attribute_value(&"ATTR_1".to_string());
-            combat_technique_bonus = (courage - 8) % 3;
-        } else {
+        if self.is_ranged_combat_technique(weapon.combat_technique()) {
             let dexterity = self.attribute_value(&"ATTR_5".to_string());
-            combat_technique_bonus = (dexterity - 8) % 3
+            combat_technique_bonus = ((dexterity - 8) as f64 / 3.0) as i32;
+        } else {
+            let courage = self.attribute_value(&"ATTR_1".to_string());
+            combat_technique_bonus = ((courage - 8) as f64 / 3.0) as i32;
         }
 
-        self.combat_technique_base_value(combat_technique_id) + combat_technique_bonus
+        self.combat_technique_base_value(weapon.combat_technique()) + combat_technique_bonus + weapon.at()
     }
 
     pub fn is_ranged_combat_technique(&self, combat_technique_id: &String) -> bool {
@@ -131,7 +131,7 @@ impl OptolithHero {
         range_techniques.contains(&combat_technique_id.as_str())
     }
 
-    pub fn parry_value(&self, combat_technique_id: &String, primary_attributes: Vec<String>) -> i32 {
+    pub fn parry_value(&self, weapon :&OptolithWeapon, primary_attributes: Vec<String>) -> i32 {
         let mut primary_attribute_value = 0;
         for attribute in primary_attributes {
             let attribute_value = self.attribute_value(&attribute);
@@ -140,10 +140,18 @@ impl OptolithHero {
             }
         }
 
-        let ct_base_value = self.combat_technique_base_value(combat_technique_id);
-        let ct_bonus = ((primary_attribute_value - 8) % 3) as i32 ;
+        let ct_base_value = self.combat_technique_base_value(weapon.combat_technique());
+        let ct_bonus = ((primary_attribute_value - 8) as f64 / 3.0) as i32 ;
 
         let ct_base_value_half = (ct_base_value as f64 / 2.0).ceil() as i32;
-        ct_base_value_half + ct_bonus
+
+        if weapon.combat_technique() == "CT_10"
+        {
+            ct_base_value_half + ct_bonus + weapon.pa() * 2
+        }else
+        {
+            ct_base_value_half + ct_bonus + weapon.pa()
+        }
+        
     }
 }

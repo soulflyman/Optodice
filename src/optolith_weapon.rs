@@ -75,4 +75,14 @@ impl OptolithWeapon {
     pub fn combat_technique(&self) -> &String {
         &self.combat_technique
     }
+
+    /// Get a reference to the optolith weapon's at.
+    pub fn at(&self) -> &i32 {
+        &self.at
+    }
+
+    /// Get a reference to the optolith weapon's pa.
+    pub fn pa(&self) -> &i32 {
+        &self.pa
+    }
 }
