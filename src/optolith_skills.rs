@@ -5,6 +5,7 @@ use json::JsonValue;
 pub struct OptolithSkills {
     by_id: HashMap<String, Skill>,
     pub by_group: HashMap<String, Vec<Skill>>,
+    group_order: Vec<String>,
 }
 
 #[derive(Debug, Default, Clone)]
@@ -12,15 +13,15 @@ pub struct Skill {
     pub id: String,
     pub group_id: String,
     pub name: String,
-    pub test: Vec<String>,
-    pub test_display: Vec<String>,
+    pub check: Vec<String>,
+    pub check_display: Vec<String>,
 }
 
 #[derive(Debug, Default, Clone)]
 struct SkillGroup {
     id: String,
     name: String,
-    test: Vec<String>,
+    check: Vec<String>,
 }
 
 impl OptolithSkills {
@@ -41,17 +42,17 @@ impl OptolithSkills {
             
             let mut grouped_skills: Vec<Skill> = Vec::new();
             for (skill_id, skill_values) in tmp_skills.entries() {
-                let mut test: Vec<String> = vec!();
-                for test_id in skill_values["test"].members() {
-                    test.push(test_id.to_string());
+                let mut check: Vec<String> = vec!();
+                for check_id in skill_values["test"].members() {
+                    check.push(check_id.to_string());
                 }
 
                 let skill = Skill{
                     id: skill_id.to_string(),
                     group_id: skill_group.id.clone(),
                     name: skill_values["name"].to_string(),
-                    test_display: test.clone(),
-                    test: test,
+                    check_display: check.clone(),
+                    check,
                 };
                 dbg!(&skill.name); //todo remove
                 skills.by_id.insert(skill_id.to_string(), skill.clone());    
@@ -59,6 +60,7 @@ impl OptolithSkills {
             }
 
             skills.by_group.insert(skill_group.id.clone(), grouped_skills);
+            skills.group_order.push(skill_group.id.clone());
         }
 
         return skills;
@@ -67,11 +69,16 @@ impl OptolithSkills {
     pub fn by_id(&self, skill_id: &String) -> Skill {
         return self.by_id.get(skill_id).unwrap().clone();
     }
+
+    /// Get a reference to the optolith skills's group order.
+    pub fn group_order(&self) -> Vec<String> {
+        self.group_order.clone()
+    }
 }
 
 impl Skill {
     pub fn get_check(&self) -> Vec<String> {
-        return self.test.clone();
+        return self.check.clone();
     }
 
     pub fn get_name(&self) -> String {

@@ -300,14 +300,16 @@ fn upload_avatar(context: &Context) {
 }
 
 fn ui_add_tabs_skills(context: &Rc<RefCell<Context>>) {
-    let skills_by_group = &context.borrow().skills.by_group.clone(); //todo get rid of hashmap, because it does not keep the order!
-    for (skill_category, skills) in skills_by_group {        
+    //let skills_by_group = &context.borrow().skills.by_group.clone(); //todo get rid of hashmap, because it does not keep the order!
+    let skill_groups_order = context.borrow().skills.group_order();
+    for skill_group in skill_groups_order {     
+        let skills = &context.borrow().skills.by_group.get(&skill_group).unwrap().clone();
         let lbo_skills = gtk::ListBox::new();        
         lbo_skills.set_selection_mode(gtk::SelectionMode::None);
 
-        let nb_tab_name = gtk::Label::new(Some(skill_category));
+        let nb_tab_name = gtk::Label::new(Some(&skill_group));
         context.borrow_mut().gtk_notebook.as_ref().unwrap().append_page(&lbo_skills, Some(&nb_tab_name));
-        dbg!(&skill_category); //todo remove
+        dbg!(&skill_group); //todo remove
 
         for skill in skills {
             let box_skill = gtk::Box::new(gtk::Orientation::Horizontal, 0);
@@ -326,8 +328,8 @@ fn ui_add_tabs_skills(context: &Rc<RefCell<Context>>) {
             lbl_skill_points.set_widget_name(&format!("skill_id#{}",&skill.id));
             box_skill.add(&lbl_skill_points);            
 
-            let en_skill_test_difculty = build_skill_difficulty_entry(&context, &skill.id);
-            box_skill.add(&en_skill_test_difculty);
+            let en_skill_check_difculty = build_skill_difficulty_entry(&context, &skill.id);
+            box_skill.add(&en_skill_check_difculty);
 
             let btn_die = build_skill_check_button(&context, &skill.id);
             box_skill.add(&btn_die);
