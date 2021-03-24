@@ -237,15 +237,26 @@ fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
     let hero_status_box = gtk::Box::new(gtk::Orientation::Horizontal, 15);
     hero_status_box.set_margin_start(15);
     hero_status_box.set_margin_end(15);
+
+    let health = gtk::SpinButton::with_range(0.0, 1000.0, 1.0);
+    health.set_alignment(0.5);
+    health.set_value(28.0);
+    health.connect_changed(clone!(context => move |health| {
+        //context.borrow_mut().difficulty.pain_level = pain.get_value_as_int();
+    }));
+    let health_label = gtk::Label::new(Some("Leben"));
+    hero_status_box.add(&health_label);
+    hero_status_box.add(&health);
+
     let pain = gtk::SpinButton::with_range(0.0, 4.0, 1.0);
     pain.set_alignment(0.5);
     pain.connect_changed(clone!(context => move |pain| {
         context.borrow_mut().difficulty.pain_level = pain.get_value_as_int();
     }));
     let pain_label = gtk::Label::new(Some("Schmerz"));
-
     hero_status_box.add(&pain_label);
     hero_status_box.add(&pain);
+
     return hero_status_box;
 }
 
