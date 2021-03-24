@@ -300,7 +300,6 @@ fn upload_avatar(context: &Context) {
 }
 
 fn ui_add_tabs_skills(context: &Rc<RefCell<Context>>) {
-    //let skills_by_group = &context.borrow().skills.by_group.clone(); //todo get rid of hashmap, because it does not keep the order!
     let skill_groups_order = context.borrow().skills.group_order();
     for skill_group in skill_groups_order {     
         let skills = &context.borrow().skills.by_group.get(&skill_group).unwrap().clone();
@@ -309,7 +308,6 @@ fn ui_add_tabs_skills(context: &Rc<RefCell<Context>>) {
 
         let nb_tab_name = gtk::Label::new(Some(&skill_group));
         context.borrow_mut().gtk_notebook.as_ref().unwrap().append_page(&lbo_skills, Some(&nb_tab_name));
-        dbg!(&skill_group); //todo remove
 
         for skill in skills {
             let box_skill = gtk::Box::new(gtk::Orientation::Horizontal, 0);
@@ -465,7 +463,6 @@ fn request_string_dialog(title: &str, message: &str, apply_button_text: &str) ->
     return text;   
 }
 
-//todo add variable message
 fn abort_app_with_message(titel: &str, message: &str) {
     let msg_dialog = MessageDialog::new::<gtk::Window>(
         None,
@@ -571,10 +568,10 @@ fn build_skill_difficulty_entry(context: &Rc<RefCell<Context>>, skill_id: &str) 
     en_skill_check_difculty.set_placeholder_text(Some("+/-"));
     en_skill_check_difculty.set_width_chars(4);
     en_skill_check_difculty.set_max_length(4);
+    let skill_id_tmp = skill_id.to_string();
     en_skill_check_difculty.connect_activate(clone!(context => move |entry| {
-        let skill_id = get_skill_id(&entry.clone().upcast::<gtk::Widget>()); //todo remove like in build_attribute_difficulty_entry
         let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
-        role_skill_check(&context.borrow(), &skill_id, difficulty);
+        role_skill_check(&context.borrow(), &skill_id_tmp, difficulty);
     }));
     en_skill_check_difculty
 }
@@ -641,17 +638,7 @@ fn build_parry_difficulty_entry(context: &Rc<RefCell<Context>>, weapon: &Optolit
 fn build_hero_select(context: &Context) -> gtk::ComboBoxText {
     let hero_list = context.heroes.simple_hero_list();
     if hero_list.len() == 0 {
-        //todo use abort_app()
-        let dialog = MessageDialog::new::<gtk::Window>(
-            None,
-            DialogFlags::MODAL,
-            MessageType::Error,
-            ButtonsType::Ok,
-            "No heroes found in heroes.json.",
-        );
-        dialog.set_title("We need more hereos!");
-        dialog.connect_response(|_, _| std::process::exit(1));
-        dialog.run();        
+        abort_app_with_message("We need more heroes!", "No heroes found in heroes.json");
     }
     let hero_select = gtk::ComboBoxText::new();
     for hero in hero_list {
