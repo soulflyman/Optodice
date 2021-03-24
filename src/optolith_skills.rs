@@ -38,7 +38,6 @@ impl OptolithSkills {
                 name: group.to_string(),
                 ..SkillGroup::default()
             };
-            dbg!(&group.to_string());//todo remove
             
             let mut grouped_skills: Vec<Skill> = Vec::new();
             for (skill_id, skill_values) in tmp_skills.entries() {
@@ -54,7 +53,7 @@ impl OptolithSkills {
                     check_display: check.clone(),
                     check,
                 };
-                dbg!(&skill.name); //todo remove
+
                 skills.by_id.insert(skill_id.to_string(), skill.clone());    
                 grouped_skills.push(skill);
             }
