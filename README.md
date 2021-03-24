@@ -13,7 +13,7 @@ Optodice does not modify your heroes, it operates in read only mode on your hero
 - [x] Send data to a Discord Webhook
 - [x] Role checks on attributes
 - [x] Role checks on skills
-- [ ] Role checks on attacks
+- [x] Role checks on attacks
 - [x] Display every check result in discord with the avatar of the hero
 - [x] Support automatic uploads of avatars (upload via php script workds, ftp upload is missing)
 - [ ] Role custom dice/checks
@@ -24,6 +24,9 @@ Optodice does not modify your heroes, it operates in read only mode on your hero
 - [x] Support Linux
 - [ ] Support MacOS (github action builds are compiling, still not testet)
 - [ ] i18n
+- [ ] Settings view
+- [ ] Options to autorole critical success/fails events
+- [ ] Option to autorole battle damage
 
 ## Screenshots
 Optodice UI  
