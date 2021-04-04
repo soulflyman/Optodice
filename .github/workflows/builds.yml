@@ -1,4 +1,4 @@
-name: 🐧 Linux build
+name: 🐧 🍎 🏁 Builds
 on: [ push, pull_request ]
 
 env:
