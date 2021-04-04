@@ -1,12 +1,78 @@
-#from https://github.com/qarmin/czkawka/blob/master/.github/workflows/windows.yml
-name: 🏁 Windows
+name: 🐧 Linux build
 on: [ push, pull_request ]
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Install basic libraries
+      run: sudo apt-get update; sudo apt install libgtk-3-dev -y
+    - uses: actions/checkout@v2
+    - name: Build
+      run: cargo build --release
+    - name: Artifacts - Create collection folder
+      run: mkdir artifacts
+    - name: Artifacts - Collect optodice
+      run: mv target/release/optodice artifacts/
+    - name: Artifacts - Collect skills.json
+      run: mv skills.json artifacts/
+    - name: Artifacts - Collect attributes.json
+      run: mv attributes.json artifacts/
+    - name: Artifacts - Collect CombatTechniques.yaml
+      run: mv CombatTechniques.yaml artifacts/
+    - name: Upload a Build Artifact
+      uses: actions/upload-artifact@v2.2.2
+      with: 
+        # Artifact name
+        #name: # optional, default is artifact
+        # A file, directory or wildcard pattern that describes what to upload
+        path: artifacts
+        # The desired behavior if no files are found using the provided path.
+        if-no-files-found: error # optional, default is warn
+        #retention-days: # optional
+
+  macos-gui:
+    strategy:
+      matrix:
+        toolchain: [ stable ]
+        type: [ release ]
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          override: true
+
+      - name: Install Homebrew
+        run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+      - name: Override link[WORKAROUND] # Looks that this is a bug with current homebrew or Github CI
+        run: rm '/usr/local/bin/2to3'
+
+      - name: Install GTK3
+        run: brew install rust gtk+3
+
+      - name: Build
+        run: cargo build --release --bin optodice
+        env:
+          CARGO_INCREMENTAL: 0
+          RUSTFLAGS: "-C debuginfo=0"
+        if: ${{ matrix.type == 'release'}}
+
+      - name: Store MacOS Build
+        uses: actions/upload-artifact@v2
+        with:
+          name: optodice-macos
+          path: target/release/optodice
+        if: ${{ matrix.type == 'release' }}
+
   windows-gui:
     strategy:
       matrix:
