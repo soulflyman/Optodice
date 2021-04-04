@@ -23,6 +23,8 @@ jobs:
       run: mv skills.json artifacts/
     - name: Artifacts - Collect attributes.json
       run: mv attributes.json artifacts/
+    - name: Artifacts - Collect CombatTechniques.yaml
+      run: mv CombatTechniques.yaml artifacts/
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.2.2
       with: 
