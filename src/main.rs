@@ -203,7 +203,7 @@ fn ui_add_tab_battle(context: &Rc<RefCell<Context>>) {
 fn ui_add_dodge_to_tab(context: &Rc<RefCell<Context>>, tab: &gtk::ListBox) {
     let row = gtk::Box::new(gtk::Orientation::Horizontal, 5);
 
-    let weapon_name = gtk::Label::new(Some("Ausweiche"));
+    let weapon_name = gtk::Label::new(Some("Ausweichen"));
     weapon_name.set_halign(Align::Start);
     row.add(&weapon_name);
     row.set_child_packing(&weapon_name, true, true, 0, gtk::PackType::Start);
