@@ -27,7 +27,8 @@ jobs:
       run: mv CombatTechniques.yaml artifacts/
     - name: Upload a Build Artifact
       uses: actions/upload-artifact@v2.2.2
-      with: 
+      with:
+        name: optodice-linux
         # Artifact name
         #name: # optional, default is artifact
         # A file, directory or wildcard pattern that describes what to upload
@@ -151,6 +152,6 @@ jobs:
       - name: Store Windows GUI CrossComplile
         uses: actions/upload-artifact@v2
         with:
-          name: optodice-Windows
+          name: optodice-windows
           path: gtk_app/*
         if: ${{ matrix.type == 'release' }}
