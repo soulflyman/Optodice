@@ -30,7 +30,7 @@ use context::Context;
 use discord_webhook::{DiscordWebHook, Embed};
 use gio::prelude::*;
 use glib::{Cast, IsA, Object};
-use gtk::{Application, Bin, ButtonsType, Container, Dialog, DialogFlags, EntryExt, MessageDialog, MessageType, PackType, ResponseType, Widget, prelude::*};
+use gtk::{Align, Application, Bin, ButtonsType, Container, Dialog, DialogFlags, EntryExt, MessageDialog, MessageType, PackType, ResponseType, Widget, prelude::*};
 use gdk_pixbuf::Colorspace;
 use image::GenericImageView;
 use std::{cell::RefCell, env, error::Error, process, rc::Rc};
@@ -105,7 +105,7 @@ fn main() {
         
         let main_box = gtk::Box::new(gtk::Orientation::Vertical, 10);
         
-        let cbt_hero_select = build_hero_select(&context.borrow_mut());        
+        let cbt_hero_select = build_hero_select(&mut context.borrow_mut());        
         cbt_hero_select.connect_changed(clone!(context => move |hero_select| {
             change_hero(&context, &hero_select);                   
         }));
@@ -120,8 +120,7 @@ fn main() {
         box_hero.add(&hero_image);
 
         main_box.add(&box_hero);
-        
-       
+               
         let hero_status_box = build_hero_status_box(&context);
         main_box.add(&hero_status_box);
         
@@ -157,32 +156,19 @@ fn ui_add_tab_battle(context: &Rc<RefCell<Context>>) {
     let nb_tab_name = gtk::Label::new(Some("Kampf"));
     context.borrow_mut().gtk_notebook.as_ref().unwrap().append_page(&lbo_weapons, Some(&nb_tab_name));
 
+
     ui_add_dodge_to_tab(context, &lbo_weapons);
 
-    for weapon in context.borrow().heroes.active_hero().weapons() {
-        let row = gtk::Box::new(gtk::Orientation::Horizontal, 5);
-
+    let weapons = context.borrow_mut().heroes.active_hero().weapons();
+    for weapon in weapons {
         let weapon_name = gtk::Label::new(Some(weapon.name()));
-        row.add(&weapon_name);
-        row.set_child_packing(&weapon_name, true, true, 0, gtk::PackType::Start);
+        weapon_name.set_halign(Align::Start);
+        lbo_weapons.add(&weapon_name);
 
-        if !weapon.is_range_weapon() {
-            let ct_primary_attributes = context.borrow().combat_techniques.primary_attributes(weapon.combat_technique());
-            let parry_value = context.borrow().heroes.active_hero().parry_value(&weapon, ct_primary_attributes);
-            let pa_label =  gtk::Label::new(Some("PA")); 
-            row.add(&pa_label);
-            let pa_value =  gtk::Label::new(Some(parry_value.to_string().as_str())); 
-            row.add(&pa_value);
-            let en_parry_test_difculty = build_parry_difficulty_entry(&context, &weapon);
-            row.add(&en_parry_test_difculty);
-            let btn_die = build_parry_check_button(&context, &weapon);
-            row.add(&btn_die);
-
-            let slash =  gtk::Label::new(Some(" / ")); 
-            row.add(&slash);
-        }
-
-        let attack_value = context.borrow().heroes.active_hero().attack_value(&weapon);
+        let row = gtk::Box::new(gtk::Orientation::Horizontal, 5);
+        row.set_halign(Align::End);
+        
+        let attack_value = context.borrow_mut().heroes.active_hero().attack_value(&weapon);
 
         let at_label =  gtk::Label::new(Some("AT"));  
         row.add(&at_label);
@@ -193,6 +179,22 @@ fn ui_add_tab_battle(context: &Rc<RefCell<Context>>) {
         row.add(&en_attack_test_difculty);
         let btn_die = build_attack_check_button(&context, &weapon);
         row.add(&btn_die);
+
+        if !weapon.is_range_weapon() {
+            let slash =  gtk::Label::new(Some(" / ")); 
+            row.add(&slash);
+
+            let ct_primary_attributes = context.borrow().combat_techniques.primary_attributes(weapon.combat_technique());
+            let parry_value = context.borrow_mut().heroes.active_hero().parry_value(&weapon, ct_primary_attributes);
+            let pa_label =  gtk::Label::new(Some("PA")); 
+            row.add(&pa_label);
+            let pa_value =  gtk::Label::new(Some(parry_value.to_string().as_str())); 
+            row.add(&pa_value);
+            let en_parry_test_difculty = build_parry_difficulty_entry(&context, &weapon);
+            row.add(&en_parry_test_difculty);
+            let btn_die = build_parry_check_button(&context, &weapon);
+            row.add(&btn_die);            
+        }
         
         lbo_weapons.add(&row);
     }
@@ -201,22 +203,23 @@ fn ui_add_tab_battle(context: &Rc<RefCell<Context>>) {
 fn ui_add_dodge_to_tab(context: &Rc<RefCell<Context>>, tab: &gtk::ListBox) {
     let row = gtk::Box::new(gtk::Orientation::Horizontal, 5);
 
-        let weapon_name = gtk::Label::new(Some("Ausweiche"));
-        row.add(&weapon_name);
-        row.set_child_packing(&weapon_name, true, true, 0, gtk::PackType::Start);
-        
+    let weapon_name = gtk::Label::new(Some("Ausweiche"));
+    weapon_name.set_halign(Align::Start);
+    row.add(&weapon_name);
+    row.set_child_packing(&weapon_name, true, true, 0, gtk::PackType::Start);
+    
 
-        let dodge_value = context.borrow().heroes.active_hero().dodge_value();
+    let dodge_value = context.borrow_mut().heroes.active_hero().dodge_value();
 
-        let at_value =  gtk::Label::new(Some(dodge_value.to_string().as_str()));  
-        row.add(&at_value);
+    let at_value =  gtk::Label::new(Some(dodge_value.to_string().as_str()));  
+    row.add(&at_value);
 
-        let en_attack_test_difculty = build_dodge_difficulty_entry(&context, "dodge");
-        row.add(&en_attack_test_difculty);
-        let btn_die = build_dodge_check_button(&context, "dodge");
-        row.add(&btn_die);
-        
-        tab.add(&row);
+    let en_attack_test_difculty = build_dodge_difficulty_entry(&context, "dodge");
+    row.add(&en_attack_test_difculty);
+    let btn_die = build_dodge_check_button(&context, "dodge");
+    row.add(&btn_die);
+    
+    tab.add(&row);
 }
 
 fn ui_add_tab_custom(context: &Rc<RefCell<Context>>) {
@@ -224,6 +227,15 @@ fn ui_add_tab_custom(context: &Rc<RefCell<Context>>) {
     lbo_dice.set_selection_mode(gtk::SelectionMode::None);
     let nb_tab_name = gtk::Label::new(Some("Würfel"));
     context.borrow_mut().gtk_notebook.as_ref().unwrap().append_page(&lbo_dice, Some(&nb_tab_name));
+
+    let dice_list = vec![2,4,6,8,10,12,20];
+
+    for dice in dice_list {
+        let mut dice_button_text = String::from("w");
+        dice_button_text.push_str(dice.to_string().as_str());
+        let dice_button = gtk::Button::new();
+        dice_button.set_label(&dice_button_text);
+    }
 }
 
 fn ui_add_tab_magic(context: &Rc<RefCell<Context>>) {
@@ -242,7 +254,7 @@ fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
     health.set_alignment(0.5);
     health.set_value(28.0);
     health.connect_changed(clone!(context => move |health| {
-        //context.borrow_mut().difficulty.pain_level = pain.get_value_as_int();
+        context.borrow_mut().heroes.active_hero().set_health(health.get_value_as_int());
     }));
     let health_label = gtk::Label::new(Some("Leben"));
     hero_status_box.add(&health_label);
@@ -265,8 +277,8 @@ fn change_hero(context: &Rc<RefCell<Context>>, hero_select: &gtk::ComboBoxText) 
     context.borrow_mut().config.set_last_used_hero_id(hero_id.to_string());
     context.borrow_mut().heroes.set_active_hero(hero_id.to_string());
     
-    upload_avatar(&context.borrow_mut());
-    change_avatar(&context.borrow_mut(), &hero_select);
+    upload_avatar(&mut context.borrow_mut());
+    change_avatar(&mut context.borrow_mut(), &hero_select);
     reload_hero_stats(context);
 }
 
@@ -292,7 +304,7 @@ fn clear_notebook(context: &mut Context) {
     context.add_notebook(new_notebook);
 }
 
-fn change_avatar(context: &Context, hero_select: &gtk::ComboBoxText) {
+fn change_avatar(context: &mut Context, hero_select: &gtk::ComboBoxText) {
     let avatar_raw = base64::decode(&context.heroes.active_hero().avatar().split(',').collect::<Vec<&str>>()[1]);
     let mut avatar_buffer = image::load_from_memory(&avatar_raw.unwrap()).unwrap();
     avatar_buffer = avatar_buffer.resize(100, 100, image::imageops::FilterType::Lanczos3);
@@ -304,7 +316,7 @@ fn change_avatar(context: &Context, hero_select: &gtk::ComboBoxText) {
     avatar.set_from_pixbuf(Some(&avatar_pixbuf));
 }
 
-fn upload_avatar(context: &Context) {
+fn upload_avatar(context: &mut Context) {
     if context.config.is_avatar_uploader_url_set() {
         context.heroes.active_hero().upload_avatar(context.config.get_avatar_uploader_url());            
     }
@@ -327,10 +339,10 @@ fn ui_add_tabs_skills(context: &Rc<RefCell<Context>>) {
             box_skill.add(&lbl_skill_name);
             box_skill.set_child_packing(&lbl_skill_name, true, true, 0, gtk::PackType::Start);
 
-            let lbl_checks = build_checks_label(&skill.id, &context.borrow());
+            let lbl_checks = build_checks_label(&skill.id, &mut context.borrow_mut());
             box_skill.add(&lbl_checks);
             
-            let lbl_skill_points = gtk::Label::new(Some(context.borrow().heroes.active_hero().skill_points(&skill.id).to_string().as_str()));
+            let lbl_skill_points = gtk::Label::new(Some(context.borrow_mut().heroes.active_hero().skill_points(&skill.id).to_string().as_str()));
             lbl_skill_points.set_halign(gtk::Align::End);
             lbl_skill_points.set_justify(gtk::Justification::Right);
             lbl_skill_points.set_property_width_request(30);
@@ -355,14 +367,15 @@ fn ui_add_tab_attributes(context: &Rc<RefCell<Context>>) {
     let nb_tab_name = gtk::Label::new(Some("Attribute"));
     context.borrow_mut().gtk_notebook.as_ref().unwrap().append_page(&lbo_attributes, Some(&nb_tab_name));
 
-    for (attribute_id, attribute) in context.borrow().attributes.clone().all() {
+    let attributes = context.borrow().attributes.clone().all().to_owned();
+    for (attribute_id, attribute) in attributes {
         let box_attribute = gtk::Box::new(gtk::Orientation::Horizontal, 0);
 
         let lbl_attribute_name = build_skill_name_label(&attribute.name);
         box_attribute.add(&lbl_attribute_name);
         box_attribute.set_child_packing(&lbl_attribute_name, true, true, 0, gtk::PackType::Start);
         
-        let lbl_attribute_value = gtk::Label::new(Some(context.borrow().heroes.active_hero().attribute_value(&attribute_id.to_string()).to_string().as_str()));
+        let lbl_attribute_value = gtk::Label::new(Some(context.borrow_mut().heroes.active_hero().attribute_value(&attribute_id.to_string()).to_string().as_str()));
         lbl_attribute_value.set_halign(gtk::Align::End);
         lbl_attribute_value.set_justify(gtk::Justification::Right);
         lbl_attribute_value.set_property_width_request(30);
@@ -379,7 +392,7 @@ fn ui_add_tab_attributes(context: &Rc<RefCell<Context>>) {
     }
 }
 
-fn fire_webhook(context: &Context, die_result: CheckResult) {
+fn fire_webhook(context: &mut Context, die_result: CheckResult) {
     let mut embed = Embed::default();
     embed.description = Some(die_result.message);
     if die_result.success {
@@ -504,7 +517,7 @@ fn build_parry_check_button(context: &Rc<RefCell<Context>>, weapon: &OptolithWea
     let aweapon_tmp = weapon.clone();
     btn_die.connect_clicked(clone!(context => move |but| {
         let difficulty = get_check_difficulty(&but, &difficulty_widget_name);
-        role_parry_check(&context.borrow(), &aweapon_tmp, difficulty);
+        role_parry_check(&mut context.borrow_mut(), &aweapon_tmp, difficulty);
     }));
     return btn_die;
 }
@@ -517,7 +530,7 @@ fn build_attack_check_button(context: &Rc<RefCell<Context>>, weapon: &OptolithWe
     let weapon_tmp = weapon.clone();
     btn_die.connect_clicked(clone!(context => move |but| {
         let difficulty = get_check_difficulty(&but, &difficulty_widget_name);
-        role_attack_check(&context.borrow(), &weapon_tmp, difficulty);
+        role_attack_check(&mut context.borrow_mut(), &weapon_tmp, difficulty);
     }));
     return btn_die;
 }
@@ -529,7 +542,7 @@ fn build_dodge_check_button(context: &Rc<RefCell<Context>>, dodge_id: &str) -> g
     btn_die.set_widget_name(widget_name.as_str());
     btn_die.connect_clicked(clone!(context => move |but| {
         let difficulty = get_check_difficulty(&but, &difficulty_widget_name);
-        role_dodge_check(&context.borrow(), difficulty);
+        role_dodge_check(&mut context.borrow_mut(), difficulty);
     }));
     return btn_die;
 }
@@ -542,7 +555,7 @@ fn build_skill_check_button(context: &Rc<RefCell<Context>>, skill_id: &str) -> g
     let skill_id_tmp = skill_id.to_string();    
     btn_die.connect_clicked(clone!(context => move |but| {
         let difficulty = get_check_difficulty(&but, &difficulty_widget_name);
-        role_skill_check(&context.borrow(), &skill_id_tmp, difficulty);
+        role_skill_check(&mut context.borrow_mut(), &skill_id_tmp, difficulty);
     }));
     return btn_die;
 }
@@ -557,12 +570,12 @@ fn build_attribute_check_button(context: &Rc<RefCell<Context>>, attribute_id: &s
         //let hero_id = get_hero_id(&but);
         //let attribute_id = get_skill_id(&but.clone().upcast::<gtk::Widget>());
         let difficulty = get_check_difficulty(&but, &difficulty_widget_name);
-        role_attribute_check(&context.borrow(), &attribute_id_tmp, difficulty);
+        role_attribute_check(&mut context.borrow_mut(), &attribute_id_tmp, difficulty);
     }));
     return btn_die;
 }
 
-fn build_checks_label(skill_id: &String, context: &Context) -> gtk::Label {
+fn build_checks_label(skill_id: &String, context: &mut Context) -> gtk::Label {
     let attribute_ids = context.skills.by_id(skill_id).get_check();
     let check_name_abbr = context.attributes.name_abbrs(attribute_ids);
     
@@ -582,7 +595,7 @@ fn build_skill_difficulty_entry(context: &Rc<RefCell<Context>>, skill_id: &str) 
     let skill_id_tmp = skill_id.to_string();
     en_skill_check_difculty.connect_activate(clone!(context => move |entry| {
         let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
-        role_skill_check(&context.borrow(), &skill_id_tmp, difficulty);
+        role_skill_check(&mut context.borrow_mut(), &skill_id_tmp, difficulty);
     }));
     en_skill_check_difculty
 }
@@ -597,7 +610,7 @@ fn build_attribute_difficulty_entry(context: &Rc<RefCell<Context>>, attribute_id
     let attribute_id_tmp = attribute_id.to_string();
     en_attribute_check_difculty.connect_activate(clone!(context => move |entry| {        
         let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
-        role_attribute_check(&context.borrow(), &attribute_id_tmp, difficulty);
+        role_attribute_check(&mut context.borrow_mut(), &attribute_id_tmp, difficulty);
     }));
     en_attribute_check_difculty
 }
@@ -612,7 +625,7 @@ fn build_attack_difficulty_entry(context: &Rc<RefCell<Context>>, weapon_id: &str
     let attribute_id_tmp = weapon_id.to_string();
     en_attack_difculty.connect_activate(clone!(context => move |entry| {        
         let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
-        role_attribute_check(&context.borrow(), &attribute_id_tmp, difficulty);
+        role_attribute_check(&mut context.borrow_mut(), &attribute_id_tmp, difficulty);
     }));
     en_attack_difculty
 }
@@ -626,7 +639,7 @@ fn build_dodge_difficulty_entry(context: &Rc<RefCell<Context>>, dodge_id: &str) 
     en_dodge_difculty.set_max_length(4);
     en_dodge_difculty.connect_activate(clone!(context => move |entry| {        
         let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
-        role_dodge_check(&context.borrow(), difficulty);
+        role_dodge_check(&mut context.borrow_mut(), difficulty);
     }));
     en_dodge_difculty
 }
@@ -641,12 +654,12 @@ fn build_parry_difficulty_entry(context: &Rc<RefCell<Context>>, weapon: &Optolit
     let weapon_tmp = weapon.clone();
     en_parry_difculty.connect_activate(clone!(context => move |entry| {        
         let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
-        role_parry_check(&context.borrow(), &weapon_tmp, difficulty);
+        role_parry_check(&mut context.borrow_mut(), &weapon_tmp, difficulty);
     }));
     en_parry_difculty
 }
 
-fn build_hero_select(context: &Context) -> gtk::ComboBoxText {
+fn build_hero_select(context: &mut Context) -> gtk::ComboBoxText {
     let hero_list = context.heroes.simple_hero_list();
     if hero_list.len() == 0 {
         abort_app_with_message("We need more heroes!", "No heroes found in heroes.json");
@@ -687,34 +700,34 @@ fn get_check_difficulty(button: &gtk::Button, difficulty_widget_name: &String) -
         .unwrap();
 }
 
-fn role_parry_check(context: &Context, weapon: &OptolithWeapon, difficulty: i32) {
+fn role_parry_check(context: &mut Context, weapon: &OptolithWeapon, difficulty: i32) {
     let check_result = BattleCheck::parry(context, weapon, difficulty);
-    fire_webhook(&context, check_result.to_check_result());
+    fire_webhook(context, check_result.to_check_result());
 }
 
-fn role_attack_check(context: &Context, weapon: &OptolithWeapon, difficulty: i32) {
+fn role_attack_check(context: &mut Context, weapon: &OptolithWeapon, difficulty: i32) {
     let check_result = BattleCheck::attack(context, weapon, difficulty);
-    fire_webhook(&context, check_result.to_check_result());
+    fire_webhook(context, check_result.to_check_result());
 }
 
-fn role_skill_check(context: &Context, skill_id: &String, difficulty: i32) {
+fn role_skill_check(context: &mut Context, skill_id: &String, difficulty: i32) {
     let mut factory = SkillCheckFactory::new(context);
     let mut skill_check = factory.get_skill_check(skill_id.to_owned());
     let check_result = skill_check.check_skill(&difficulty);
    
-    fire_webhook(&context, check_result.to_check_result());
+    fire_webhook(context, check_result.to_check_result());
 }
 
-fn role_attribute_check(context: &Context, attribute_id: &String, difficulty: i32) {
+fn role_attribute_check(context: &mut Context, attribute_id: &String, difficulty: i32) {
     let mut skill_check = AttributeCheck::new(context, attribute_id.to_owned());
     let check_result = skill_check.check(&difficulty);
 
-    fire_webhook(&context, check_result.to_check_result());
+    fire_webhook(context, check_result.to_check_result());
 }
 
-fn role_dodge_check(context: &Context, difficulty: i32) {
+fn role_dodge_check(context: &mut Context, difficulty: i32) {
     let check_result = BattleCheck::dodge(context, difficulty);
-    fire_webhook(&context, check_result.to_check_result());
+    fire_webhook(context, check_result.to_check_result());
 }
 
 /// Returns the child element which has the given name.

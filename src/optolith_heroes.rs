@@ -23,8 +23,9 @@ pub mod optolith {
             let heroes_parsed = json::parse(heroes_json.as_str()).expect("Error: Failed to parse json data");
             let mut heroes: HashMap<String, OptolithHero> = HashMap::new();
             for (hero_id, hero_json) in heroes_parsed.entries() {
-                let hero = OptolithHero {
-                    hero: hero_json.to_owned(),                    
+                let mut hero = OptolithHero {
+                    hero: hero_json.to_owned(),
+                    health: 0,
                 };
                 heroes.insert(hero_id.to_string(), hero);
             }
@@ -81,8 +82,8 @@ pub mod optolith {
             self.active_hero_id = hero_id;            
         }
   
-        pub fn active_hero(&self) -> &OptolithHero {
-            &self.heroes.get(&self.active_hero_id).expect("Error: Hero not found.")
+        pub fn active_hero(&mut self) -> &mut OptolithHero {
+            self.heroes.get_mut(&self.active_hero_id).expect("Error: Hero not found.")
         }
     
         /// Get a reference to the optolith heroes's active hero id.

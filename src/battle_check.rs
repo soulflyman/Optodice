@@ -5,7 +5,7 @@ use rand::prelude::*;
 pub struct BattleCheck;
 
 impl BattleCheck { 
-    pub fn dodge(context: &Context, difficulty: i32) -> BattleCheckResult {        
+    pub fn dodge(context: &mut Context, difficulty: i32) -> BattleCheckResult {        
         
         let dodge_value = context.heroes.active_hero().dodge_value();
 
@@ -38,7 +38,7 @@ impl BattleCheck {
         }
     }
 
-    pub fn attack(context: &Context, weapon: &OptolithWeapon, difficulty: i32) -> BattleCheckResult{
+    pub fn attack(context: &mut Context, weapon: &OptolithWeapon, difficulty: i32) -> BattleCheckResult{
         let ct_value = context.heroes.active_hero().attack_value(&weapon);
         
         let mut rng = rand::thread_rng();
@@ -69,7 +69,7 @@ impl BattleCheck {
         }
     }
 
-    pub fn parry(context: &Context, weapon: &OptolithWeapon, difficulty: i32) -> BattleCheckResult {    
+    pub fn parry(context: &mut Context, weapon: &OptolithWeapon, difficulty: i32) -> BattleCheckResult {    
         let ct_primary_attributes = context.combat_techniques.primary_attributes(weapon.combat_technique());
         let parry_value = context.heroes.active_hero().parry_value(&weapon, ct_primary_attributes);
                   

@@ -13,7 +13,7 @@ pub struct AttributeCheck {
 
 impl AttributeCheck {
     pub fn new(
-        context: &Context,   
+        context: &mut Context,   
         attribute_id: String,
     ) -> AttributeCheck {
         let attribute_check = AttributeCheck {

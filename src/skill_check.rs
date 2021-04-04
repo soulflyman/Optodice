@@ -14,7 +14,7 @@ pub struct SkillCheck {
 
 impl SkillCheck {
     pub fn new(
-        context: &Context,   
+        context: &mut Context,   
         skill_id: String,
     ) -> SkillCheck {
         let mut skill_check = SkillCheck::default();

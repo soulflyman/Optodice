@@ -10,7 +10,7 @@ pub struct SkillCheckFactory {
 }
 
 impl SkillCheckFactory {
-    pub fn new(context: &Context) -> SkillCheckFactory {   
+    pub fn new(context: &mut Context) -> SkillCheckFactory {   
         SkillCheckFactory{
             skill_checks: HashMap::new(),
             context: context.clone(),
@@ -19,7 +19,7 @@ impl SkillCheckFactory {
  
     pub fn get_skill_check(&mut self, skill_id :String) -> SkillCheck {
         if !self.skill_checks.contains_key(&skill_id) {            
-            let new_abilit_check = SkillCheck::new(&self.context, skill_id.clone());
+            let new_abilit_check = SkillCheck::new(&mut self.context, skill_id.clone());
             self.skill_checks.insert(skill_id.clone(), new_abilit_check.clone());
             return new_abilit_check;
         }else{

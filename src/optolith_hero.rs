@@ -6,6 +6,7 @@ use crate::optolith_weapon::OptolithWeapon;
 #[derive(Debug, Clone)]
 pub struct OptolithHero {
     pub(crate) hero: JsonValue,
+    pub(crate) health: i32,
 }
 
 impl OptolithHero {
@@ -153,5 +154,15 @@ impl OptolithHero {
             ct_base_value_half + ct_bonus + weapon.pa()
         }
         
+    }
+
+    /// Get a reference to the optolith hero's health.
+    pub fn health(&self) -> &i32 {
+        &self.health
+    }
+
+    /// Set the optolith hero's health.
+    pub fn set_health(&mut self, health: i32) {
+        self.health = health;
     }
 }
