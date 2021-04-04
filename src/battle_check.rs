@@ -92,7 +92,7 @@ impl BattleCheck {
 
         BattleCheckResult {
             action_name: format!("{} Parade", weapon.name()),
-            action_name_abbr: "AT".to_string(),
+            action_name_abbr: "PA".to_string(),
             action_value: parry_value,
             dice_value,
             difficulty,
