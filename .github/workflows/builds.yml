@@ -6,9 +6,7 @@ env:
 
 jobs:
   linux:
-
     runs-on: ubuntu-latest
-
     steps:
     - name: Install basic libraries
       run: sudo apt-get update; sudo apt install libgtk-3-dev -y
@@ -25,7 +23,7 @@ jobs:
       run: mv attributes.json artifacts/
     - name: Artifacts - Collect CombatTechniques.yaml
       run: mv CombatTechniques.yaml artifacts/
-    - name: Upload a Build Artifact
+    - name: Store Linux Build
       uses: actions/upload-artifact@v2.2.2
       with:
         name: optodice-linux
@@ -38,17 +36,13 @@ jobs:
         #retention-days: # optional
 
   macos:
-    strategy:
-      matrix:
-        toolchain: [ stable ]
-        type: [ release ]
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
 
       - uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ matrix.toolchain }}
+          toolchain: stable
           override: true
 
       - name: Install Homebrew
@@ -65,20 +59,14 @@ jobs:
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0"
-        if: ${{ matrix.type == 'release'}}
 
       - name: Store MacOS Build
         uses: actions/upload-artifact@v2
         with:
           name: optodice-macos
           path: target/release/optodice
-        if: ${{ matrix.type == 'release' }}
 
   windows:
-    strategy:
-      matrix:
-        toolchain: [ stable ]
-        type: [ release ]
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
@@ -99,7 +87,7 @@ jobs:
       - name: Install Gtk, Mingw, unzip, zip and wget
         run: sudo apt-get update; sudo apt install mingw-w64 libgtk-3-dev unzip wget zip -y
 
-      - name: Build GUI Release Cross Compile
+      - name: Build
         run: |
           rustup target add x86_64-pc-windows-gnu
 
@@ -147,11 +135,9 @@ jobs:
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0 -D warnings"
-        if: ${{ matrix.type == 'release'}}
 
-      - name: Store Windows GUI CrossComplile
+      - name: Store Windows Build
         uses: actions/upload-artifact@v2
         with:
           name: optodice-windows
           path: gtk_app/*
-        if: ${{ matrix.type == 'release' }}

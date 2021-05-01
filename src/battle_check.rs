@@ -39,7 +39,7 @@ impl BattleCheck {
     }
 
     pub fn attack(context: &mut Context, weapon: &OptolithWeapon, difficulty: i32) -> BattleCheckResult{
-        let ct_value = context.heroes.active_hero().attack_value(&weapon);
+        let ct_value = context.heroes.active_hero().attack_value(&weapon) + difficulty;
         
         let mut rng = rand::thread_rng();
         let dice_value = rng.gen_range(1..21);

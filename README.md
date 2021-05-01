@@ -27,6 +27,7 @@ Optodice does not modify your heroes, it operates in read only mode on your hero
 - [ ] Settings view
 - [ ] Options to autorole critical success/fails events
 - [ ] Option to autorole battle damage
+- [ ] Cumulative Group Checks Using Multiple Skills
 
 ## Screenshots
 Optodice UI  
