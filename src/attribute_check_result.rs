@@ -1,4 +1,4 @@
-use crate::check_result::CheckResult;
+use crate::check_result::{CheckResult, CheckResultStatus};
 
 
 #[derive(Default)]
@@ -22,7 +22,7 @@ impl AttributeCheckResult {
             difficulty_str = self.difficulty.to_string();
         }
 
-        let check_results = format!("{} {:>2} {:>2} = {:>2}\t[{:>2}]\n", 
+        let check_results = format!("`{} {:>2} {:>2} = {:>2}\t[{:>2}]`\n", 
                                                                 self.attribute_name_abbr, 
                                                                 self.attribute_value, 
                                                                 difficulty_str, 
@@ -31,9 +31,7 @@ impl AttributeCheckResult {
 
         let res = format!("**{attribute_name}** {difficulty}\n \
                                     Eigenschaftswert {attribute_value}\n \
-                                    ```\n\
-                                    {check_results}\
-                                    ```",
+                                    {check_results}\n",
                                     attribute_name=self.attribute_name.as_str(), 
                                     difficulty=difficulty_str, 
                                     attribute_value=self.attribute_value.to_string(), 
@@ -47,10 +45,15 @@ impl AttributeCheckResult {
     }
 
     pub fn to_check_result(&self) -> CheckResult {
+        let status = match self.success {
+            true => CheckResultStatus::Success,
+            false => CheckResultStatus::Failure,
+        };
+
         CheckResult {
-            message: self.get_formated(),    
-            success: self.success,
+            message: self.get_formated(),
             critical: self.critical,
+            status: status,
         }
     }
 }

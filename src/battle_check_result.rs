@@ -1,4 +1,4 @@
-use crate::check_result::CheckResult;
+use crate::check_result::{CheckResult, CheckResultStatus};
 
 
 #[derive(Default)]
@@ -22,7 +22,7 @@ impl BattleCheckResult {
             difficulty_str = self.difficulty.to_string();
         }
 
-        let check_results = format!("{} {:>2} {:>2} = {:>2}\t[{:>2}]\n", 
+        let check_results = format!("`{} {:>2} {:>2} = {:>2}\t[{:>2}]`\n", 
                                                                 self.action_name_abbr, 
                                                                 self.action_value, 
                                                                 difficulty_str, 
@@ -31,9 +31,7 @@ impl BattleCheckResult {
 
         let res = format!("**{action_name}** {difficulty}\n \
                                     {action_name}wert {action_value}\n \
-                                    ```\n\
-                                    {check_results}\
-                                    ```",
+                                    {check_results}\n",
                                     action_name=self.action_name.as_str(), 
                                     difficulty=difficulty_str, 
                                     action_value=self.action_value.to_string(), 
@@ -47,9 +45,14 @@ impl BattleCheckResult {
     }
 
     pub fn to_check_result(&self) -> CheckResult {
+        let status = match self.success {
+            true => CheckResultStatus::Success,
+            false => CheckResultStatus::Failure,
+        };
+
         CheckResult {
             message: self.get_formated(),    
-            success: self.success,
+            status: status,
             critical: self.critical,
         }
     }

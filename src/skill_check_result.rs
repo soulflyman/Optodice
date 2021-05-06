@@ -1,4 +1,4 @@
-use crate::check_result::CheckResult;
+use crate::check_result::{CheckResult, CheckResultStatus};
 
 
 #[derive(Default)]
@@ -26,14 +26,12 @@ impl SkillCheckResult {
 
         let mut check_results = String::default();
         for i in 0..self.attribute_names.len() {
-            check_results.push_str(format!("{} {:>2} {:>2} = {:>2}\t[{:>2}]\n", self.attribute_names[i], self.attribute_values[i], difficulty_str, (self.attribute_values[i] as i32 + difficulty_str.parse::<i32>().unwrap_or(0)), self.dice_values[i]).as_str());
+            check_results.push_str(format!("`{} {:>2} {:>2} = {:>2}\t[{:>2}]`\n", self.attribute_names[i], self.attribute_values[i], difficulty_str, (self.attribute_values[i] as i32 + difficulty_str.parse::<i32>().unwrap_or(0)), self.dice_values[i]).as_str());
         }
 
         let res = format!("**{skill_name}** {difficulty}\n \
                                     Talentwert {skill_points}\n \
-                                    ```\n\
-                                    {check_results}\
-                                    ```\n \
+                                    {check_results}\n \
                                     QS: {quality_level}",
                                     skill_name=self.skill_name.as_str(), 
                                     difficulty=difficulty_str, 
@@ -49,9 +47,14 @@ impl SkillCheckResult {
     }
 
     pub fn to_check_result(&self) -> CheckResult {
+        let status = match self.success {
+            true => CheckResultStatus::Success,
+            false => CheckResultStatus::Failure,
+        };
+
         CheckResult {
             message: self.get_formated(),    
-            success: self.success,
+            status: status,
             critical: self.critical,
         }
     }
