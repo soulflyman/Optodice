@@ -22,7 +22,7 @@ use crate::optolith_heroes::optolith::*;
 use attribute_check::AttributeCheck;
 use battle_check::BattleCheck;
 use config::Config;
-use check_result::CheckResult;
+use check_result::*;
 use optolith_weapon::OptolithWeapon;
 use skill_check_result::SkillCheckResult;
 use attribute_check_result::AttributeCheckResult;
@@ -65,6 +65,7 @@ pub struct CheckFactories {
 
 const COLOR_SUCCESS: u32 = 65280;
 const COLOR_FAILURE: u32 = 16711680;
+const COLOR_INFORMATION: u32 = 5814783;
 
 fn main() {
     //debug GTK ui: GTK_DEBUG=interactive cargo run
@@ -395,11 +396,12 @@ fn ui_add_tab_attributes(context: &Rc<RefCell<Context>>) {
 fn fire_webhook(context: &mut Context, die_result: CheckResult) {
     let mut embed = Embed::default();
     embed.description = Some(die_result.message);
-    if die_result.success {
-        embed.color = Some(COLOR_SUCCESS);
-    } else {
-        embed.color = Some(COLOR_FAILURE);
-    }
+    embed.color = match die_result.status {
+        CheckResultStatus::Success => Some(COLOR_SUCCESS),
+        CheckResultStatus::Failure => Some(COLOR_FAILURE),
+        CheckResultStatus::Information => Some(COLOR_INFORMATION),
+        _ => None,
+    };
 
     let mut webhook = DiscordWebHook::new_with_embed(context.config.get_webhook_url().as_str(), embed);
 
