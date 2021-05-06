@@ -165,4 +165,11 @@ impl OptolithHero {
     pub fn set_health(&mut self, health: i32) {
         self.health = health;
     }
+
+    pub fn ini(&mut self) -> i32 {
+        let mu = self.attribute_value(&"ATTR_1".to_string());
+        let ge = self.attribute_value(&"ATTR_6".to_string());
+
+        return ((mu + ge) as f64 / 2.0).ceil() as i32;
+    }
 }

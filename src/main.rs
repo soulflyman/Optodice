@@ -24,6 +24,7 @@ use battle_check::BattleCheck;
 use config::Config;
 use check_result::*;
 use optolith_weapon::OptolithWeapon;
+use rand::Rng;
 use skill_check_result::SkillCheckResult;
 use attribute_check_result::AttributeCheckResult;
 use context::Context;
@@ -263,6 +264,7 @@ fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
 
     let pain = gtk::SpinButton::with_range(0.0, 4.0, 1.0);
     pain.set_alignment(0.5);
+    pain.set_widget_name("pain_level");
     pain.connect_changed(clone!(context => move |pain| {
         context.borrow_mut().difficulty.pain_level = pain.get_value_as_int();
     }));
@@ -270,7 +272,64 @@ fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
     hero_status_box.add(&pain_label);
     hero_status_box.add(&pain);
 
+    let ini_button_lable = format!("Ini. ({}) 🎲", context.borrow_mut().heroes.active_hero().ini());
+    let ini_button = gtk::Button::with_label(&ini_button_lable);
+    ini_button.connect_clicked(clone!(context => move |_| {
+        //let difficulty = get_check_difficulty(&but, &difficulty_widget_name);
+        role_ini_check(&mut context.borrow_mut());
+    }));
+    hero_status_box.add(&ini_button);
+
     return hero_status_box;
+}
+
+fn role_ini_check(context: &mut Context) 
+{   
+    let ini = context.heroes.active_hero().ini();
+    let modification = condition_modification(context);
+    let mut rng = rand::thread_rng();
+    let dice_value = rng.gen_range(1..7);
+    
+    let ini_result = ini + dice_value + modification;
+
+    let mut modification_str :String = String::default();
+    if modification > 0 {
+        modification_str.push_str("+");
+        modification_str.push_str(modification.to_string().as_str());
+    } else if modification < 0 {
+        modification_str = modification.to_string();
+    }
+
+    let check = format!("{} {:>2} {:>2} +[{:>2}] = ", "INI", ini, modification_str, dice_value);    
+
+    let webhook_msg = format!("**{skill_name}** {difficulty}\n \
+                                `{check}` **{ini_result}**",
+                                skill_name="Initative", 
+                                difficulty=modification_str,                                 
+                                check=check,
+                                ini_result=ini_result);
+
+    let ini_check_result = CheckResult {
+        message: webhook_msg,
+        critical: false,
+        status: CheckResultStatus::Information,
+    };                           
+    fire_webhook(context, ini_check_result);
+}
+
+fn condition_modification(context: &mut Context) -> i32 {
+    let mut condition_mod = 0;
+    condition_mod += get_pain(&context);
+
+    return condition_mod *-1;
+}
+
+fn get_pain(context: &Context) -> i32 {
+    let pain: Option<gtk::SpinButton> = find_child_by_name(context.gtk_main_box.as_ref().unwrap(), "pain_level");
+    match pain {
+        Some(pain) => pain.get_value_as_int(),
+        None => 0
+    }
 }
 
 fn change_hero(context: &Rc<RefCell<Context>>, hero_select: &gtk::ComboBoxText) {
@@ -518,7 +577,8 @@ fn build_parry_check_button(context: &Rc<RefCell<Context>>, weapon: &OptolithWea
     btn_die.set_widget_name(widget_name.as_str());
     let aweapon_tmp = weapon.clone();
     btn_die.connect_clicked(clone!(context => move |but| {
-        let difficulty = get_check_difficulty(&but, &difficulty_widget_name);
+        let condition_modification = condition_modification(&mut context.borrow_mut());
+        let difficulty = get_check_difficulty(&but, &difficulty_widget_name) + condition_modification;    
         role_parry_check(&mut context.borrow_mut(), &aweapon_tmp, difficulty);
     }));
     return btn_die;
@@ -531,7 +591,8 @@ fn build_attack_check_button(context: &Rc<RefCell<Context>>, weapon: &OptolithWe
     btn_die.set_widget_name(widget_name.as_str());
     let weapon_tmp = weapon.clone();
     btn_die.connect_clicked(clone!(context => move |but| {
-        let difficulty = get_check_difficulty(&but, &difficulty_widget_name);
+        let condition_modification = condition_modification(&mut context.borrow_mut());
+        let difficulty = get_check_difficulty(&but, &difficulty_widget_name) + condition_modification;
         role_attack_check(&mut context.borrow_mut(), &weapon_tmp, difficulty);
     }));
     return btn_die;
@@ -543,7 +604,8 @@ fn build_dodge_check_button(context: &Rc<RefCell<Context>>, dodge_id: &str) -> g
     let difficulty_widget_name = format!("dodge_difficulty#{}", dodge_id);
     btn_die.set_widget_name(widget_name.as_str());
     btn_die.connect_clicked(clone!(context => move |but| {
-        let difficulty = get_check_difficulty(&but, &difficulty_widget_name);
+        let condition_modification = condition_modification(&mut context.borrow_mut());
+        let difficulty = get_check_difficulty(&but, &difficulty_widget_name) + condition_modification;
         role_dodge_check(&mut context.borrow_mut(), difficulty);
     }));
     return btn_die;
@@ -556,7 +618,8 @@ fn build_skill_check_button(context: &Rc<RefCell<Context>>, skill_id: &str) -> g
     btn_die.set_widget_name(widget_name.as_str());
     let skill_id_tmp = skill_id.to_string();    
     btn_die.connect_clicked(clone!(context => move |but| {
-        let difficulty = get_check_difficulty(&but, &difficulty_widget_name);
+        let condition_modification = condition_modification(&mut context.borrow_mut());
+        let difficulty = get_check_difficulty(&but, &difficulty_widget_name) + condition_modification;
         role_skill_check(&mut context.borrow_mut(), &skill_id_tmp, difficulty);
     }));
     return btn_die;
@@ -571,7 +634,8 @@ fn build_attribute_check_button(context: &Rc<RefCell<Context>>, attribute_id: &s
     btn_die.connect_clicked(clone!(context => move |but| {
         //let hero_id = get_hero_id(&but);
         //let attribute_id = get_skill_id(&but.clone().upcast::<gtk::Widget>());
-        let difficulty = get_check_difficulty(&but, &difficulty_widget_name);
+        let condition_modification = condition_modification(&mut context.borrow_mut());
+        let difficulty = get_check_difficulty(&but, &difficulty_widget_name) + condition_modification;
         role_attribute_check(&mut context.borrow_mut(), &attribute_id_tmp, difficulty);
     }));
     return btn_die;
@@ -588,12 +652,8 @@ fn build_checks_label(skill_id: &String, context: &mut Context) -> gtk::Label {
 }
 
 fn build_skill_difficulty_entry(context: &Rc<RefCell<Context>>, skill_id: &str) -> gtk::Entry {
-    let en_skill_check_difculty = gtk::Entry::new();
-    en_skill_check_difculty.set_widget_name(format!("skill_difficulty#{}", skill_id).as_str());
-    en_skill_check_difculty.set_alignment(0.5);
-    en_skill_check_difculty.set_placeholder_text(Some("+/-"));
-    en_skill_check_difculty.set_width_chars(4);
-    en_skill_check_difculty.set_max_length(4);
+    let widget_name = format!("skill_difficulty#{}", skill_id);
+    let en_skill_check_difculty = build_default_dificulty_entry_field(widget_name.as_str());    
     let skill_id_tmp = skill_id.to_string();
     en_skill_check_difculty.connect_activate(clone!(context => move |entry| {
         let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
@@ -603,12 +663,8 @@ fn build_skill_difficulty_entry(context: &Rc<RefCell<Context>>, skill_id: &str) 
 }
 
 fn build_attribute_difficulty_entry(context: &Rc<RefCell<Context>>, attribute_id: &str) -> gtk::Entry {
-    let en_attribute_check_difculty = gtk::Entry::new();
-    en_attribute_check_difculty.set_widget_name(format!("attribute_difficulty#{}", attribute_id).as_str());
-    en_attribute_check_difculty.set_alignment(0.5);
-    en_attribute_check_difculty.set_placeholder_text(Some("+/-"));
-    en_attribute_check_difculty.set_width_chars(4);
-    en_attribute_check_difculty.set_max_length(4);
+    let widget_name = format!("attribute_difficulty#{}", attribute_id);
+    let en_attribute_check_difculty = build_default_dificulty_entry_field(widget_name.as_str());
     let attribute_id_tmp = attribute_id.to_string();
     en_attribute_check_difculty.connect_activate(clone!(context => move |entry| {        
         let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
@@ -618,12 +674,8 @@ fn build_attribute_difficulty_entry(context: &Rc<RefCell<Context>>, attribute_id
 }
 
 fn build_attack_difficulty_entry(context: &Rc<RefCell<Context>>, weapon_id: &str) -> gtk::Entry {
-    let en_attack_difculty = gtk::Entry::new();
-    en_attack_difculty.set_widget_name(format!("attack_difficulty#{}", weapon_id).as_str());
-    en_attack_difculty.set_alignment(0.5);
-    en_attack_difculty.set_placeholder_text(Some("+/-"));
-    en_attack_difculty.set_width_chars(4);
-    en_attack_difculty.set_max_length(4);
+    let widget_name = format!("attack_difficulty#{}", weapon_id);
+    let en_attack_difculty = build_default_dificulty_entry_field(widget_name.as_str());
     let attribute_id_tmp = weapon_id.to_string();
     en_attack_difculty.connect_activate(clone!(context => move |entry| {        
         let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
@@ -633,12 +685,8 @@ fn build_attack_difficulty_entry(context: &Rc<RefCell<Context>>, weapon_id: &str
 }
 
 fn build_dodge_difficulty_entry(context: &Rc<RefCell<Context>>, dodge_id: &str) -> gtk::Entry {
-    let en_dodge_difculty = gtk::Entry::new();
-    en_dodge_difculty.set_widget_name(format!("dodge_difficulty#{}", dodge_id).as_str());
-    en_dodge_difculty.set_alignment(0.5);
-    en_dodge_difculty.set_placeholder_text(Some("+/-"));
-    en_dodge_difculty.set_width_chars(4);
-    en_dodge_difculty.set_max_length(4);
+    let widget_name = format!("dodge_difficulty#{}", dodge_id);
+    let en_dodge_difculty = build_default_dificulty_entry_field(widget_name.as_str());
     en_dodge_difculty.connect_activate(clone!(context => move |entry| {        
         let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
         role_dodge_check(&mut context.borrow_mut(), difficulty);
@@ -647,18 +695,24 @@ fn build_dodge_difficulty_entry(context: &Rc<RefCell<Context>>, dodge_id: &str) 
 }
 
 fn build_parry_difficulty_entry(context: &Rc<RefCell<Context>>, weapon: &OptolithWeapon) -> gtk::Entry {
-    let en_parry_difculty = gtk::Entry::new();
-    en_parry_difculty.set_widget_name(format!("parry_difficulty#{}", weapon.id()).as_str());
-    en_parry_difculty.set_alignment(0.5);
-    en_parry_difculty.set_placeholder_text(Some("+/-"));
-    en_parry_difculty.set_width_chars(4);
-    en_parry_difculty.set_max_length(4);
+    let widget_name = format!("parry_difficulty#{}", weapon.id());
+    let en_parry_difculty = build_default_dificulty_entry_field(widget_name.as_str());
     let weapon_tmp = weapon.clone();
     en_parry_difculty.connect_activate(clone!(context => move |entry| {        
         let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
         role_parry_check(&mut context.borrow_mut(), &weapon_tmp, difficulty);
     }));
     en_parry_difculty
+}
+
+fn build_default_dificulty_entry_field(widget_name: &str) -> gtk::Entry {
+    let entry = gtk::Entry::new();
+    entry.set_widget_name(widget_name);
+    entry.set_alignment(0.5);
+    entry.set_placeholder_text(Some("+/-"));
+    entry.set_width_chars(4);
+    entry.set_max_length(4);
+    return entry
 }
 
 fn build_hero_select(context: &mut Context) -> gtk::ComboBoxText {
