@@ -30,11 +30,11 @@ use attribute_check_result::AttributeCheckResult;
 use context::Context;
 use discord_webhook::{DiscordWebHook, Embed};
 use gio::prelude::*;
-use glib::{Cast, IsA, Object};
+use glib::{Cast, IsA, Object, SignalHandlerId};
 use gtk::{Align, Application, Bin, ButtonsType, Container, Dialog, DialogFlags, EntryExt, MessageDialog, MessageType, PackType, ResponseType, Widget, prelude::*};
 use gdk_pixbuf::Colorspace;
 use image::GenericImageView;
-use std::{cell::RefCell, env, error::Error, process, rc::Rc};
+use std::{cell::RefCell, env, error::Error, process, rc::Rc, str::FromStr};
 use crate::skill_check_factory::SkillCheckFactory;
 use crate::optolith_skills::OptolithSkills;
 use crate::optolith_combat_technique::OptolithCombatTechnique;
@@ -119,7 +119,14 @@ fn main() {
         let hero_image = gtk::Image::new();
         hero_image.set_halign(gtk::Align::End);
         hero_image.set_widget_name("optolith_avatar");
-        box_hero.add(&hero_image);
+        
+        let hero_image_event_box = gtk::EventBox::new();
+        hero_image_event_box.add(&hero_image);
+        hero_image_event_box.connect_button_press_event(clone!(context => move |_,_| {
+            send_hero_status(&mut context.borrow_mut());
+            Inhibit::default()
+        }));
+        box_hero.add(&hero_image_event_box);
 
         main_box.add(&box_hero);
                
@@ -137,6 +144,21 @@ fn main() {
     }));
 
     app.run(&env::args().collect::<Vec<_>>());
+}
+
+fn send_hero_status(context: &mut Context) {
+    let mut msg = String::new();
+    msg.push_str("**Zustand**\n");
+    msg.push_str(format!("Lebensenergie: {:>2}\n", get_health(context)).as_str());
+    msg.push_str(format!("Schmerz: {:>2}\n", get_pain(context)).as_str());
+
+    let discord_msg = CheckResult {
+        message: msg,
+        critical: false,
+        status: CheckResultStatus::Information,
+
+    };
+    fire_webhook(context, discord_msg);
 }
 
 fn check_config(context: &mut Context) {
@@ -255,12 +277,24 @@ fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
     let health = gtk::SpinButton::with_range(0.0, 1000.0, 1.0);
     health.set_alignment(0.5);
     health.set_value(28.0);
+    health.set_widget_name("health_points");
     health.connect_changed(clone!(context => move |health| {
         context.borrow_mut().heroes.active_hero().set_health(health.get_value_as_int());
     }));
-    let health_label = gtk::Label::new(Some("Leben"));
+    let health_label = gtk::Label::new(Some("LE"));
     hero_status_box.add(&health_label);
     hero_status_box.add(&health);
+
+    let asp = gtk::SpinButton::with_range(0.0, 1000.0, 1.0);
+    asp.set_alignment(0.5);
+    asp.set_value(28.0);
+    asp.set_widget_name("astral_points");
+    asp.connect_changed(clone!(context => move |asp| {
+        context.borrow_mut().heroes.active_hero().set_health(asp.get_value_as_int());
+    }));
+    let asp_label = gtk::Label::new(Some("AsP"));
+    hero_status_box.add(&asp_label);
+    hero_status_box.add(&asp);
 
     let pain = gtk::SpinButton::with_range(0.0, 4.0, 1.0);
     pain.set_alignment(0.5);
@@ -275,15 +309,38 @@ fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
     let ini_button_lable = format!("Ini. ({}) 🎲", context.borrow_mut().heroes.active_hero().ini());
     let ini_button = gtk::Button::with_label(&ini_button_lable);
     ini_button.connect_clicked(clone!(context => move |_| {
-        //let difficulty = get_check_difficulty(&but, &difficulty_widget_name);
-        role_ini_check(&mut context.borrow_mut());
+        role_ini(&mut context.borrow_mut());
     }));
     hero_status_box.add(&ini_button);
+
+    let config_button_label = String::from("⚙️");
+    let config_button = gtk::Button::with_label(&config_button_label);
+    config_button.connect_clicked(clone!(context => move |_| {
+        display_config();
+    }));
+    hero_status_box.add(&config_button);
 
     return hero_status_box;
 }
 
-fn role_ini_check(context: &mut Context) 
+fn display_config() {
+    let glade_src = include_str!("./../settings_layout.glade");
+    let builder = gtk::Builder::from_string(glade_src);
+
+    let config_window: gtk::Window = builder.get_object("config_window").unwrap();
+    /*
+    let button: gtk::Button = builder.get_object("button1").unwrap();
+    let dialog: gtk::MessageDialog = builder.get_object("messagedialog1").unwrap();
+
+    button.connect_clicked(move |_| {
+        dialog.run();
+        dialog.hide();
+    });
+    */
+    config_window.show_all();
+}
+
+fn role_ini(context: &mut Context) 
 {   
     let ini = context.heroes.active_hero().ini();
     let modification = condition_modification(context);
@@ -309,12 +366,12 @@ fn role_ini_check(context: &mut Context)
                                 check=check,
                                 ini_result=ini_result);
 
-    let ini_check_result = CheckResult {
+    let ini_as_check_result = CheckResult {
         message: webhook_msg,
         critical: false,
         status: CheckResultStatus::Information,
     };                           
-    fire_webhook(context, ini_check_result);
+    fire_webhook(context, ini_as_check_result);
 }
 
 fn condition_modification(context: &mut Context) -> i32 {
@@ -326,6 +383,14 @@ fn condition_modification(context: &mut Context) -> i32 {
 
 fn get_pain(context: &Context) -> i32 {
     let pain: Option<gtk::SpinButton> = find_child_by_name(context.gtk_main_box.as_ref().unwrap(), "pain_level");
+    match pain {
+        Some(pain) => pain.get_value_as_int(),
+        None => 0
+    }
+}
+
+fn get_health(context: &Context) -> i32 {
+    let pain: Option<gtk::SpinButton> = find_child_by_name(context.gtk_main_box.as_ref().unwrap(), "health_points");
     match pain {
         Some(pain) => pain.get_value_as_int(),
         None => 0
