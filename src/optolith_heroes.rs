@@ -23,7 +23,7 @@ pub mod optolith {
             let heroes_parsed = json::parse(heroes_json.as_str()).expect("Error: Failed to parse json data");
             let mut heroes: HashMap<String, OptolithHero> = HashMap::new();
             for (hero_id, hero_json) in heroes_parsed.entries() {
-                let mut hero = OptolithHero {
+                let hero = OptolithHero {
                     hero: hero_json.to_owned(),
                     health: 0,
                 };
