@@ -86,7 +86,8 @@ To send the status of your character to Discord, just left click the avater.
 - [ ] Settings view
 - [ ] Options to autorole critical success/fails events
 - [ ] Option to autorole battle damage
-- [ ] Cumulative Group Checks Using Multiple Skills   
+- [ ] Cumulative Group Checks Using Multiple Skills
+- [ ] Save character state when switching characters or restarting the application
    
 # Screenshots
 Optodice UI  
