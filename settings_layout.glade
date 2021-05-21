@@ -151,7 +151,7 @@ Chose between one of the following options.</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_top">10</property>
-                        <property name="label" translatable="yes">Fix avatar image for every Hero</property>
+                        <property name="label" translatable="yes">Fix avatar image for every character</property>
                         <attributes>
                           <attribute name="weight" value="bold"/>
                         </attributes>
@@ -401,7 +401,7 @@ Chose between one of the following options.</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_top">9</property>
-                        <property name="label" translatable="yes">Upload the avatar of the selected hero</property>
+                        <property name="label" translatable="yes">Upload the avatar of the selected character</property>
                         <attributes>
                           <attribute name="weight" value="bold"/>
                         </attributes>
@@ -449,10 +449,10 @@ Chose between one of the following options.</property>
                         <property name="margin_left">5</property>
                         <property name="margin_top">5</property>
                         <property name="margin_bottom">5</property>
-                        <property name="label" translatable="yes">The easiest way to use the avatar of the selected Hero with
+                        <property name="label" translatable="yes">The easiest way to use the avatar of the selected character with
 the Discord Webhook is the Optodice avater upload script.
 
-You must have a Webspace with PHP.
+You must have a Webspace with PHP support.
 Create a subfolder on your webspace and put the script into
 this subfolder.
 
@@ -467,10 +467,10 @@ the &lt;i&gt;upload-avater.php&lt;/i&gt; script into this folder.
 For this example the Upload-Script URL would look like this:
 http://example.com/optodice/avatar-upload.php
 
-If everything works correct, the avatar of the selected hero
+If everything works correct, the avatar of the selected character
 will be uploaded with the help of the upload script and is used
 for every message Optodice sends to the Discord Webhook in
-the name of your hero.</property>
+the name of your character.</property>
                         <property name="use_markup">True</property>
                       </object>
                     </child>
@@ -536,13 +536,13 @@ to the channel he is assigned to.
 
 &lt;b&gt;Creating a Discord Webhook:&lt;/b&gt;
 To create a webhook for an Discord channel you need to have
-the rights to do so. If you are not net owner/admin of the
+the rights to do so. If you are not the owner/admin of the
 channel, ask the administrator if he can create a webhook for
-your party.
+your party channel.
 To create a webhook just right click the channel for which
 you want to create a webhook. Then &lt;i&gt;Edit Channel&lt;/i&gt; -&gt;
 &lt;i&gt;Integrations&lt;/i&gt; -&gt; &lt;i&gt;Create Webhook&lt;/i&gt;
-You don't have to change Name and Avatar but be sure to
+You don't have to change name and avatar but be sure to
 that the correct channel is selected. Then copy the webhook
 URL and past it into the Optodice settings and send it to the 
 other players.
@@ -557,7 +557,7 @@ Example setup the developers use:
  - one voice/video channel for the gameplay
  - one channel for adventure/story related data (maps, portraits,
    names of characters, quest log, etc.)
- - one channel for Optodice output (check results, hero status...)</property>
+ - one channel for Optodice output (check results, character status...)</property>
                         <property name="use_markup">True</property>
                       </object>
                       <packing>
