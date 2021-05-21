@@ -5,11 +5,22 @@ use crate::optolith_weapon::OptolithWeapon;
 
 #[derive(Debug, Clone)]
 pub struct OptolithHero {
-    pub(crate) hero: JsonValue,
-    pub(crate) health: i32,
+    hero: JsonValue,
+    health: i32,
+    pain_level: i32,
+    astral_points: i32,
 }
 
 impl OptolithHero {
+    pub fn new(hero_json: &JsonValue) -> OptolithHero {
+        OptolithHero {
+            hero: hero_json.to_owned(),
+            health: 0,
+            pain_level: 0,
+            astral_points: 0,
+        }
+    }
+
     pub fn name(&self) -> String {
         self.hero["name"].to_string()
     }
