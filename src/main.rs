@@ -108,7 +108,9 @@ fn main() {
         let hero_image_event_box = gtk::EventBox::new();
         hero_image_event_box.add(&hero_image);
         hero_image_event_box.connect_button_press_event(clone!(@strong context => move |_,button_press_event| {
-            dbg!(button_press_event.get_button());
+            if button_press_event.get_button() != 1 {
+                return Inhibit::default();
+            }
             send_hero_status(&mut context.borrow_mut());
             Inhibit::default()
         }));
@@ -137,6 +139,7 @@ fn send_hero_status(context: &mut Context) {
     msg.push_str("**Zustand**\n");
     msg.push_str(format!("Lebensenergie: {:>2}\n", get_health(context)).as_str());
     msg.push_str(format!("Schmerz: {:>2}\n", get_pain(context)).as_str());
+    msg.push_str(format!("Astralpunkte: {:>2}", get_pain(context)).as_str()))
 
     let discord_msg = CheckResult {
         message: msg,
@@ -182,7 +185,7 @@ fn ui_add_tab_battle(context: &Rc<RefCell<Context>>) {
 
         let at_label =  gtk::Label::new(Some("AT"));  
         row.add(&at_label);
-        let at_value =  gtk::Label::new(Some(attack_value.to_string().as_str()));  
+        let at_value =  gtk::Label::new(Some(format!("{:>2}", attack_value).as_str()));  
         row.add(&at_value);
 
         let en_attack_test_difculty = build_attack_difficulty_entry(&context, &weapon.id());
@@ -198,7 +201,7 @@ fn ui_add_tab_battle(context: &Rc<RefCell<Context>>) {
             let parry_value = context.borrow_mut().heroes.active_hero().parry_value(&weapon, ct_primary_attributes);
             let pa_label =  gtk::Label::new(Some("PA")); 
             row.add(&pa_label);
-            let pa_value =  gtk::Label::new(Some(parry_value.to_string().as_str())); 
+            let pa_value =  gtk::Label::new(Some(format!("{:>2}", parry_value).as_str())); 
             row.add(&pa_value);
             let en_parry_test_difculty = build_parry_difficulty_entry(&context, &weapon);
             row.add(&en_parry_test_difculty);
@@ -379,6 +382,14 @@ fn get_health(context: &Context) -> i32 {
     let pain: Option<gtk::SpinButton> = find_child_by_name(context.gtk_main_box.as_ref().unwrap(), "health_points");
     match pain {
         Some(pain) => pain.get_value_as_int(),
+        None => 0
+    }
+}
+
+fn get_astral_points(context: &context) -> i32 {
+    let astral_points: Option<gtk::SpinButton> = find_child_by_name(context.gtk_main_box.as_ref().unwrap(), "astral_points");
+    match astral_points {
+        Some(astral_points) => astral_points.get_value_as_int(),
         None => 0
     }
 }
