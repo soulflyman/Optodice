@@ -137,9 +137,14 @@ fn main() {
 fn send_hero_status(context: &mut Context) {
     let mut msg = String::new();
     msg.push_str("**Zustand**\n");
-    msg.push_str(format!("Lebensenergie: {:>2}\n", get_health(context)).as_str());
-    msg.push_str(format!("Schmerz: {:>2}\n", get_pain(context)).as_str());
-    msg.push_str(format!("Astralpunkte: {:>2}", get_pain(context)).as_str()))
+    let health = context.heroes.active_hero().health();
+    msg.push_str(format!("Lebensenergie: {:>2}\n", health).as_str());
+
+    let pain_level = context.heroes.active_hero().pain_level();
+    msg.push_str(format!("Schmerz: {:>2}\n", pain_level).as_str());
+
+    let asp = context.heroes.active_hero().astral_points();
+    msg.push_str(format!("Astralpunkte: {:>2}", asp).as_str());
 
     let discord_msg = CheckResult {
         message: msg,
@@ -279,7 +284,7 @@ fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
     asp.set_value(28.0);
     asp.set_widget_name("astral_points");
     asp.connect_changed(clone!(@weak context => move |asp| {
-        context.borrow_mut().heroes.active_hero().set_health(asp.get_value_as_int());
+        context.borrow_mut().heroes.active_hero().set_astral_points(asp.get_value_as_int());
     }));
     let asp_label = gtk::Label::new(Some("AsP"));
     hero_status_box.add(&asp_label);
@@ -290,6 +295,7 @@ fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
     pain.set_widget_name("pain_level");
     pain.connect_changed(clone!(@weak context => move |pain| {
         context.borrow_mut().difficulty.pain_level = pain.get_value_as_int();
+        context.borrow_mut().heroes.active_hero().set_pain_level(pain.get_value_as_int());
     }));
     let pain_label = gtk::Label::new(Some("Schmerz"));
     hero_status_box.add(&pain_label);
@@ -365,33 +371,9 @@ fn role_ini(context: &mut Context)
 
 fn condition_modification(context: &mut Context) -> i32 {
     let mut condition_mod = 0;
-    condition_mod += get_pain(&context);
+    condition_mod += context.heroes.active_hero().pain_level();
 
     return condition_mod *-1;
-}
-
-fn get_pain(context: &Context) -> i32 {
-    let pain: Option<gtk::SpinButton> = find_child_by_name(context.gtk_main_box.as_ref().unwrap(), "pain_level");
-    match pain {
-        Some(pain) => pain.get_value_as_int(),
-        None => 0
-    }
-}
-
-fn get_health(context: &Context) -> i32 {
-    let pain: Option<gtk::SpinButton> = find_child_by_name(context.gtk_main_box.as_ref().unwrap(), "health_points");
-    match pain {
-        Some(pain) => pain.get_value_as_int(),
-        None => 0
-    }
-}
-
-fn get_astral_points(context: &context) -> i32 {
-    let astral_points: Option<gtk::SpinButton> = find_child_by_name(context.gtk_main_box.as_ref().unwrap(), "astral_points");
-    match astral_points {
-        Some(astral_points) => astral_points.get_value_as_int(),
-        None => 0
-    }
 }
 
 fn change_hero(context: &Rc<RefCell<Context>>, hero_select: &gtk::ComboBoxText) {

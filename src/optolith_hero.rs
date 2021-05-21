@@ -183,4 +183,24 @@ impl OptolithHero {
 
         return ((mu + ge) as f64 / 2.0).ceil() as i32;
     }
+
+    pub fn astral_points(&self) -> &i32 {
+        &self.astral_points
+    }
+
+    pub fn set_astral_points(&mut self, astral_points: i32) {
+        self.astral_points = astral_points;
+    }
+
+    pub fn set_pain_level(&mut self, pain_level: i32) {
+        self.pain_level = pain_level;
+    }
+
+    pub fn pain_level(&self) -> &i32 {
+        &self.pain_level
+    }
+
+    pub fn is_mage(&self) -> bool {
+        true
+    }
 }
