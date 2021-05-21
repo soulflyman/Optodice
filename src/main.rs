@@ -30,11 +30,11 @@ use attribute_check_result::AttributeCheckResult;
 use context::Context;
 use discord_webhook::{DiscordWebHook, Embed};
 use gio::prelude::*;
-use glib::{Cast, IsA, Object, SignalHandlerId};
+use glib::{Cast, IsA, Object, clone};
 use gtk::{Align, Application, Bin, ButtonsType, Container, Dialog, DialogFlags, EntryExt, MessageDialog, MessageType, PackType, ResponseType, Widget, prelude::*};
 use gdk_pixbuf::Colorspace;
 use image::GenericImageView;
-use std::{cell::RefCell, env, error::Error, process, rc::Rc, str::FromStr};
+use std::{cell::RefCell, env, error::Error, process, rc::Rc};
 use crate::skill_check_factory::SkillCheckFactory;
 use crate::optolith_skills::OptolithSkills;
 use crate::optolith_combat_technique::OptolithCombatTechnique;
@@ -42,22 +42,7 @@ use crate::optolith_combat_techniques::OptolithCombatTechniques;
 use crate::optolith_attributes::OptolithAttributes;
 use crate::difficulty::Difficulty;
 
-macro_rules! clone {
-    (@param _) => ( _ );
-    (@param $x:ident) => ( $x );
-    ($($n:ident),+ => move || $body:expr) => (
-        {
-            $( let $n = $n.clone(); )+
-            move || $body
-        }
-    );
-    ($($n:ident),+ => move |$($p:tt),+| $body:expr) => (
-        {
-            $( let $n = $n.clone(); )+
-            move |$(clone!(@param $p),)+| $body
-        }
-    );
-}
+
 
 #[derive(Debug, Clone)]
 pub struct CheckFactories {
@@ -95,11 +80,11 @@ fn main() {
         gio::ApplicationFlags::FLAGS_NONE,
     )
     .expect("Failed to initialize GTK.");
-    
+ 
     //todo check if it makes sense to use bind_property anywhere in the project
     // https://github.com/gtk-rs/gtk-rs/blob/ebf86fe9e5e5c0bb43437a88b84928b3466cd45b/examples/src/bin/listbox_model.rs#L128
     // https://gtk-rs.org/docs/gtk/struct.ComboBoxText.html#method.bind_property
-    app.connect_activate(clone!(context => move |app| {
+    app.connect_activate(clone!(@weak context => move |app| {
         
         context.borrow_mut().gtk_window = Some(gtk::WindowBuilder::new().build());
         
@@ -108,7 +93,7 @@ fn main() {
         let main_box = gtk::Box::new(gtk::Orientation::Vertical, 10);
         
         let cbt_hero_select = build_hero_select(&mut context.borrow_mut());        
-        cbt_hero_select.connect_changed(clone!(context => move |hero_select| {
+        cbt_hero_select.connect_changed(clone!(@weak context => move |hero_select| {
             change_hero(&context, &hero_select);                   
         }));
                 
@@ -122,7 +107,8 @@ fn main() {
         
         let hero_image_event_box = gtk::EventBox::new();
         hero_image_event_box.add(&hero_image);
-        hero_image_event_box.connect_button_press_event(clone!(context => move |_,_| {
+        hero_image_event_box.connect_button_press_event(clone!(@strong context => move |_,button_press_event| {
+            dbg!(button_press_event.get_button());
             send_hero_status(&mut context.borrow_mut());
             Inhibit::default()
         }));
@@ -278,7 +264,7 @@ fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
     health.set_alignment(0.5);
     health.set_value(28.0);
     health.set_widget_name("health_points");
-    health.connect_changed(clone!(context => move |health| {
+    health.connect_changed(clone!(@weak context => move |health| {
         context.borrow_mut().heroes.active_hero().set_health(health.get_value_as_int());
     }));
     let health_label = gtk::Label::new(Some("LE"));
@@ -289,7 +275,7 @@ fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
     asp.set_alignment(0.5);
     asp.set_value(28.0);
     asp.set_widget_name("astral_points");
-    asp.connect_changed(clone!(context => move |asp| {
+    asp.connect_changed(clone!(@weak context => move |asp| {
         context.borrow_mut().heroes.active_hero().set_health(asp.get_value_as_int());
     }));
     let asp_label = gtk::Label::new(Some("AsP"));
@@ -299,7 +285,7 @@ fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
     let pain = gtk::SpinButton::with_range(0.0, 4.0, 1.0);
     pain.set_alignment(0.5);
     pain.set_widget_name("pain_level");
-    pain.connect_changed(clone!(context => move |pain| {
+    pain.connect_changed(clone!(@weak context => move |pain| {
         context.borrow_mut().difficulty.pain_level = pain.get_value_as_int();
     }));
     let pain_label = gtk::Label::new(Some("Schmerz"));
@@ -308,14 +294,14 @@ fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
 
     let ini_button_lable = format!("Ini. ({}) 🎲", context.borrow_mut().heroes.active_hero().ini());
     let ini_button = gtk::Button::with_label(&ini_button_lable);
-    ini_button.connect_clicked(clone!(context => move |_| {
+    ini_button.connect_clicked(clone!(@weak context => move |_| {
         role_ini(&mut context.borrow_mut());
     }));
     hero_status_box.add(&ini_button);
 
     let config_button_label = String::from("⚙️");
     let config_button = gtk::Button::with_label(&config_button_label);
-    config_button.connect_clicked(clone!(context => move |_| {
+    config_button.connect_clicked(clone!(@weak context => move |_| {
         display_config();
     }));
     hero_status_box.add(&config_button);
@@ -641,7 +627,7 @@ fn build_parry_check_button(context: &Rc<RefCell<Context>>, weapon: &OptolithWea
     let difficulty_widget_name = format!("parry_difficulty#{}", weapon.id());
     btn_die.set_widget_name(widget_name.as_str());
     let aweapon_tmp = weapon.clone();
-    btn_die.connect_clicked(clone!(context => move |but| {
+    btn_die.connect_clicked(clone!(@weak context => move |but| {
         let condition_modification = condition_modification(&mut context.borrow_mut());
         let difficulty = get_check_difficulty(&but, &difficulty_widget_name) + condition_modification;    
         role_parry_check(&mut context.borrow_mut(), &aweapon_tmp, difficulty);
@@ -655,7 +641,7 @@ fn build_attack_check_button(context: &Rc<RefCell<Context>>, weapon: &OptolithWe
     let difficulty_widget_name = format!("attack_difficulty#{}", weapon.id());
     btn_die.set_widget_name(widget_name.as_str());
     let weapon_tmp = weapon.clone();
-    btn_die.connect_clicked(clone!(context => move |but| {
+    btn_die.connect_clicked(clone!(@weak context => move |but| {
         let condition_modification = condition_modification(&mut context.borrow_mut());
         let difficulty = get_check_difficulty(&but, &difficulty_widget_name) + condition_modification;
         role_attack_check(&mut context.borrow_mut(), &weapon_tmp, difficulty);
@@ -668,7 +654,7 @@ fn build_dodge_check_button(context: &Rc<RefCell<Context>>, dodge_id: &str) -> g
     let widget_name = format!("dodge_check_button#{}", dodge_id);
     let difficulty_widget_name = format!("dodge_difficulty#{}", dodge_id);
     btn_die.set_widget_name(widget_name.as_str());
-    btn_die.connect_clicked(clone!(context => move |but| {
+    btn_die.connect_clicked(clone!(@weak context => move |but| {
         let condition_modification = condition_modification(&mut context.borrow_mut());
         let difficulty = get_check_difficulty(&but, &difficulty_widget_name) + condition_modification;
         role_dodge_check(&mut context.borrow_mut(), difficulty);
@@ -682,7 +668,7 @@ fn build_skill_check_button(context: &Rc<RefCell<Context>>, skill_id: &str) -> g
     let difficulty_widget_name = format!("skill_difficulty#{}", skill_id);
     btn_die.set_widget_name(widget_name.as_str());
     let skill_id_tmp = skill_id.to_string();    
-    btn_die.connect_clicked(clone!(context => move |but| {
+    btn_die.connect_clicked(clone!(@weak context => move |but| {
         let condition_modification = condition_modification(&mut context.borrow_mut());
         let difficulty = get_check_difficulty(&but, &difficulty_widget_name) + condition_modification;
         role_skill_check(&mut context.borrow_mut(), &skill_id_tmp, difficulty);
@@ -696,7 +682,7 @@ fn build_attribute_check_button(context: &Rc<RefCell<Context>>, attribute_id: &s
     let difficulty_widget_name = format!("attribute_difficulty#{}", attribute_id);
     btn_die.set_widget_name(widget_name.as_str());
     let attribute_id_tmp = attribute_id.to_string();
-    btn_die.connect_clicked(clone!(context => move |but| {
+    btn_die.connect_clicked(clone!(@weak context => move |but| {
         //let hero_id = get_hero_id(&but);
         //let attribute_id = get_skill_id(&but.clone().upcast::<gtk::Widget>());
         let condition_modification = condition_modification(&mut context.borrow_mut());
@@ -720,7 +706,7 @@ fn build_skill_difficulty_entry(context: &Rc<RefCell<Context>>, skill_id: &str) 
     let widget_name = format!("skill_difficulty#{}", skill_id);
     let en_skill_check_difculty = build_default_dificulty_entry_field(widget_name.as_str());    
     let skill_id_tmp = skill_id.to_string();
-    en_skill_check_difculty.connect_activate(clone!(context => move |entry| {
+    en_skill_check_difculty.connect_activate(clone!(@weak context => move |entry| {
         let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
         role_skill_check(&mut context.borrow_mut(), &skill_id_tmp, difficulty);
     }));
@@ -731,7 +717,7 @@ fn build_attribute_difficulty_entry(context: &Rc<RefCell<Context>>, attribute_id
     let widget_name = format!("attribute_difficulty#{}", attribute_id);
     let en_attribute_check_difculty = build_default_dificulty_entry_field(widget_name.as_str());
     let attribute_id_tmp = attribute_id.to_string();
-    en_attribute_check_difculty.connect_activate(clone!(context => move |entry| {        
+    en_attribute_check_difculty.connect_activate(clone!(@weak context => move |entry| {        
         let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
         role_attribute_check(&mut context.borrow_mut(), &attribute_id_tmp, difficulty);
     }));
@@ -742,7 +728,7 @@ fn build_attack_difficulty_entry(context: &Rc<RefCell<Context>>, weapon_id: &str
     let widget_name = format!("attack_difficulty#{}", weapon_id);
     let en_attack_difculty = build_default_dificulty_entry_field(widget_name.as_str());
     let attribute_id_tmp = weapon_id.to_string();
-    en_attack_difculty.connect_activate(clone!(context => move |entry| {        
+    en_attack_difculty.connect_activate(clone!(@weak context => move |entry| {        
         let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
         role_attribute_check(&mut context.borrow_mut(), &attribute_id_tmp, difficulty);
     }));
@@ -752,7 +738,7 @@ fn build_attack_difficulty_entry(context: &Rc<RefCell<Context>>, weapon_id: &str
 fn build_dodge_difficulty_entry(context: &Rc<RefCell<Context>>, dodge_id: &str) -> gtk::Entry {
     let widget_name = format!("dodge_difficulty#{}", dodge_id);
     let en_dodge_difculty = build_default_dificulty_entry_field(widget_name.as_str());
-    en_dodge_difculty.connect_activate(clone!(context => move |entry| {        
+    en_dodge_difculty.connect_activate(clone!(@weak context => move |entry| {        
         let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
         role_dodge_check(&mut context.borrow_mut(), difficulty);
     }));
@@ -763,7 +749,7 @@ fn build_parry_difficulty_entry(context: &Rc<RefCell<Context>>, weapon: &Optolit
     let widget_name = format!("parry_difficulty#{}", weapon.id());
     let en_parry_difculty = build_default_dificulty_entry_field(widget_name.as_str());
     let weapon_tmp = weapon.clone();
-    en_parry_difculty.connect_activate(clone!(context => move |entry| {        
+    en_parry_difculty.connect_activate(clone!(@weak context => move |entry| {        
         let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
         role_parry_check(&mut context.borrow_mut(), &weapon_tmp, difficulty);
     }));
@@ -793,6 +779,8 @@ fn build_hero_select(context: &mut Context) -> gtk::ComboBoxText {
     hero_select.set_widget_name("hero_select");
     if context.heroes.active_hero_id().is_empty() {
         hero_select.set_active(Some(0));
+        let active_hero = hero_select.get_active_id().unwrap().to_string();
+        context.heroes.set_active_hero(active_hero);
     } else {
         hero_select.set_active_id(Some(context.heroes.active_hero_id().as_str()));
     }
