@@ -445,8 +445,9 @@ Chose between one of the following options.</property>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="halign">start</property>
                         <property name="valign">start</property>
-                        <property name="margin_left">5</property>
+                        <property name="margin_left">10</property>
                         <property name="margin_top">5</property>
                         <property name="margin_bottom">5</property>
                         <property name="label" translatable="yes">The easiest way to use the avatar of the selected character with
@@ -488,8 +489,11 @@ the name of your character.</property>
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="halign">start</property>
                         <property name="valign">start</property>
+                        <property name="margin_left">10</property>
                         <property name="margin_top">5</property>
+                        <property name="margin_bottom">5</property>
                         <property name="label" translatable="yes">&lt;b&gt;What a check/dice role does:&lt;/b&gt;
 - roles the required number of dice with the help of a random
   number generator (see below)
@@ -526,8 +530,11 @@ to accomplish, however I just use the rand crate (library) from
                       <object class="GtkLabel">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="margin_left">5</property>
+                        <property name="halign">start</property>
+                        <property name="valign">start</property>
+                        <property name="margin_left">10</property>
                         <property name="margin_top">5</property>
+                        <property name="margin_bottom">5</property>
                         <property name="label" translatable="yes">Optodice requires a Discord Webhook URL to work.
 
 If you roll some dice, the result will be send to the webhook
@@ -547,7 +554,7 @@ that the correct channel is selected. Then copy the webhook
 URL and past it into the Optodice settings and send it to the 
 other players.
 
-Webhooks are just like simple boots that post everything you
+Webhooks are just like simple bots that post everything you
 send to there specific URL. So be aware to share your webhook
 URL only with trustworthy users!
 Only one webhook is required for a channel and every user can
