@@ -1,4 +1,4 @@
-use std::{fs, path::{Path, PathBuf}};
+use std::{env::var, fs, path::{Path, PathBuf}, str::FromStr};
 use serde_derive::{Serialize, Deserialize};
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
@@ -30,16 +30,36 @@ impl Config {
     }
 
     fn get_config_file_path() -> PathBuf {
-        //TODO use os depending path for config file:
-        // linux: $XDG_CONFIG_HOME/Optodice
-        // windows: %appdata%/Optodice
-        // macos: $HOME/Library/Application Support/Optodice
-        let mut optodice_path = std::env::current_exe().expect("Error: Unable to define Application path.");
-        optodice_path.pop();
-        let mut config_toml_path = Path::new(&optodice_path).to_path_buf();
-        config_toml_path.push("config.toml");
-        dbg!(&config_toml_path);
-        return config_toml_path;
+        let mut config_dir_path = Config::get_config_dir_path();
+        if !config_dir_path.exists() {
+            fs::create_dir(&config_dir_path).expect("Error: Failed to create config dir.")
+        }
+        config_dir_path.push("config.toml");
+        dbg!(&config_dir_path);
+        return config_dir_path
+    }
+
+    fn get_config_dir_path() -> PathBuf {
+        let mut system_config_dir_path = String::default();
+        let macos_config_dir_extras = "/Library/Application Support";
+        if cfg!(unix) {
+            system_config_dir_path = var("XDG_CONFIG_HOME").expect("Error: Unable to find AppData directory.");            
+        } else if cfg!(windows) {
+            system_config_dir_path = var("appdata").expect("Error: Unable to find AppData directory.");           
+        } else if cfg!(macos) {
+            system_config_dir_path = var("HOME").expect("Error: Unable to find AppData directory.");
+            system_config_dir_path.push_str(macos_config_dir_extras);
+        } else {
+            panic!("Error: Unknow platform. Couldn't find config folder.");
+        };
+
+        if system_config_dir_path.is_empty() || system_config_dir_path == macos_config_dir_extras.to_string() {
+            panic!("Error: Ups, system variable $XDG_CONFIG_HOME (*nix), %appdata% (Windows) or $HOME (macos) are not set or the.");
+        }
+
+        let mut config_path = Path::new(system_config_dir_path.as_str()).to_path_buf();
+        config_path.push("Optodice");
+        return config_path;
     }
 
     pub fn set_webhook_url(&mut self, webhook_url: String) {
