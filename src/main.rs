@@ -140,12 +140,14 @@ fn send_hero_status(context: &mut Context) {
     let health = context.heroes.active_hero().health();
     msg.push_str(format!("Lebensenergie: {:>2}\n", health).as_str());
 
+    if context.heroes.active_hero().is_mage() {
+        let asp = context.heroes.active_hero().astral_points();
+        msg.push_str(format!("Astralpunkte: {:>2}", asp).as_str());    
+    }
+
     let pain_level = context.heroes.active_hero().pain_level();
     msg.push_str(format!("Schmerz: {:>2}\n", pain_level).as_str());
-
-    let asp = context.heroes.active_hero().astral_points();
-    msg.push_str(format!("Astralpunkte: {:>2}", asp).as_str());
-
+    
     let discord_msg = CheckResult {
         message: msg,
         critical: false,
@@ -279,16 +281,19 @@ fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
     hero_status_box.add(&health_label);
     hero_status_box.add(&health);
 
-    let asp = gtk::SpinButton::with_range(0.0, 1000.0, 1.0);
-    asp.set_alignment(0.5);
-    asp.set_value(0.0);
-    asp.set_widget_name("astral_points");
-    asp.connect_changed(clone!(@weak context => move |asp| {
-        context.borrow_mut().heroes.active_hero().set_astral_points(asp.get_value_as_int());
-    }));
-    let asp_label = gtk::Label::new(Some("AsP"));
-    hero_status_box.add(&asp_label);
-    hero_status_box.add(&asp);
+    if context.borrow_mut().heroes.active_hero().is_mage() {
+        let asp = gtk::SpinButton::with_range(0.0, 1000.0, 1.0);
+        asp.set_alignment(0.5);
+        asp.set_value(0.0);
+        asp.set_widget_name("astral_points");
+        asp.connect_changed(clone!(@weak context => move |asp| {
+            context.borrow_mut().heroes.active_hero().set_astral_points(asp.get_value_as_int());
+        }));
+        let asp_label = gtk::Label::new(Some("AsP"));
+        hero_status_box.add(&asp_label);
+        hero_status_box.add(&asp);
+    }
+
 
     let pain = gtk::SpinButton::with_range(0.0, 4.0, 1.0);
     pain.set_alignment(0.5);
@@ -388,7 +393,9 @@ fn change_hero(context: &Rc<RefCell<Context>>, hero_select: &gtk::ComboBoxText) 
 
 fn reload_hero_stats(context: &Rc<RefCell<Context>>) {
     clear_notebook(&mut context.borrow_mut());
-    
+    //TODO reload hero status row (health, astral points, ...)
+    // for this to work, the hero status has to be wraped into another box and this has to be referenced in context struct like the notebook.
+    // maybee split this new box into two, so the config button will not be redrawn on character change
     ui_add_tab_attributes(&context);
     ui_add_tabs_skills(&context);
     ui_add_tab_battle(&context);
