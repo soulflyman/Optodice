@@ -53,7 +53,7 @@ pub mod optolith {
                 let mut hero_path  = Path::new(&hero_path_str).to_path_buf();
                 hero_path.push("Library/Application Support/Optolith/heroes.json");
             };
-            panic!("Error: Could not determin heroes.json path.");
+            panic!("Error: Unknown platform. Could not determin heroes.json path.");
         }
 
         pub fn simple_hero_list(&self) -> Vec<SimpleHero> {
