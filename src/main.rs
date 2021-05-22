@@ -270,7 +270,7 @@ fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
 
     let health = gtk::SpinButton::with_range(0.0, 1000.0, 1.0);
     health.set_alignment(0.5);
-    health.set_value(28.0);
+    health.set_value(0.0);
     health.set_widget_name("health_points");
     health.connect_changed(clone!(@weak context => move |health| {
         context.borrow_mut().heroes.active_hero().set_health(health.get_value_as_int());
@@ -281,7 +281,7 @@ fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
 
     let asp = gtk::SpinButton::with_range(0.0, 1000.0, 1.0);
     asp.set_alignment(0.5);
-    asp.set_value(28.0);
+    asp.set_value(0.0);
     asp.set_widget_name("astral_points");
     asp.connect_changed(clone!(@weak context => move |asp| {
         context.borrow_mut().heroes.active_hero().set_astral_points(asp.get_value_as_int());
