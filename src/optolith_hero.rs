@@ -201,6 +201,6 @@ impl OptolithHero {
     }
 
     pub fn is_mage(&self) -> bool {
-        true
+        self.hero["activatable"].has_key("ADV_50")
     }
 }
