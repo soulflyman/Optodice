@@ -136,6 +136,13 @@ fn main() {
     app.run(&env::args().collect::<Vec<_>>());
 }
 
+fn set_icon(window: &gtk::Window) {
+    let window_icon = Pixbuf::from_file("dice-shield.png");
+    if window_icon.is_ok() {
+        window.set_icon(Some(&window_icon.unwrap()));
+    }        
+}
+
 fn send_hero_status(context: &mut Context) {
     let mut msg = String::new();
     msg.push_str("**Zustand**\n");
