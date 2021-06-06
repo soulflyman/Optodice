@@ -43,8 +43,6 @@ use crate::optolith_combat_techniques::OptolithCombatTechniques;
 use crate::optolith_attributes::OptolithAttributes;
 use crate::difficulty::Difficulty;
 
-
-
 #[derive(Debug, Clone)]
 pub struct CheckFactories {
     skills: SkillCheckFactory,    
@@ -325,14 +323,14 @@ fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
     let config_button_label = String::from("⚙️");
     let config_button = gtk::Button::with_label(&config_button_label);
     config_button.connect_clicked(clone!(@weak context => move |_| {
-        display_config();
+        display_config(&context);
     }));
     hero_status_box.add(&config_button);
 
     return hero_status_box;
 }
 
-fn display_config() {
+fn display_config(context: &Rc<RefCell<Context>>) {
     let glade_src = include_str!("./../settings_layout.glade");
     let builder = gtk::Builder::from_string(glade_src);
 
@@ -340,6 +338,17 @@ fn display_config() {
     config_window.set_title("Optodice - Einstellugnen");
     set_icon(&config_window);
     config_window.show_all();
+
+    let cancel_button: gtk::Button = builder.get_object("config#cancel_button").unwrap();
+    cancel_button.connect_clicked(clone!(@weak config_window => move |_| {
+        config_window.close();
+    }));
+
+    let save_button: gtk::Button = builder.get_object("config#save_button").unwrap();
+    save_button.connect_clicked(clone!(@weak config_window => move |_| {
+        config_window.close();
+    }));
+
 }
 
 fn role_ini(context: &mut Context) 
