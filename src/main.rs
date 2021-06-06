@@ -539,25 +539,46 @@ fn fire_webhook(context: &mut Context, die_result: CheckResult) {
         _ => None,
     };
 
-    let mut webhook = DiscordWebHook::new_with_embed(context.config.get_webhook_url().as_str(), embed);
+    let mut webhook = DiscordWebHook::new_with_embed(context.config.webhook_url().as_str(), embed);
 
-    if context.config.use_avatars() {
-        let mut avatar_url = context.config.get_avatar_base_url();
-        if !avatar_url.ends_with("/") {
-            avatar_url.push_str("/");
-        }
-        avatar_url.push_str(context.heroes.active_hero().get_avatar_file_name().as_str());       
+    let avatar_url = build_avatar_url(context);
+    if !avatar_url.is_empty() {        
         webhook.set_avatar_url(avatar_url.as_str());
     }    
+
     webhook.set_username(context.heroes.active_hero().name().as_str());
     let webhook_result = webhook.fire();
-       
+    
+    dbg!(&webhook_result)   ;
     if webhook_result.is_err() {
-        display_error("Discord Webhock Error", &webhook_result.err().unwrap());
+        display_reqwest_error("Discord Webhock Error", &webhook_result.err().unwrap());
+        return;
+    }
+
+    let status_code = webhook_result.unwrap().status();
+    if status_code != 204 {        
+        display_error("Discord Webhock Error", format!("Unbekannter fehler beim senden and Discord.\nDie Server Antwort lautet: {}", status_code).as_str());
     }
 }
 
-fn display_error(title: &str, error: &dyn Error) {
+fn build_avatar_url(context: &mut Context) -> String {
+    if !context.config.use_avatar() {
+        return String::default();
+    }
+
+    if context.config.is_avatar_static_url_set() {
+        return context.config.avatar_static_url();
+    }
+
+    let mut avatar_url = context.config.avatar_base_url();
+    if !avatar_url.ends_with("/") {
+        avatar_url.push_str("/");
+    }
+    avatar_url.push_str(context.heroes.active_hero().get_avatar_file_name().as_str());       
+    return avatar_url;
+}
+
+fn display_reqwest_error(title: &str, error: &dyn Error) {
     let dialog = Dialog::with_buttons::<gtk::Window>(
         Some(title),
         None,
@@ -574,7 +595,28 @@ fn display_error(title: &str, error: &dyn Error) {
 
     let response_type = dialog.run();
     if response_type == ResponseType::Ok {
-        dialog.close();
+        dialog.hide();
+    }      
+}
+
+fn display_error(title: &str, error_msg: &str) {
+    let dialog = Dialog::with_buttons::<gtk::Window>(
+        Some(title),
+        None,
+        DialogFlags::MODAL,
+        &[("Ok", ResponseType::Ok)]
+    );
+    dialog.set_modal(true);
+
+    let dialog_label = gtk::Label::new(Some(error_msg));
+    dialog.get_content_area().add(&dialog_label);
+    dialog.set_default_response(ResponseType::Ok);
+
+    dialog.show_all();  
+
+    let response_type = dialog.run();
+    if response_type == ResponseType::Ok {
+        dialog.hide();
     }      
 }
 
