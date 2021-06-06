@@ -40,21 +40,28 @@ impl Config {
     }
 
     fn get_config_dir_path() -> PathBuf {
-        let mut system_config_dir_path = String::default();
+        let mut system_config_dir_path: String;
         let macos_config_dir_extras = "/Library/Application Support";
         if cfg!(unix) {
-            system_config_dir_path = var("XDG_CONFIG_HOME").expect("Error: Unable to find AppData directory.");            
+            system_config_dir_path = match var("XDG_CONFIG_HOME"){
+                Ok(path) => path,
+                Err(_) => {
+                    let mut home_dir = var("HOME").expect("Error: System variable $HOME ist not set.");
+                    home_dir.push_str("/.config");
+                    home_dir
+                }
+            }
         } else if cfg!(windows) {
             system_config_dir_path = var("appdata").expect("Error: Unable to find AppData directory.");           
         } else if cfg!(macos) {
-            system_config_dir_path = var("HOME").expect("Error: Unable to find AppData directory.");
+            system_config_dir_path = var("HOME").expect("Error: System variable $HOME ist not set.");
             system_config_dir_path.push_str(macos_config_dir_extras);
         } else {
             panic!("Error: Unknow platform. Couldn't find config folder.");
         };
 
         if system_config_dir_path.is_empty() || system_config_dir_path == macos_config_dir_extras.to_string() {
-            panic!("Error: Ups, system variable $XDG_CONFIG_HOME (*nix), %appdata% (Windows) or $HOME (macos) are not set or the.");
+            panic!("Error: Ups, system variable $XDG_CONFIG_HOME (Linux), %appdata% (Windows) or $HOME (Linux or MacOS) are not set or the.");
         }
 
         let mut config_path = Path::new(system_config_dir_path.as_str()).to_path_buf();
