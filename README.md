@@ -90,7 +90,7 @@ To send the status of your character to Discord, just left click on the avater.
 - [x] Support Linux
 - [ ] Support MacOS (github action builds are compiling, still not testet)
 - [ ] i18n (sorry, only a german UI is available at the moment)
-- [ ] Settings view
+- [x] Settings view
 - [ ] Options to autorole critical success/fails events
 - [ ] Option to autorole battle damage
 - [ ] Cumulative Group Checks Using Multiple Skills
