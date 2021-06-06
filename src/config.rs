@@ -90,10 +90,12 @@ impl Config {
 
     pub fn set_avatar_uploader_url(&mut self, avatar_uploader_url: String) {
         self.avatar_uploader_url = None;
-        if !avatar_uploader_url.is_empty() {
-            self.avatar_uploader_url = Some(avatar_uploader_url.clone());
-        }        
+        self.avatar_uploader_url = Some(avatar_uploader_url.clone());
         self.save();
+
+        if avatar_uploader_url.is_empty() {
+            return;
+        }        
 
         let pos = avatar_uploader_url.rfind('/');
         if pos.is_none() {
