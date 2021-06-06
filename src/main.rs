@@ -564,10 +564,10 @@ fn display_error(title: &str, error: &dyn Error) {
 }
 
 fn request_webhook_url() -> String {
-    let title = "No webhook URL was found in the config.toml.";
-    let message = "Please enter the URL of the Discord Webhook.";
-    let apply_button_text = "Save";
-    let webhook_url = request_string_dialog(title, message, apply_button_text);
+    let title = "Keine Webhook URL gefunden";
+    let message = "Bitte gib eine gültige Discord Webhook URL ein.\nDiese kann später noch geändert werden.";
+    let apply_button_text = "Speichern";
+    let webhook_url = string_request_dialog(title, message, apply_button_text);
     if webhook_url.is_empty() {
         abort_app_with_message("We need more hooks!", "No Hook, no Game!");
     }
@@ -576,18 +576,18 @@ fn request_webhook_url() -> String {
 }
 
 fn request_avatar_uploader_url() -> String {
-    let title = "No Avatar Uploader URL was found in the config.toml.";
-    let message = "Please enter the URL of the Avatar Uploader PHP script.";
-    let apply_button_text = "Save";
-    request_string_dialog(title, message, apply_button_text)
+    let title = "Keine Avatar Uploader Script URL gefunden";
+    let message = "Die Verwendung eines Avatar Uploader Scripts ist Optional und kann später noch geändert werden.\n\nBitte gib die URL zum Avatar Uploader Script ein.";
+    let apply_button_text = "Speichern";
+    return string_request_dialog(title, message, apply_button_text)
 }
 
-fn request_string_dialog(title: &str, message: &str, apply_button_text: &str) -> String {
+fn string_request_dialog(title: &str, message: &str, apply_button_text: &str) -> String {
     let dialog = Dialog::with_buttons::<gtk::Window>(
         Some(title),
         None,
         DialogFlags::MODAL,
-        &[(apply_button_text, ResponseType::Apply)]
+        &[(apply_button_text, ResponseType::Apply), ("Abbruch", ResponseType::Cancel)]
     );
     dialog.set_modal(true);
 
@@ -602,11 +602,11 @@ fn request_string_dialog(title: &str, message: &str, apply_button_text: &str) ->
 
     let response_type = dialog.run();
     if response_type != ResponseType::Apply {
-        dialog.close();     
+        dialog.hide();     
         return String::default();
     }
     let text = webhook_url_entry.get_text().to_string().trim().to_string();    
-    dialog.close();
+    dialog.hide();
     return text;   
 }
 
