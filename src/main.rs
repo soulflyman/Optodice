@@ -23,6 +23,7 @@ use attribute_check::AttributeCheck;
 use battle_check::BattleCheck;
 use config::Config;
 use check_result::*;
+use gdk_pixbuf::Pixbuf;
 use optolith_weapon::OptolithWeapon;
 use rand::Rng;
 use skill_check_result::SkillCheckResult;
@@ -85,8 +86,9 @@ fn main() {
     // https://github.com/gtk-rs/gtk-rs/blob/ebf86fe9e5e5c0bb43437a88b84928b3466cd45b/examples/src/bin/listbox_model.rs#L128
     // https://gtk-rs.org/docs/gtk/struct.ComboBoxText.html#method.bind_property
     app.connect_activate(clone!(@weak context => move |app| {
-        
-        context.borrow_mut().gtk_window = Some(gtk::WindowBuilder::new().build());
+        let main_window = gtk::WindowBuilder::new().build();
+        set_icon(&main_window);        
+        context.borrow_mut().gtk_window = Some(main_window);
         
         check_config(&mut context.borrow_mut());
         
@@ -328,15 +330,8 @@ fn display_config() {
     let builder = gtk::Builder::from_string(glade_src);
 
     let config_window: gtk::Window = builder.get_object("config_window").unwrap();
-    /*
-    let button: gtk::Button = builder.get_object("button1").unwrap();
-    let dialog: gtk::MessageDialog = builder.get_object("messagedialog1").unwrap();
-
-    button.connect_clicked(move |_| {
-        dialog.run();
-        dialog.hide();
-    });
-    */
+    config_window.set_title("Optodice - Einstellugnen");
+    set_icon(&config_window);
     config_window.show_all();
 }
 
