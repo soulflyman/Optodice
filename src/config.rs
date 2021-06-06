@@ -120,7 +120,7 @@ impl Config {
     }
 
     pub fn is_avatar_uploader_url_set(&self) -> bool {
-        self.avatar_uploader_url.is_some() && !self.avatar_uploader_url.as_ref().unwrap().is_empty()
+        self.avatar_uploader_url.is_some()
     }
 
     pub fn set_avatar_base_url(&mut self, avater_base_url: String) {
