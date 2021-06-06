@@ -71,7 +71,7 @@ fn main() {
     //    skills: SkillCheckFactory::new(&context.borrow()),
     //};    
 
-    let last_used_hero_id = context.borrow().config.get_last_used_hero_id().clone();
+    let last_used_hero_id = context.borrow().config.last_used_hero_id().clone();
     context.borrow_mut().heroes.set_active_hero(last_used_hero_id);
     
     let app = Application::new(
@@ -183,7 +183,6 @@ fn ui_add_tab_battle(context: &Rc<RefCell<Context>>) {
     let nb_tab_name = gtk::Label::new(Some("Kampf"));
     context.borrow_mut().gtk_notebook.as_ref().unwrap().append_page(&lbo_weapons, Some(&nb_tab_name));
 
-
     ui_add_dodge_to_tab(context, &lbo_weapons);
 
     let weapons = context.borrow_mut().heroes.active_hero().weapons();
@@ -235,7 +234,6 @@ fn ui_add_dodge_to_tab(context: &Rc<RefCell<Context>>, tab: &gtk::ListBox) {
     row.add(&weapon_name);
     row.set_child_packing(&weapon_name, true, true, 0, gtk::PackType::Start);
     
-
     let dodge_value = context.borrow_mut().heroes.active_hero().dodge_value();
 
     let at_value =  gtk::Label::new(Some(dodge_value.to_string().as_str()));  
@@ -301,7 +299,6 @@ fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
         hero_status_box.add(&asp);
     }
 
-
     let pain = gtk::SpinButton::with_range(0.0, 4.0, 1.0);
     pain.set_alignment(0.5);
     pain.set_widget_name("pain_level");
@@ -331,24 +328,42 @@ fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
 }
 
 fn display_config(context: &Rc<RefCell<Context>>) {
+    let config = &mut context.borrow_mut().config;
     let glade_src = include_str!("./../settings_layout.glade");
     let builder = gtk::Builder::from_string(glade_src);
 
     let config_window: gtk::Window = builder.get_object("config_window").unwrap();
-    config_window.set_title("Optodice - Einstellugnen");
+    config_window.set_title("Optodice - Einstellungen");
     set_icon(&config_window);
-    config_window.show_all();
 
-    let cancel_button: gtk::Button = builder.get_object("config#cancel_button").unwrap();
-    cancel_button.connect_clicked(clone!(@weak config_window => move |_| {
+    let close_button: gtk::Button = builder.get_object("config#close_button").unwrap();
+    close_button.connect_clicked(clone!(@weak config_window => move |_| {        
         config_window.close();
     }));
 
-    let save_button: gtk::Button = builder.get_object("config#save_button").unwrap();
-    save_button.connect_clicked(clone!(@weak config_window => move |_| {
-        config_window.close();
+    let webhook_url_entry: gtk::Entry = builder.get_object("config#discord#webhook_url").unwrap();
+    webhook_url_entry.set_text(config.webhook_url().as_str());
+    webhook_url_entry.connect_changed(clone!(@weak context => move |ui_entry| {
+        let url = ui_entry.get_text().to_string();
+        context.borrow_mut().config.set_webhook_url(url);
     }));
 
+    let avatar_static_url_entry: gtk::Entry = builder.get_object( "config#avatar#static_url").unwrap();
+    avatar_static_url_entry.set_text(config.avatar_static_url().as_str());
+    avatar_static_url_entry.connect_changed(clone!(@weak context => move |ui_entry| {
+        let url = ui_entry.get_text().to_string();
+        context.borrow_mut().config.set_avatar_static_url(url);
+    }));
+
+    let avatar_uploader_url_entry: gtk::Entry = builder.get_object( "config#avatar#uploader_url").unwrap();
+    avatar_uploader_url_entry.set_text(config.avatar_uploader_url().as_str());
+    avatar_uploader_url_entry.connect_changed(clone!(@weak context => move |ui_entry| {
+        let url = ui_entry.get_text().to_string();
+        context.borrow_mut().config.set_avatar_uploader_url(url);
+    }));
+
+
+    config_window.show_all();    
 }
 
 fn role_ini(context: &mut Context) 
@@ -389,7 +404,7 @@ fn condition_modification(context: &mut Context) -> i32 {
     let mut condition_mod = 0;
     condition_mod += context.heroes.active_hero().pain_level();
 
-    return condition_mod *-1;
+    return condition_mod * -1;
 }
 
 fn change_hero(context: &Rc<RefCell<Context>>, hero_select: &gtk::ComboBoxText) {
@@ -440,7 +455,7 @@ fn change_avatar(context: &mut Context, hero_select: &gtk::ComboBoxText) {
 
 fn upload_avatar(context: &mut Context) {
     if context.config.is_avatar_uploader_url_set() {
-        context.heroes.active_hero().upload_avatar(context.config.get_avatar_uploader_url());            
+        context.heroes.active_hero().upload_avatar(context.config.avatar_uploader_url());            
     }
 }
 

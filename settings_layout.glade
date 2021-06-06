@@ -131,7 +131,7 @@ Chose between one of the following options.</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkEntry" id="config#avatar#fix_url">
+                              <object class="GtkEntry" id="config#avatar#static_url">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                               </object>
@@ -210,7 +210,7 @@ Chose between one of the following options.</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkEntry" id="config#avatar#upload-script">
+                                          <object class="GtkEntry" id="config#avatar#uploader_url">
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                           </object>
@@ -471,7 +471,10 @@ http://example.com/optodice/avatar-upload.php
 If everything works correct, the avatar of the selected character
 will be uploaded with the help of the upload script and is used
 for every message Optodice sends to the Discord Webhook in
-the name of your character.</property>
+the name of your character.
+
+&lt;b&gt;Attention:&lt;/b&gt; When a Static Avatar URL and a Avatar Uploader Script
+URL is set, then the Optodice will always use the static avatar URL.</property>
                         <property name="use_markup">True</property>
                       </object>
                     </child>
@@ -623,21 +626,11 @@ Example setup the developers use:
             <property name="spacing">8</property>
             <property name="layout_style">start</property>
             <child>
-              <object class="GtkButton" id="config#save_button">
-                <property name="label" translatable="yes">Save</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-              </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
+              <placeholder/>
             </child>
             <child>
-              <object class="GtkButton" id="config#cancel_button">
-                <property name="label" translatable="yes">Cancel</property>
+              <object class="GtkButton" id="config#close_button">
+                <property name="label" translatable="yes">Close</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>

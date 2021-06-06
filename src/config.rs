@@ -6,12 +6,13 @@ pub struct Config {
     webhook_url: Option<String>,
     last_used_hero_id: Option<String>,
     avatar_uploader_url: Option<String>,
-    avater_base_url: Option<String>,
+    avatar_base_url: Option<String>,
+    avatar_static_url: Option<String>,
 }
 
 impl Config {
     pub fn load() -> Config {        
-        let config_file_path = Config::get_config_file_path();
+        let config_file_path = Config::config_file_path();
         if config_file_path.exists() {
             let config_toml_content = fs::read_to_string(config_file_path).expect("Error: Failed to read config.toml file.");
             let config: Config = toml::from_str(config_toml_content.as_str()).expect("Error: Parsing of config.toml failed.");
@@ -24,13 +25,13 @@ impl Config {
     }
 
     fn save(&self) {
-        let config_file_path = Config::get_config_file_path();
+        let config_file_path = Config::config_file_path();
         let new_config_toml = toml::to_string_pretty(self).expect("Error: Failed to serealize config data.");
         fs::write(config_file_path, new_config_toml).expect("Error: Unable to write config.toml file.");
     }
 
-    fn get_config_file_path() -> PathBuf {
-        let mut config_dir_path = Config::get_config_dir_path();
+    fn config_file_path() -> PathBuf {
+        let mut config_dir_path = Config::config_dir_path();
         if !config_dir_path.exists() {
             fs::create_dir(&config_dir_path).expect("Error: Failed to create config dir.")
         }
@@ -39,7 +40,7 @@ impl Config {
         return config_dir_path
     }
 
-    fn get_config_dir_path() -> PathBuf {
+    fn config_dir_path() -> PathBuf {
         let mut system_config_dir_path: String;
         let macos_config_dir_extras = "/Library/Application Support";
         if cfg!(unix) {
@@ -74,7 +75,7 @@ impl Config {
         self.save();
     }
 
-    pub fn get_webhook_url(&self) -> String {
+    pub fn webhook_url(&self) -> String {
         return self.webhook_url.clone().unwrap_or_default();        
     }
 
@@ -88,10 +89,10 @@ impl Config {
     }
 
     pub fn is_avatar_base_url_set(&self) -> bool {
-        self.avater_base_url.is_some() && !self.avater_base_url.as_ref().unwrap().is_empty() 
+        self.avatar_base_url.is_some() && !self.avatar_base_url.as_ref().unwrap().is_empty() 
     }
 
-    pub fn get_last_used_hero_id(&self) -> String {
+    pub fn last_used_hero_id(&self) -> String {
         return self.last_used_hero_id.clone().unwrap_or_default();
     }
 
@@ -115,7 +116,7 @@ impl Config {
         self.set_avatar_base_url(avatar_base_url.unwrap().to_string());
     }
 
-    pub fn get_avatar_uploader_url(&self) -> String {
+    pub fn avatar_uploader_url(&self) -> String {
         return self.avatar_uploader_url.clone().unwrap_or_default();        
     }
 
@@ -124,15 +125,28 @@ impl Config {
     }
 
     pub fn set_avatar_base_url(&mut self, avater_base_url: String) {
-        self.avater_base_url = Some(avater_base_url);
+        self.avatar_base_url = Some(avater_base_url);
         self.save();
     }
 
-    pub fn get_avatar_base_url(&self) -> String {
-        return self.avater_base_url.clone().unwrap_or_default();        
+    pub fn avatar_base_url(&self) -> String {
+        return self.avatar_base_url.clone().unwrap_or_default();        
     }
 
-    pub fn use_avatars(&self) -> bool {        
-        self.is_avatar_uploader_url_set() && self.is_avatar_base_url_set()
+    pub fn use_avatar(&self) -> bool {        
+        self.is_avatar_static_url_set() || (self.is_avatar_uploader_url_set() && self.is_avatar_base_url_set())
+    }
+
+    pub fn avatar_static_url(&self) -> String {
+        return self.avatar_static_url.clone().unwrap_or_default();
+    }
+
+    pub fn set_avatar_static_url(&mut self, static_url: String) {
+        self.avatar_static_url = Some(static_url);
+        self.save();
+    }
+
+    pub fn is_avatar_static_url_set(&self) -> bool {        
+        self.avatar_static_url.is_some() && !self.avatar_static_url.as_ref().unwrap().is_empty() 
     }
 }
