@@ -84,7 +84,7 @@ To send the status of your character to Discord, just left click on the avater.
 - [ ] Role custom checks
 - [x] Display avatar in Optodice
 - [x] keep track of health
-- [X] keep track of pain level
+- [x] keep track of pain level
 - [ ] keep track of money
 - [x] Support Windows
 - [x] Support Linux
