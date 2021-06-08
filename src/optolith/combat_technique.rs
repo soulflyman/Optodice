@@ -15,8 +15,4 @@ impl OptolithCombatTechnique {
     pub fn primary(&self) -> Vec<String> {
         self.primary.clone()
     }
-
-    pub fn group(&self) -> i32 {
-        self.gr.clone()
-    }
 }

@@ -1,7 +1,7 @@
 
 use crate::Context;
 use std::collections::HashMap;
-use crate::skill_check::SkillCheck;
+use crate::checks::skill_check::SkillCheck;
 
 #[derive(Debug, Clone)]
 pub struct SkillCheckFactory {

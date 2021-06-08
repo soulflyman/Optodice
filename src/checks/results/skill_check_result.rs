@@ -42,10 +42,6 @@ impl SkillCheckResult {
         return res;
     }        
 
-    pub fn is_success(&self) -> bool {
-        return self.success;
-    }
-
     pub fn to_check_result(&self) -> CheckResult {
         let status = match self.success {
             true => CheckResultStatus::Success,

@@ -1,4 +1,4 @@
-use crate::{context::Context, optolith_weapon::OptolithWeapon};
+use crate::{context::Context, optolith::weapon::OptolithWeapon};
 use crate::battle_check_result::BattleCheckResult;
 use rand::prelude::*;
 #[derive(Debug, Default, Clone)]

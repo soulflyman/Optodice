@@ -1,34 +1,12 @@
-mod optolith_weapon;
-mod optolith_hero;
-mod optolith_heroes;
-mod check_result;
+mod optolith;
+mod checks;
 mod config;
-mod skill_check_result;
-mod skill_check_factory;
-mod skill_check;
-mod battle_check_result;
-mod battle_check;
-mod attribute_check_result;
-mod attribute_check;
-mod optolith_attributes;
-mod optolith_skills;
 mod context;
 mod difficulty;
-mod optolith_combat_techniques;
-mod optolith_combat_technique;
-#[macro_use] extern crate serde_derive;
+mod ui;
 
-use crate::optolith_heroes::optolith::*;
-use attribute_check::AttributeCheck;
-use battle_check::BattleCheck;
-use config::Config;
-use check_result::*;
 use gdk_pixbuf::Pixbuf;
-use optolith_weapon::OptolithWeapon;
 use rand::Rng;
-use skill_check_result::SkillCheckResult;
-use attribute_check_result::AttributeCheckResult;
-use context::Context;
 use discord_webhook::{DiscordWebHook, Embed};
 use gio::prelude::*;
 use glib::{Cast, IsA, Object, clone};
@@ -36,12 +14,15 @@ use gtk::{Align, Application, Bin, ButtonsType, Container, Dialog, DialogFlags, 
 use gdk_pixbuf::Colorspace;
 use image::GenericImageView;
 use std::{cell::RefCell, env, error::Error, process, rc::Rc};
-use crate::skill_check_factory::SkillCheckFactory;
-use crate::optolith_skills::OptolithSkills;
-use crate::optolith_combat_technique::OptolithCombatTechnique;
-use crate::optolith_combat_techniques::OptolithCombatTechniques;
-use crate::optolith_attributes::OptolithAttributes;
+
+use crate::config::Config;
+use crate::check_result::*;
+use crate::context::Context;
+use crate::optolith::{heroes::*, attributes::*, combat_techniques::*, skills::*, weapon::* };
+use crate::checks::{attribute_check::*, battle_check::*, skill_check_factory::*, results::*};
 use crate::difficulty::Difficulty;
+
+#[macro_use] extern crate serde_derive;
 
 #[derive(Debug, Clone)]
 pub struct CheckFactories {
@@ -53,6 +34,8 @@ const COLOR_FAILURE: u32 = 16711680;
 const COLOR_INFORMATION: u32 = 5814783;
 
 fn main() {
+    ui::settings::bla();
+
     //debug GTK ui: GTK_DEBUG=interactive cargo run
     let context: Rc<RefCell<Context>> = Rc::new(RefCell::new(Context {
         config: Config::load(),
@@ -854,12 +837,6 @@ fn build_hero_select(context: &mut Context) -> gtk::ComboBoxText {
     }
     
     return hero_select;
-}
-
-fn get_skill_id(widget: &gtk::Widget) -> String {
-    let btn_name = widget.get_widget_name();
-    let btn_name_split = btn_name.as_str().split('#').collect::<Vec<_>>();
-    return btn_name_split[0].to_string();
 }
 
 fn get_check_difficulty(button: &gtk::Button, difficulty_widget_name: &String) -> i32 {

@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde_yaml;
 
-use crate::optolith_combat_technique::OptolithCombatTechnique;
+use crate::optolith::combat_technique::OptolithCombatTechnique;
 
 #[derive(Debug, Clone)]
 pub struct OptolithCombatTechniques {
@@ -28,9 +28,5 @@ impl OptolithCombatTechniques {
     //todo move this int OptolithCombatTechnique and use OptolitComabatTechniques.get().primary() instead 
     pub fn primary_attributes(&self, combat_technique_id: &String) -> Vec<String> {
         self.by_id.get(combat_technique_id).unwrap().primary()
-    }
-
-    pub fn get(&self, combat_technique_id: &String) -> &OptolithCombatTechnique {
-        self.by_id.get(combat_technique_id).unwrap()
     }
 }

@@ -1,7 +1,7 @@
-use crc::crc32;
+use crc::{CRC_32_ISO_HDLC, Crc};
 use json::JsonValue;
 
-use crate::optolith_weapon::OptolithWeapon;
+use crate::{display_error, optolith::weapon::OptolithWeapon};
 
 #[derive(Debug, Clone)]
 pub struct OptolithHero {
@@ -10,6 +10,8 @@ pub struct OptolithHero {
     pain_level: i32,
     astral_points: i32,
 }
+
+const CRC: Crc<u32> = Crc::<u32>::new(&CRC_32_ISO_HDLC);   
 
 impl OptolithHero {
     pub fn new(hero_json: &JsonValue) -> OptolithHero {
@@ -73,7 +75,10 @@ impl OptolithHero {
         let res = client.post(uploader_url.as_str())
             .form(&params)
             .send();
-        //dbg!(res);
+
+        if res.is_err() {            
+            display_error("Avatar upload failed!", &res.err().unwrap().to_string());
+        }
     }
 
     pub fn get_avatar_file_name(&self) -> String {
@@ -86,7 +91,9 @@ impl OptolithHero {
     }
 
     fn avater_checksum(&self) -> String {
-        crc32::checksum_ieee(self.avatar().as_bytes()).to_string()
+        let mut digest = CRC.digest();
+        digest.update(self.avatar().as_bytes());
+        return digest.finalize().to_string();
     }
 
     pub fn weapons(&self) -> Vec<OptolithWeapon> {
