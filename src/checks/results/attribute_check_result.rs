@@ -1,6 +1,5 @@
 use crate::check_result::{CheckResult, CheckResultStatus};
 
-
 #[derive(Default)]
 pub struct AttributeCheckResult {
     pub attribute_name: String,

@@ -14,11 +14,12 @@ impl OptolithCombatTechniques {
     pub fn new() -> OptolithCombatTechniques {
         let f = std::fs::File::open("CombatTechniques.yaml").unwrap();
         let ct_list: Vec<OptolithCombatTechnique> = serde_yaml::from_reader(f).unwrap();
-        dbg!(&ct_list);
         let mut by_id: HashMap<String, OptolithCombatTechnique> = HashMap::new();
+
         for ct in ct_list.clone() {
             by_id.insert(ct.id(), ct);
         }
+
         OptolithCombatTechniques {
             list: ct_list,
             by_id,

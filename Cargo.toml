@@ -15,7 +15,7 @@ gio = "*"
 glib = "*"
 gdk = "0.13.2"
 gdk-pixbuf = "0.9.0"
-discord-webhook = { version = "0.1.1-alpha", git = "https://github.com/soulflyman/discord-webhook", branch = "main" }
+discord-webhook = { version = "0.1.2-alpha", git = "https://github.com/soulflyman/discord-webhook", branch = "main" }
 toml = "*"
 #ftp = { version = "<version>", features = ["secure"] }
 reqwest = { version = "0.11", features = ["blocking", "json"] }
