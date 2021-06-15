@@ -1,9 +1,9 @@
-use std::{collections::HashMap, fs};
+use std::fs;
 use json::JsonValue;
 
 #[derive(Debug, Default, Clone)]
 pub struct OptolithAttributes {
-    by_id: HashMap<String, Attribute>
+    attributes: Vec<Attribute>
 }
 
 #[derive(Debug, Default, Clone)]
@@ -22,7 +22,7 @@ impl OptolithAttributes {
         let mut attributes = OptolithAttributes::default();
 
         for (attribute_id, attribute_values) in attributes_json.entries() {
-            attributes.by_id.insert(attribute_id.to_string(), Attribute{
+            attributes.attributes.push( Attribute{
               id: attribute_id.to_string(),
               name: attribute_values["name"].to_string(),
               name_abbr: attribute_values["nameAbbr"].to_string(),
@@ -33,7 +33,13 @@ impl OptolithAttributes {
     }
   
     pub fn by_id(&self, attribute_id: &String) -> Attribute {
-        return self.by_id.get(attribute_id).unwrap().clone();
+        for attribute in &self.attributes {
+            if attribute.id == attribute_id.to_owned() {
+                return attribute.clone();
+            }
+        }
+
+        Attribute::default()
     }
 
     pub fn name_abbrs(&self, attribute_ids: Vec<String>) -> Vec<String> {
@@ -44,8 +50,8 @@ impl OptolithAttributes {
         return name_abbrs;
     }    
 
-    pub fn all(&self) -> &HashMap<String, Attribute> {
-        &self.by_id
+    pub fn all(&self) -> &Vec<Attribute> {
+        &self.attributes
     }
 }
 

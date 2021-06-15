@@ -1,7 +1,7 @@
 use std::{cell::RefCell, rc::Rc};
 
-use glib::{Cast, clone};
-use gtk::{Align, BinExt, BoxExt, ButtonExt, ComboBoxExt, ComboBoxTextExt, ContainerExt, EditableSignals, EntryExt, LabelExt, ListBoxExt, SpinButtonExt, WidgetExt, prelude::{ComboBoxExtManual, NotebookExtManual}};
+use glib::clone;
+use gtk::{Align, BoxExt, ButtonExt, ComboBoxExt, ComboBoxTextExt, ContainerExt, EditableSignals, EntryExt, LabelExt, ListBoxExt, SpinButtonExt, WidgetExt, prelude::{ComboBoxExtManual, NotebookExtManual}};
 
 use crate::{context::Context, optolith::weapon::OptolithWeapon, ui::{actions::*, get_check_difficulty, settings::display_config}};
 
@@ -334,24 +334,24 @@ pub fn ui_add_tab_attributes(context: &Rc<RefCell<Context>>) {
     context.borrow_mut().gtk_notebook.as_ref().unwrap().append_page(&lbo_attributes, Some(&nb_tab_name));
 
     let attributes = context.borrow().attributes.clone().all().to_owned();
-    for (attribute_id, attribute) in attributes {
+    for attribute in attributes {
         let box_attribute = gtk::Box::new(gtk::Orientation::Horizontal, 0);
 
         let lbl_attribute_name = build_skill_name_label(&attribute.name);
         box_attribute.add(&lbl_attribute_name);
         box_attribute.set_child_packing(&lbl_attribute_name, true, true, 0, gtk::PackType::Start);
         
-        let lbl_attribute_value = gtk::Label::new(Some(context.borrow_mut().heroes.active_hero().attribute_value(&attribute_id.to_string()).to_string().as_str()));
+        let lbl_attribute_value = gtk::Label::new(Some(context.borrow_mut().heroes.active_hero().attribute_value(&attribute.id.to_string()).to_string().as_str()));
         lbl_attribute_value.set_halign(gtk::Align::End);
         lbl_attribute_value.set_justify(gtk::Justification::Right);
         lbl_attribute_value.set_property_width_request(30);
-        lbl_attribute_value.set_widget_name(&format!("attribute_id#{}",&attribute_id));
+        lbl_attribute_value.set_widget_name(&format!("attribute_id#{}",&attribute.id));
         box_attribute.add(&lbl_attribute_value);
         
-        let en_atribute_test_difculty = build_attribute_difficulty_entry(&context, &attribute_id);
+        let en_atribute_test_difculty = build_attribute_difficulty_entry(&context, &attribute.id);
         box_attribute.add(&en_atribute_test_difculty);
 
-        let btn_die = build_attribute_check_button(&context, &attribute_id);
+        let btn_die = build_attribute_check_button(&context, &attribute.id);
         box_attribute.add(&btn_die);
 
         lbo_attributes.add(&box_attribute);
