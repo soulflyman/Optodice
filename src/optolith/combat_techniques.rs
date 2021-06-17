@@ -12,7 +12,7 @@ pub struct OptolithCombatTechniques {
 
 impl OptolithCombatTechniques {
     pub fn new() -> OptolithCombatTechniques {
-        let f = std::fs::File::open("CombatTechniques.yaml").unwrap();
+        let f = std::fs::File::open("./optolith-data/Data/univ/CombatTechniques.yaml").unwrap();
         let ct_list: Vec<OptolithCombatTechnique> = serde_yaml::from_reader(f).unwrap();
         let mut by_id: HashMap<String, OptolithCombatTechnique> = HashMap::new();
 

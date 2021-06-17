@@ -15,7 +15,7 @@ pub struct Attribute {
 
 impl OptolithAttributes {
     pub fn new() -> OptolithAttributes {
-        let path = "./attributes.json";
+        let path = "./optolith-data/custom/attributes.json";
         let json_data = fs::read_to_string(path).expect("Unable to read file");
         let attributes_json: JsonValue = json::parse(&json_data).expect("Error: Parsing of json data failed.");
 

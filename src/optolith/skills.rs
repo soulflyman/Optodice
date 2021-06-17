@@ -26,7 +26,7 @@ struct SkillGroup {
 
 impl OptolithSkills {
     pub fn new() -> OptolithSkills {
-        let path = "./skills.json";
+        let path = "./optolith-data/custom/skills.json";
         let json_data = fs::read_to_string(path).expect("Unable to read file");
         let skills_json: JsonValue = json::parse(&json_data).expect("Error: Parsing of json data failed.");
 
