@@ -290,6 +290,9 @@ pub fn ui_add_tab_dice(context: &Rc<RefCell<Context>>) {
 }
 
 pub fn ui_add_tab_magic(context: &Rc<RefCell<Context>>) {
+    if !context.borrow_mut().heroes.active_hero().is_mage() {
+        return;
+    }
     let lbo_spells = gtk::ListBox::new();
     lbo_spells.set_selection_mode(gtk::SelectionMode::None);
     let nb_tab_name = gtk::Label::new(Some("Magie"));
