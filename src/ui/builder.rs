@@ -3,7 +3,7 @@ use std::{cell::RefCell, rc::Rc};
 use glib::clone;
 use gtk::{Align, BoxExt, ButtonExt, ComboBoxExt, ComboBoxTextExt, ContainerExt, EditableSignals, EntryExt, LabelExt, ListBoxExt, SpinButtonExt, WidgetExt, prelude::{ComboBoxExtManual, NotebookExtManual}};
 
-use crate::{context::Context, optolith::weapon::OptolithWeapon, ui::{actions::*, get_check_difficulty, settings::display_config}};
+use crate::{context::Context, optolith::{spell::Spell, weapon::OptolithWeapon}, ui::{actions::*, get_check_difficulty, settings::display_config}};
 
 use super::dialog::abort_app_with_message;
 
@@ -38,6 +38,20 @@ pub fn build_attack_check_button(context: &Rc<RefCell<Context>>, weapon: &Optoli
         let condition_modification = condition_modification(&mut context.borrow_mut());
         let difficulty = get_check_difficulty(&but, &difficulty_widget_name) + condition_modification;
         role_attack_check(&mut context.borrow_mut(), &weapon_tmp, difficulty);
+    }));
+    return btn_die;
+}
+
+pub fn build_spell_check_button(context: &Rc<RefCell<Context>>, spell: &Spell) -> gtk::Button {
+    let btn_die = gtk::Button::with_label("🎲");
+    let widget_name = format!("spell_button#{}", spell.id());
+    let difficulty_widget_name = format!("spell_difficulty#{}", spell.id());
+    btn_die.set_widget_name(widget_name.as_str());
+    let spell_tmp = spell.clone();
+    btn_die.connect_clicked(clone!(@weak context => move |but| {
+        let condition_modification = condition_modification(&mut context.borrow_mut());
+        let difficulty = get_check_difficulty(&but, &difficulty_widget_name) + condition_modification;
+        role_spell_check(&mut context.borrow_mut(), &spell_tmp, difficulty);
     }));
     return btn_die;
 }
@@ -90,7 +104,7 @@ pub fn build_attribute_check_button(context: &Rc<RefCell<Context>>, attribute_id
     return btn_die;
 }
 
-pub fn build_checks_label(skill_id: &String, context: &mut Context) -> gtk::Label {
+pub fn build_skill_checks_label(skill_id: &String, context: &mut Context) -> gtk::Label {
     let attribute_ids = context.skills.by_id(skill_id).get_check();
     let check_name_abbr = context.attributes.name_abbrs(attribute_ids);
     
@@ -98,6 +112,16 @@ pub fn build_checks_label(skill_id: &String, context: &mut Context) -> gtk::Labe
     lbl_skill_test.set_justify(gtk::Justification::Right);
     lbl_skill_test.set_property_width_request(100);
     return lbl_skill_test;
+}
+
+pub fn build_spell_checks_label(spell: &Spell, context: &mut Context) -> gtk::Label {
+    let attribute_ids: Vec<String> = spell.check().to_owned();
+    let check_name_abbr = context.attributes.name_abbrs(attribute_ids);
+    
+    let lbl_spell_test = gtk::Label::new(Some(check_name_abbr.join(" / ").as_str()));
+    lbl_spell_test.set_justify(gtk::Justification::Right);
+    lbl_spell_test.set_property_width_request(100);
+    return lbl_spell_test;
 }
 
 pub fn build_skill_difficulty_entry(context: &Rc<RefCell<Context>>, skill_id: &str) -> gtk::Entry {
@@ -131,6 +155,17 @@ pub fn build_attack_difficulty_entry(context: &Rc<RefCell<Context>>, weapon_id: 
         role_attribute_check(&mut context.borrow_mut(), &attribute_id_tmp, difficulty);
     }));
     en_attack_difculty
+}
+
+pub fn build_spell_difficulty_entry(context: &Rc<RefCell<Context>>, spell: &Spell) -> gtk::Entry {
+    let widget_name = format!("spell_difficulty#{}", spell.id());
+    let en_spell_difculty = build_default_dificulty_entry_field(widget_name.as_str());
+    let clone_spell = spell.clone();
+    en_spell_difculty.connect_activate(clone!(@weak context => move |entry| {        
+        let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
+        role_spell_check(&mut context.borrow_mut(), &clone_spell, difficulty);
+    }));
+    en_spell_difculty
 }
 
 pub fn build_dodge_difficulty_entry(context: &Rc<RefCell<Context>>, dodge_id: &str) -> gtk::Entry {
@@ -255,10 +290,38 @@ pub fn ui_add_tab_dice(context: &Rc<RefCell<Context>>) {
 }
 
 pub fn ui_add_tab_magic(context: &Rc<RefCell<Context>>) {
-    let lbo_dice = gtk::ListBox::new();
-    lbo_dice.set_selection_mode(gtk::SelectionMode::None);
+    let lbo_spells = gtk::ListBox::new();
+    lbo_spells.set_selection_mode(gtk::SelectionMode::None);
     let nb_tab_name = gtk::Label::new(Some("Magie"));
-    context.borrow_mut().gtk_notebook.as_ref().unwrap().append_page(&lbo_dice, Some(&nb_tab_name));
+    context.borrow_mut().gtk_notebook.as_ref().unwrap().append_page(&lbo_spells, Some(&nb_tab_name));
+
+    let spells = context.borrow_mut().heroes.active_hero().spells();
+    for spell in spells {
+        let box_spell = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+
+        let lbl_spell_name = gtk::Label::new(Some(spell.name()));    
+        lbl_spell_name.set_halign(gtk::Align::Start);
+        box_spell.add(&lbl_spell_name);
+        box_spell.set_child_packing(&lbl_spell_name, true, true, 0, gtk::PackType::Start);        
+
+        let lbl_checks = build_spell_checks_label(&spell, &mut context.borrow_mut());
+        box_spell.add(&lbl_checks);
+
+        let lbl_spell_points = gtk::Label::new(Some(&spell.points().to_string()));
+        lbl_spell_points.set_halign(gtk::Align::End);
+        lbl_spell_points.set_justify(gtk::Justification::Right);
+        lbl_spell_points.set_property_width_request(30);
+        lbl_spell_points.set_widget_name(&format!("spell_id#{}",&spell.id()));
+        box_spell.add(&lbl_spell_points);            
+
+        let en_spell_check_dificulty = build_spell_difficulty_entry(&context, &spell);
+        box_spell.add(&en_spell_check_dificulty);
+
+        let btn_die = build_spell_check_button(&context, &spell);
+        box_spell.add(&btn_die);
+
+        lbo_spells.add(&box_spell);
+    }
 }
 
 pub fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
@@ -336,7 +399,7 @@ pub fn ui_add_tabs_skills(context: &Rc<RefCell<Context>>) {
             box_skill.add(&lbl_skill_name);
             box_skill.set_child_packing(&lbl_skill_name, true, true, 0, gtk::PackType::Start);
 
-            let lbl_checks = build_checks_label(&skill.id, &mut context.borrow_mut());
+            let lbl_checks = build_skill_checks_label(&skill.id, &mut context.borrow_mut());
             box_skill.add(&lbl_checks);
             
             let lbl_skill_points = gtk::Label::new(Some(context.borrow_mut().heroes.active_hero().skill_points(&skill.id).to_string().as_str()));

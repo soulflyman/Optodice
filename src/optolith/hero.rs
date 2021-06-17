@@ -1,7 +1,7 @@
 use crc::{CRC_32_ISO_HDLC, Crc};
 use json::JsonValue;
 
-use crate::{display_error, optolith::weapon::OptolithWeapon};
+use crate::{display_error, optolith::{spell::Spell, spells::Spells, weapon::OptolithWeapon}};
 
 #[derive(Debug, Clone)]
 pub struct OptolithHero {
@@ -112,6 +112,24 @@ impl OptolithHero {
         }
         
         return weapons;
+    }
+
+    pub fn spells(&self) -> Vec<Spell> {        
+        let mut spells: Vec<Spell> = vec![];
+
+        if !self.hero.has_key("spells")  {
+            return spells;
+        }
+        
+        let all_spells = Spells::new();
+        for (spell_id,spell_points) in self.hero["spells"].entries() {
+            let mut spell = all_spells.by_id(&spell_id.to_string());
+            // todo remove let spell_points_i = spell_points.as_i32().unwrap_or_default();
+            spell.set_points(spell_points.as_i32().unwrap_or_default());
+            spells.push(spell);
+        }
+        
+        return spells;
     }
 
     pub fn dodge_value(&self) -> i32 {

@@ -2,9 +2,9 @@ use crate::check_result::{CheckResult, CheckResultStatus};
 
 
 #[derive(Default)]
-pub struct SkillCheckResult {
-    pub skill_name: String,
-    pub skill_points: i32,
+pub struct SpellCheckResult {
+    pub spell_name: String,
+    pub spell_points: i32,
     pub attribute_names: Vec<String>,
     pub attribute_values: Vec<i32>,
     pub dice_values: Vec<i32>,
@@ -14,7 +14,7 @@ pub struct SkillCheckResult {
     pub critical: bool,
 }
 
-impl SkillCheckResult {    
+impl SpellCheckResult {    
     pub fn get_formated(&self) -> String {
         let mut difficulty_str :String = String::default();
         if self.difficulty > 0 {
@@ -29,13 +29,13 @@ impl SkillCheckResult {
             check_results.push_str(format!("`{} {:>2} {:>2} = {:>2}\t[{:>2}]`\n", self.attribute_names[i], self.attribute_values[i], difficulty_str, (self.attribute_values[i] as i32 + difficulty_str.parse::<i32>().unwrap_or(0)), self.dice_values[i]).as_str());
         }
 
-        let res = format!("**{skill_name}** {difficulty}\n \
-                                    Talentwert {skill_points}\n \
+        let res = format!("**{spell_name}** {difficulty}\n \
+                                    Fertigkeitswert {spell_points}\n \
                                     {check_results}\n \
                                     QS: {quality_level}",
-                                    skill_name=self.skill_name.as_str(), 
+                                    spell_name=self.spell_name.as_str(), 
                                     difficulty=difficulty_str, 
-                                    skill_points=self.skill_points.to_string(), 
+                                    spell_points=self.spell_points.to_string(), 
                                     check_results=check_results, 
                                     quality_level=self.quality.to_string());
 

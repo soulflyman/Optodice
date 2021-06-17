@@ -5,7 +5,7 @@ use gtk::{ComboBoxExt, ImageExt, WidgetExt};
 use image::GenericImageView;
 use rand::Rng;
 
-use crate::{ui::builder::*, avatar::upload_avatar, checks::{attribute_check::AttributeCheck, battle_check::BattleCheck, results::check_result::{CheckResult, CheckResultStatus}, skill_check_factory::SkillCheckFactory}, context::Context, optolith::weapon::OptolithWeapon, webhook::fire_webhook};
+use crate::{avatar::upload_avatar, checks::{attribute_check::AttributeCheck, battle_check::BattleCheck, results::check_result::{CheckResult, CheckResultStatus}, skill_check_factory::SkillCheckFactory, spell_check::SpellCheck}, context::Context, optolith::{spell::Spell, weapon::OptolithWeapon}, ui::builder::*, webhook::fire_webhook};
 
 use super::{clear_notebook, find_child_by_name};
 
@@ -32,6 +32,11 @@ pub fn role_attribute_check(context: &mut Context, attribute_id: &String, diffic
     let mut skill_check = AttributeCheck::new(context, attribute_id.to_owned());
     let check_result = skill_check.check(&difficulty);
 
+    fire_webhook(context, check_result.to_check_result());
+}
+
+pub fn role_spell_check(context: &mut Context, spell: &Spell, difficulty: i32) {
+    let check_result = SpellCheck::check(context, spell, &difficulty);
     fire_webhook(context, check_result.to_check_result());
 }
 
@@ -131,7 +136,7 @@ pub fn reload_hero_stats(context: &Rc<RefCell<Context>>) {
     ui_add_tabs_skills(&context);
     ui_add_tab_battle(&context);
     ui_add_tab_magic(&context);
-    ui_add_tab_custom(&context);
+    ui_add_tab_dice(&context);
 
     context.borrow_mut().gtk_main_box.as_ref().unwrap().show_all();
 }
