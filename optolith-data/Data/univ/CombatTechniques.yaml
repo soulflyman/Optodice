@@ -1,0 +1,173 @@
+- id: CT_1
+# name: Armbrüste
+  ic: B
+  primary:
+    - ATTR_5
+  bpr: 6
+  gr: 2
+
+- id: CT_2
+# name: Bögen
+  ic: C
+  primary:
+    - ATTR_5
+  bpr: 4
+  gr: 2
+
+- id: CT_3
+# name: Dolche
+  ic: B
+  primary:
+    - ATTR_6
+  bpr: 14
+  gr: 1
+
+- id: CT_4
+# name: Fechtwaffen
+  ic: C
+  primary:
+    - ATTR_6
+  bpr: 8
+  gr: 1
+
+- id: CT_5
+# name: Hiebwaffen
+  ic: C
+  primary:
+    - ATTR_8
+  bpr: 12
+  gr: 1
+
+- id: CT_6
+# name: Kettenwaffen
+  ic: C
+  primary:
+    - ATTR_8
+  bpr: 10
+  hasNoParry: true
+  gr: 1
+
+- id: CT_7
+# name: Lanzen
+  ic: B
+  primary:
+    - ATTR_8
+  bpr: 6
+  gr: 1
+
+- id: CT_8
+# name: Peitschen
+  ic: B
+  primary:
+    - ATTR_5
+  bpr: 4
+  hasNoParry: true
+  gr: 1
+
+- id: CT_9
+# name: Raufen
+  ic: B
+  primary:
+    - ATTR_6
+    - ATTR_8
+  bpr: 12
+  gr: 1
+
+- id: CT_10
+# name: Schilde
+  ic: C
+  primary:
+    - ATTR_8
+  bpr: 10
+  gr: 1
+
+- id: CT_11
+# name: Schleudern
+  ic: B
+  primary:
+    - ATTR_5
+  bpr: 4
+  gr: 2
+
+- id: CT_12
+# name: Schwerter
+  ic: C
+  primary:
+    - ATTR_6
+    - ATTR_8
+  bpr: 13
+  gr: 1
+
+- id: CT_13
+# name: Stangenwaffen
+  ic: C
+  primary:
+    - ATTR_6
+    - ATTR_8
+  bpr: 12
+  gr: 1
+
+- id: CT_14
+# name: Wurfwaffen
+  ic: B
+  primary:
+    - ATTR_5
+  bpr: 10
+  gr: 2
+
+- id: CT_15
+# name: Zweihandhiebwaffen
+  ic: C
+  primary:
+    - ATTR_8
+  bpr: 11
+  gr: 1
+
+- id: CT_16
+# name: Zweihandschwerter
+  ic: C
+  primary:
+    - ATTR_8
+  bpr: 12
+  gr: 1
+
+- id: CT_17
+# name: Feuerspeien
+  ic: B
+  primary:
+    - ATTR_5
+  bpr: 1
+  gr: 2
+
+- id: CT_18
+# name: Blasrohre
+  ic: B
+  primary:
+    - ATTR_5
+  bpr: 10
+  gr: 2
+
+- id: CT_19
+# name: Diskusse
+  ic: C
+  primary:
+    - ATTR_5
+  bpr: 12
+  gr: 2
+
+- id: CT_20
+# name: Fächer
+  ic: C
+  primary:
+    - ATTR_6
+  bpr: 13
+  gr: 1
+
+- id: CT_21
+# name: Spießwaffen
+  ic: C
+  primary:
+    - ATTR_8
+  bpr: 12
+  hasNoParry: true
+  gr: 1
