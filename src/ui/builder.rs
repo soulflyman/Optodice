@@ -207,19 +207,50 @@ pub fn ui_add_dodge_to_tab(context: &Rc<RefCell<Context>>, tab: &gtk::ListBox) {
     tab.add(&row);
 }
 
-pub fn ui_add_tab_custom(context: &Rc<RefCell<Context>>) {
+pub fn ui_add_tab_dice(context: &Rc<RefCell<Context>>) {
     let lbo_dice = gtk::ListBox::new();
     lbo_dice.set_selection_mode(gtk::SelectionMode::None);
     let nb_tab_name = gtk::Label::new(Some("Würfel"));
     context.borrow_mut().gtk_notebook.as_ref().unwrap().append_page(&lbo_dice, Some(&nb_tab_name));
 
-    let dice_list = vec![2,4,6,8,10,12,20];
+    let dice_list: Vec<(&str, &str)> = vec![
+        ("6", "./assets/icons/d6.png"),    
+        ("20", "./assets/icons/d20.png"),
+        ("4", "./assets/icons/d4.png"),
+        ("8", "./assets/icons/d8.png"),
+        ("10", "./assets/icons/d10.png"),
+        ("12", "./assets/icons/d12.png"),
+        ("2", "./assets/icons/d2.png"),
+    ];
 
-    for dice in dice_list {
-        let mut dice_button_text = String::from("w");
-        dice_button_text.push_str(dice.to_string().as_str());
+    let mut dice_row = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+    
+    let mut box_child_count = 0;
+    for (dice_name, icon_path) in dice_list {
+        let img_buf: gdk_pixbuf::Pixbuf = gdk_pixbuf::Pixbuf::from_file(icon_path).unwrap().scale_simple(80,80, gdk_pixbuf::InterpType::Bilinear).unwrap();
+        let img = gtk::Image::from_pixbuf(Some(&img_buf));
         let dice_button = gtk::Button::new();
-        dice_button.set_label(&dice_button_text);
+        dice_button.set_image(Some(&img));
+        //dice_button.set_label(dice_name);
+        dice_button.set_always_show_image(true);
+        let tmp_dice = dice_name.clone();
+        dice_button.connect_clicked(move |_| {
+            dbg!(&tmp_dice);
+        });
+
+        dice_row.add(&dice_button);
+        dice_row.set_child_packing(&dice_button, true, true, 0, gtk::PackType::Start);
+        box_child_count += 1;
+
+        if box_child_count == 2 {
+            box_child_count = 0;
+            lbo_dice.add(&dice_row.clone());
+            dice_row = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+        }
+    }
+
+    if box_child_count == 1 {        
+        lbo_dice.add(&dice_row.clone());    
     }
 }
 
