@@ -17,12 +17,10 @@ jobs:
       run: mkdir artifacts
     - name: Artifacts - Collect optodice
       run: mv target/release/optodice artifacts/
-    - name: Artifacts - Collect skills.json
-      run: mv skills.json artifacts/
-    - name: Artifacts - Collect attributes.json
-      run: mv attributes.json artifacts/
-    - name: Artifacts - Collect CombatTechniques.yaml
-      run: mv CombatTechniques.yaml artifacts/
+    - name: Artifacts - Collect assets
+      run: mv assets artifacts/
+    - name: Artifacts - Collect optolith-data
+      run: mv optolith-data artifacts/
     - name: Store Linux Build
       uses: actions/upload-artifact@v2.2.2
       with:
@@ -112,9 +110,8 @@ jobs:
 
           mkdir $GTK_APP
           cp target/x86_64-pc-windows-gnu/release/optodice.exe $GTK_APP
-          cp skills.json $GTK_APP
-          cp attributes.json $GTK_APP
-          cp CombatTechniques.yaml $GTK_APP
+          cp assets $GTK_APP
+          cp optolith-data $GTK_APP
           cp $GTK_LIBRARY/bin/*.dll $GTK_APP
           mkdir -p $GTK_APP/share/glib-2.0/schemas
           mkdir $GTK_APP/share/icons
