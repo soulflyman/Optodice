@@ -68,7 +68,6 @@ pub fn send_hero_status(context: &mut Context) {
     fire_webhook(context, discord_msg);
 }
 
-
 pub fn role_ini(context: &mut Context) 
 {   
     let ini = context.heroes.active_hero().ini();
@@ -103,6 +102,24 @@ pub fn role_ini(context: &mut Context)
     fire_webhook(context, ini_as_check_result);
 }
 
+pub fn role_dice(dice_type: i32, context: &mut Context) 
+{   
+    let mut rng = rand::thread_rng();
+    let dice_max = dice_type + 1;
+    let dice_value = rng.gen_range(1..dice_max);
+    
+    let webhook_msg = format!("**Würfelwurf**\n \
+                                `{check} = ` [**{dice_value:>2}**]",
+                                check=format!("d{}", dice_type),
+                                dice_value=dice_value);
+
+    let dice_role_result = CheckResult {
+        message: webhook_msg,
+        critical: false,
+        status: CheckResultStatus::Information,
+    };                           
+    fire_webhook(context, dice_role_result);
+}
 
 pub fn change_avatar(context: &mut Context, hero_select: &gtk::ComboBoxText) {
     let avatar_raw = base64::decode(&context.heroes.active_hero().avatar().split(',').collect::<Vec<&str>>()[1]);

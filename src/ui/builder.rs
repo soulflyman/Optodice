@@ -1,7 +1,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use glib::clone;
-use gtk::{Align, BoxExt, ButtonExt, ComboBoxExt, ComboBoxTextExt, ContainerExt, EditableSignals, EntryExt, LabelExt, ListBoxExt, SpinButtonExt, WidgetExt, prelude::{ComboBoxExtManual, NotebookExtManual}};
+use gtk::{Adjustment, Align, BoxExt, ButtonExt, ComboBoxExt, ComboBoxTextExt, ContainerExt, EditableSignals, EntryExt, LabelExt, ListBoxExt, SpinButtonExt, WidgetExt, prelude::{ComboBoxExtManual, NotebookExtManual}};
 
 use crate::{context::Context, optolith::{spell::Spell, weapon::OptolithWeapon}, ui::{actions::*, get_check_difficulty, settings::display_config}};
 
@@ -205,6 +205,7 @@ pub fn build_hero_select(context: &mut Context) -> gtk::ComboBoxText {
         abort_app_with_message("We need more heroes!", "No heroes found in heroes.json");
     }
     let hero_select = gtk::ComboBoxText::new();
+    hero_select.set_can_focus(false);
     for hero in hero_list {
         hero_select.append(Some(hero.id.as_str()), hero.name.as_str());
     }
@@ -243,38 +244,38 @@ pub fn ui_add_dodge_to_tab(context: &Rc<RefCell<Context>>, tab: &gtk::ListBox) {
 }
 
 pub fn ui_add_tab_dice(context: &Rc<RefCell<Context>>) {
-    let lbo_dice = gtk::ListBox::new();
-    lbo_dice.set_selection_mode(gtk::SelectionMode::None);
+    let lbo_dice = gtk::Box::new(gtk::Orientation::Vertical, 0);
     let nb_tab_name = gtk::Label::new(Some("Würfel"));
     context.borrow_mut().gtk_notebook.as_ref().unwrap().append_page(&lbo_dice, Some(&nb_tab_name));
 
-    let dice_list: Vec<(&str, &str)> = vec![
-        ("6", "./assets/icons/d6.png"),    
-        ("20", "./assets/icons/d20.png"),
-        ("4", "./assets/icons/d4.png"),
-        ("8", "./assets/icons/d8.png"),
-        ("10", "./assets/icons/d10.png"),
-        ("12", "./assets/icons/d12.png"),
-        ("2", "./assets/icons/d2.png"),
+    let dice_list: Vec<(i32, &str)> = vec![
+        (6, "./assets/icons/d6.png"),    
+        (20, "./assets/icons/d20.png"),
+        (4, "./assets/icons/d4.png"),
+        (8, "./assets/icons/d8.png"),
+        (10, "./assets/icons/d10.png"),
+        (12, "./assets/icons/d12.png"),
+        (2, "./assets/icons/d2.png"),
     ];
 
     let mut dice_row = gtk::Box::new(gtk::Orientation::Horizontal, 0);
-    
+        
     let mut box_child_count = 0;
-    for (dice_name, icon_path) in dice_list {
+    for (dice_type, icon_path) in dice_list {
         let img_buf: gdk_pixbuf::Pixbuf = gdk_pixbuf::Pixbuf::from_file(icon_path).unwrap().scale_simple(80,80, gdk_pixbuf::InterpType::Bilinear).unwrap();
         let img = gtk::Image::from_pixbuf(Some(&img_buf));
-        let dice_button = gtk::Button::new();
+        let dice_button = gtk::Button::with_label("");
         dice_button.set_image(Some(&img));
-        //dice_button.set_label(dice_name);
         dice_button.set_always_show_image(true);
-        let tmp_dice = dice_name.clone();
-        dice_button.connect_clicked(move |_| {
-            dbg!(&tmp_dice);
-        });
+        dice_button.set_can_focus(false);
+        let tmp_dice = dice_type.clone();
+        dice_button.connect_clicked(clone!(@weak context => move |_| {            
+            role_dice(tmp_dice, &mut context.borrow_mut());
+        }));
 
         dice_row.add(&dice_button);
         dice_row.set_child_packing(&dice_button, true, true, 0, gtk::PackType::Start);
+
         box_child_count += 1;
 
         if box_child_count == 2 {
@@ -389,11 +390,14 @@ pub fn ui_add_tabs_skills(context: &Rc<RefCell<Context>>) {
     let skill_groups_order = context.borrow().skills.group_order();
     for skill_group in skill_groups_order {     
         let skills = &context.borrow().skills.by_group.get(&skill_group).unwrap().clone();
-        let lbo_skills = gtk::ListBox::new();        
+        let lbo_skills = gtk::ListBox::new();
         lbo_skills.set_selection_mode(gtk::SelectionMode::None);
 
+        let scroll = gtk::ScrolledWindow::new(None::<&Adjustment>, None::<&Adjustment>);
+        scroll.add(&lbo_skills);
+
         let nb_tab_name = gtk::Label::new(Some(&skill_group));
-        context.borrow_mut().gtk_notebook.as_ref().unwrap().append_page(&lbo_skills, Some(&nb_tab_name));
+        context.borrow_mut().gtk_notebook.as_ref().unwrap().append_page(&scroll, Some(&nb_tab_name));
 
         for skill in skills {
             let box_skill = gtk::Box::new(gtk::Orientation::Horizontal, 0);
