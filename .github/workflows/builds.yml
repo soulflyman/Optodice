@@ -107,7 +107,7 @@ jobs:
 
       - name: Artifacts - collect binaries
         run: |
-          GTK_LIBRARY="$(pwd)/gtk_library"
+          GTK_LIBRARY="$(pwd)/gtk_library/mingw64"
           GTK_APP="$(pwd)/gtk_app"
 
           mkdir $GTK_APP
