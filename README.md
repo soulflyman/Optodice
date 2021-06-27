@@ -28,14 +28,14 @@ you want to create a webhook. Then ***Edit Channel ->
 Integrations -> Create Webhook***
 You don't have to change Name and Avatar but be sure to
 that the correct channel is selected. Then copy the webhook
-URL and save it for late or send it to the 
+URL and save it for late or send it to the
 other players. Optodice will ask you for this URL at the first start.
 
 Example setup the developers use:
- - one voice/video channel for the gameplay
- - one channel for adventure/story related data (maps, portraits,
-   names of characters, quest log, etc.)
- - one channel for Optodice output (check results, character status...)
+- one voice/video channel for the gameplay
+- one channel for adventure/story related data (maps, portraits,
+  names of characters, quest log, etc.)
+- one channel for Optodice output (check results, character status...)
 
 ### 2.) Use your Avatar
 This is Optional but recomended.
@@ -56,7 +56,7 @@ your webspace.
 Then create a subfolder in ***htdocs*** called ***optodice*** and upload
 the ***upload-avater.php*** script into this folder.
 For this example, when Optodice asks you for your Upload-Script URL you would enter it like:
-http://example.com/optodice/avatar-upload.php
+`http://example.com/optodice/avatar-upload.php`
 
 If everything works correct, the avatar of the selected character
 will be uploaded with the help of the upload script and is used
@@ -72,7 +72,7 @@ To Add some dificulty modification just add the number in the text box beside th
 To send the status of your character to Discord, just left click on the avater.
 
 ---
-## Roadmap (some sort of) 
+## Roadmap (some sort of)
 - [x] Select from multiple characters
 - [x] Send data to a Discord Webhook
 - [x] Role checks on attributes
@@ -97,8 +97,9 @@ To send the status of your character to Discord, just left click on the avater.
 - [ ] Save character state when switching characters or restarting the application
 - [ ] Role checks on spells
 - [ ] support all kind of magic (at the moment not all types of magic are supported)
-   
-# Screenshots
+
+---
+## Screenshots
 Optodice UI  
 ![Screenshot of the Optodice UI](https://github.com/soulflyman/optodice/blob/main/.github/assets/screenshots/optodice.png?raw=true)
 
