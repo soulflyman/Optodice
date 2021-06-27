@@ -44,6 +44,7 @@ fn main() {
         gtk_window: None,
         gtk_main_box: None,
         gtk_notebook: None,
+        gtk_avatar: None,
     }));
    
     //TODO use check_factories in button actions!
@@ -57,8 +58,7 @@ fn main() {
     let app = Application::new(
         Some("net.farting-unicorn.optodice"),
         gio::ApplicationFlags::FLAGS_NONE,
-    )
-    .expect("Failed to initialize GTK.");
+    );
  
     //todo check if it makes sense to use bind_property anywhere in the project
     // https://github.com/gtk-rs/gtk-rs/blob/ebf86fe9e5e5c0bb43437a88b84928b3466cd45b/examples/src/bin/listbox_model.rs#L128
@@ -81,14 +81,14 @@ fn main() {
         box_hero.add(&cbt_hero_select);
         box_hero.set_child_packing(&cbt_hero_select,true,true, 0, PackType::Start);
         
-        let hero_image = gtk::Image::new();
-        hero_image.set_halign(gtk::Align::End);
-        hero_image.set_widget_name("optolith_avatar");
+        context.borrow_mut().gtk_avatar = Some(gtk::Image::new());
+        context.borrow_mut().gtk_avatar.as_ref().unwrap().set_halign(gtk::Align::End);
+        context.borrow_mut().gtk_avatar.as_ref().unwrap().set_widget_name("optolith_avatar");
         
         let hero_image_event_box = gtk::EventBox::new();
-        hero_image_event_box.add(&hero_image);
+        hero_image_event_box.add(context.borrow_mut().gtk_avatar.as_ref().unwrap());
         hero_image_event_box.connect_button_press_event(clone!(@strong context => move |_,button_press_event| {
-            if button_press_event.get_button() != 1 {
+            if button_press_event.button() != 1 {
                 return Inhibit::default();
             }
             send_hero_status(&mut context.borrow_mut());
@@ -111,7 +111,7 @@ fn main() {
         change_hero(&context, &cbt_hero_select);
     }));
 
-    app.run(&env::args().collect::<Vec<_>>());
+    app.run();
 }
 
 fn check_config(context: &mut Context) {

@@ -1,6 +1,7 @@
 use gdk_pixbuf::Pixbuf;
 use glib::{Cast, IsA, Object};
-use gtk::{Bin, BinExt, Container, ContainerExt, EntryExt, GtkWindowExt, Widget, WidgetExt};
+use gtk::{Bin, Container, Widget};
+use gtk::prelude::{BinExt, ContainerExt, EntryExt, GtkWindowExt, WidgetExt};
 
 use crate::context::Context;
 
@@ -19,12 +20,12 @@ pub fn set_icon(window: &gtk::Window) {
 pub fn get_check_difficulty(button: &gtk::Button, difficulty_widget_name: &String) -> i32 {
     //let skill_id = get_skill_id(&button.clone().upcast::<gtk::Widget>());
     let parent_widget = button
-        .get_parent()
+        .parent()
         .expect("Error: Failed to get parent widget of pressed button.");    
     let skill_label: gtk::Entry = find_child_by_name(&parent_widget, difficulty_widget_name.as_str())
         .expect("Error: Failed to find child");
     return skill_label
-        .get_text()
+        .text()
         .to_string()
         .parse::<i32>()
         .or::<i32>(Ok(0))
@@ -101,8 +102,8 @@ pub fn find_widget_by_name<W: Clone + IsA<Object> + IsA<Widget>>(
     name: &str,
 ) -> Option<Widget> {
     if let Ok(container) = parent.clone().dynamic_cast::<Container>() {
-        for child in container.get_children() {
-            if child.get_widget_name() == name {
+        for child in container.children() {
+            if child.widget_name() == name {
                 return Some(child);
             }
             if let Some(widget) = find_widget_by_name(&child, name) {
@@ -110,8 +111,8 @@ pub fn find_widget_by_name<W: Clone + IsA<Object> + IsA<Widget>>(
             }
         }
     } else if let Ok(bin) = parent.clone().dynamic_cast::<Bin>() {
-        if let Some(child) = bin.get_child() {
-            if child.get_widget_name() == name {
+        if let Some(child) = bin.child() {
+            if child.widget_name() == name {
                 return Some(child);
             }
             if let Some(widget) = find_widget_by_name(&child, name) {

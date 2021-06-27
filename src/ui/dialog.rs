@@ -1,6 +1,7 @@
 use std::{error::Error, process};
 
-use gtk::{ButtonsType, ContainerExt, Dialog, DialogExt, DialogFlags, EntryExt, GtkWindowExt, MessageDialog, MessageType, ResponseType, WidgetExt};
+use gtk::{ButtonsType, Dialog, DialogFlags, MessageDialog, MessageType, ResponseType};
+use gtk::prelude::{ContainerExt, EntryExt, GtkWindowExt, WidgetExt, DialogExt};
 
 
 pub fn abort_app_with_message(titel: &str, message: &str) {
@@ -29,7 +30,7 @@ pub fn display_error(title: &str, error_msg: &str) {
     dialog.set_modal(true);
 
     let dialog_label = gtk::Label::new(Some(error_msg));
-    dialog.get_content_area().add(&dialog_label);
+    dialog.content_area().add(&dialog_label);
     dialog.set_default_response(ResponseType::Ok);
 
     dialog.show_all();  
@@ -63,12 +64,12 @@ pub fn string_request_dialog(title: &str, message: &str, apply_button_text: &str
     dialog.set_modal(true);
 
     let dialog_label = gtk::Label::new(Some(message));
-    dialog.get_content_area().add(&dialog_label);   
+    dialog.content_area().add(&dialog_label);   
     
     let webhook_url_entry = gtk::Entry::new();              
     webhook_url_entry.set_activates_default(true);
     dialog.set_default_response(ResponseType::Apply);
-    dialog.get_content_area().add(&webhook_url_entry);     
+    dialog.content_area().add(&webhook_url_entry);     
     dialog.show_all();         
 
     let response_type = dialog.run();
@@ -76,7 +77,7 @@ pub fn string_request_dialog(title: &str, message: &str, apply_button_text: &str
         dialog.hide();     
         return String::default();
     }
-    let text = webhook_url_entry.get_text().to_string().trim().to_string();    
+    let text = webhook_url_entry.text().to_string().trim().to_string();    
     dialog.hide();
     return text;   
 }
@@ -98,7 +99,7 @@ pub fn display_reqwest_error(title: &str, error: &dyn Error) {
     dialog.set_modal(true);
 
     let dialog_label = gtk::Label::new(Some(error.to_string().as_str()));
-    dialog.get_content_area().add(&dialog_label);
+    dialog.content_area().add(&dialog_label);
     dialog.set_default_response(ResponseType::Ok);
 
     dialog.show_all();  

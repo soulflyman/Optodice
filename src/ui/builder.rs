@@ -1,7 +1,8 @@
 use std::{cell::RefCell, rc::Rc};
 
 use glib::clone;
-use gtk::{Adjustment, Align, BoxExt, ButtonExt, ComboBoxExt, ComboBoxTextExt, ContainerExt, EditableSignals, EntryExt, LabelExt, ListBoxExt, SpinButtonExt, WidgetExt, prelude::{ComboBoxExtManual, NotebookExtManual}};
+use gtk::{Adjustment, Align, EditableSignals, prelude::{ComboBoxExtManual, NotebookExtManual}};
+use gtk::prelude::{BoxExt, ButtonExt, ComboBoxExt, ComboBoxTextExt, ContainerExt, WidgetExt, EntryExt, LabelExt, ListBoxExt, SpinButtonExt};
 
 use crate::{context::Context, optolith::{spell::Spell, weapon::OptolithWeapon}, ui::{actions::*, get_check_difficulty, settings::display_config}};
 
@@ -110,7 +111,7 @@ pub fn build_skill_checks_label(skill_id: &String, context: &mut Context) -> gtk
     
     let lbl_skill_test = gtk::Label::new(Some(check_name_abbr.join(" / ").as_str()));
     lbl_skill_test.set_justify(gtk::Justification::Right);
-    lbl_skill_test.set_property_width_request(100);
+    lbl_skill_test.set_size_request(100, -1);
     return lbl_skill_test;
 }
 
@@ -120,7 +121,7 @@ pub fn build_spell_checks_label(spell: &Spell, context: &mut Context) -> gtk::La
     
     let lbl_spell_test = gtk::Label::new(Some(check_name_abbr.join(" / ").as_str()));
     lbl_spell_test.set_justify(gtk::Justification::Right);
-    lbl_spell_test.set_property_width_request(100);
+    lbl_spell_test.set_size_request(100, -1);
     return lbl_spell_test;
 }
 
@@ -129,7 +130,7 @@ pub fn build_skill_difficulty_entry(context: &Rc<RefCell<Context>>, skill_id: &s
     let en_skill_check_difculty = build_default_dificulty_entry_field(widget_name.as_str());    
     let skill_id_tmp = skill_id.to_string();
     en_skill_check_difculty.connect_activate(clone!(@weak context => move |entry| {
-        let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
+        let difficulty = entry.text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
         role_skill_check(&mut context.borrow_mut(), &skill_id_tmp, difficulty);
     }));
     en_skill_check_difculty
@@ -140,7 +141,7 @@ pub fn build_attribute_difficulty_entry(context: &Rc<RefCell<Context>>, attribut
     let en_attribute_check_difculty = build_default_dificulty_entry_field(widget_name.as_str());
     let attribute_id_tmp = attribute_id.to_string();
     en_attribute_check_difculty.connect_activate(clone!(@weak context => move |entry| {        
-        let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
+        let difficulty = entry.text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
         role_attribute_check(&mut context.borrow_mut(), &attribute_id_tmp, difficulty);
     }));
     en_attribute_check_difculty
@@ -151,7 +152,7 @@ pub fn build_attack_difficulty_entry(context: &Rc<RefCell<Context>>, weapon_id: 
     let en_attack_difculty = build_default_dificulty_entry_field(widget_name.as_str());
     let attribute_id_tmp = weapon_id.to_string();
     en_attack_difculty.connect_activate(clone!(@weak context => move |entry| {        
-        let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
+        let difficulty = entry.text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
         role_attribute_check(&mut context.borrow_mut(), &attribute_id_tmp, difficulty);
     }));
     en_attack_difculty
@@ -162,7 +163,7 @@ pub fn build_spell_difficulty_entry(context: &Rc<RefCell<Context>>, spell: &Spel
     let en_spell_difculty = build_default_dificulty_entry_field(widget_name.as_str());
     let clone_spell = spell.clone();
     en_spell_difculty.connect_activate(clone!(@weak context => move |entry| {        
-        let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
+        let difficulty = entry.text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
         role_spell_check(&mut context.borrow_mut(), &clone_spell, difficulty);
     }));
     en_spell_difculty
@@ -172,7 +173,7 @@ pub fn build_dodge_difficulty_entry(context: &Rc<RefCell<Context>>, dodge_id: &s
     let widget_name = format!("dodge_difficulty#{}", dodge_id);
     let en_dodge_difculty = build_default_dificulty_entry_field(widget_name.as_str());
     en_dodge_difculty.connect_activate(clone!(@weak context => move |entry| {        
-        let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
+        let difficulty = entry.text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
         role_dodge_check(&mut context.borrow_mut(), difficulty);
     }));
     en_dodge_difculty
@@ -183,7 +184,7 @@ pub fn build_parry_difficulty_entry(context: &Rc<RefCell<Context>>, weapon: &Opt
     let en_parry_difculty = build_default_dificulty_entry_field(widget_name.as_str());
     let weapon_tmp = weapon.clone();
     en_parry_difculty.connect_activate(clone!(@weak context => move |entry| {        
-        let difficulty = entry.get_text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
+        let difficulty = entry.text().to_string().parse::<i32>().or::<i32>(Ok(0)).unwrap();
         role_parry_check(&mut context.borrow_mut(), &weapon_tmp, difficulty);
     }));
     en_parry_difculty
@@ -213,7 +214,7 @@ pub fn build_hero_select(context: &mut Context) -> gtk::ComboBoxText {
     hero_select.set_widget_name("hero_select");
     if context.heroes.active_hero_id().is_empty() {
         hero_select.set_active(Some(0));
-        let active_hero = hero_select.get_active_id().unwrap().to_string();
+        let active_hero = hero_select.active_id().unwrap().to_string();
         context.heroes.set_active_hero(active_hero);
     } else {
         hero_select.set_active_id(Some(context.heroes.active_hero_id().as_str()));
@@ -294,10 +295,16 @@ pub fn ui_add_tab_magic(context: &Rc<RefCell<Context>>) {
     if !context.borrow_mut().heroes.active_hero().is_mage() {
         return;
     }
+    
+    let nb_tab_name = gtk::Label::new(Some("Magie"));
+
     let lbo_spells = gtk::ListBox::new();
     lbo_spells.set_selection_mode(gtk::SelectionMode::None);
-    let nb_tab_name = gtk::Label::new(Some("Magie"));
-    context.borrow_mut().gtk_notebook.as_ref().unwrap().append_page(&lbo_spells, Some(&nb_tab_name));
+
+    let scroll = gtk::ScrolledWindow::new(None::<&Adjustment>, None::<&Adjustment>);
+    scroll.add(&lbo_spells);
+
+    context.borrow_mut().gtk_notebook.as_ref().unwrap().append_page(&scroll, Some(&nb_tab_name));
 
     let spells = context.borrow_mut().heroes.active_hero().spells();
     for spell in spells {
@@ -314,7 +321,7 @@ pub fn ui_add_tab_magic(context: &Rc<RefCell<Context>>) {
         let lbl_spell_points = gtk::Label::new(Some(&spell.points().to_string()));
         lbl_spell_points.set_halign(gtk::Align::End);
         lbl_spell_points.set_justify(gtk::Justification::Right);
-        lbl_spell_points.set_property_width_request(30);
+        lbl_spell_points.set_size_request(30, -1);
         lbl_spell_points.set_widget_name(&format!("spell_id#{}",&spell.id()));
         box_spell.add(&lbl_spell_points);            
 
@@ -338,7 +345,7 @@ pub fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
     health.set_value(0.0);
     health.set_widget_name("health_points");
     health.connect_changed(clone!(@weak context => move |health| {
-        context.borrow_mut().heroes.active_hero().set_health(health.get_value_as_int());
+        context.borrow_mut().heroes.active_hero().set_health(health.value_as_int());
     }));
     let health_label = gtk::Label::new(Some("LE"));
     hero_status_box.add(&health_label);
@@ -350,7 +357,7 @@ pub fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
         asp.set_value(0.0);
         asp.set_widget_name("astral_points");
         asp.connect_changed(clone!(@weak context => move |asp| {
-            context.borrow_mut().heroes.active_hero().set_astral_points(asp.get_value_as_int());
+            context.borrow_mut().heroes.active_hero().set_astral_points(asp.value_as_int());
         }));
         let asp_label = gtk::Label::new(Some("AsP"));
         hero_status_box.add(&asp_label);
@@ -361,8 +368,8 @@ pub fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
     pain.set_alignment(0.5);
     pain.set_widget_name("pain_level");
     pain.connect_changed(clone!(@weak context => move |pain| {
-        context.borrow_mut().difficulty.pain_level = pain.get_value_as_int();
-        context.borrow_mut().heroes.active_hero().set_pain_level(pain.get_value_as_int());
+        context.borrow_mut().difficulty.pain_level = pain.value_as_int();
+        context.borrow_mut().heroes.active_hero().set_pain_level(pain.value_as_int());
     }));
     let pain_label = gtk::Label::new(Some("Schmerz"));
     hero_status_box.add(&pain_label);
@@ -412,7 +419,7 @@ pub fn ui_add_tabs_skills(context: &Rc<RefCell<Context>>) {
             let lbl_skill_points = gtk::Label::new(Some(context.borrow_mut().heroes.active_hero().skill_points(&skill.id).to_string().as_str()));
             lbl_skill_points.set_halign(gtk::Align::End);
             lbl_skill_points.set_justify(gtk::Justification::Right);
-            lbl_skill_points.set_property_width_request(30);
+            lbl_skill_points.set_size_request(30, -1);
             lbl_skill_points.set_widget_name(&format!("skill_id#{}",&skill.id));
             box_skill.add(&lbl_skill_points);            
 
@@ -445,7 +452,7 @@ pub fn ui_add_tab_attributes(context: &Rc<RefCell<Context>>) {
         let lbl_attribute_value = gtk::Label::new(Some(context.borrow_mut().heroes.active_hero().attribute_value(&attribute.id.to_string()).to_string().as_str()));
         lbl_attribute_value.set_halign(gtk::Align::End);
         lbl_attribute_value.set_justify(gtk::Justification::Right);
-        lbl_attribute_value.set_property_width_request(30);
+        lbl_attribute_value.set_size_request(30, -1);
         lbl_attribute_value.set_widget_name(&format!("attribute_id#{}",&attribute.id));
         box_attribute.add(&lbl_attribute_value);
         

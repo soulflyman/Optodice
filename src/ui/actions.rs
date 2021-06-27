@@ -1,7 +1,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use gdk_pixbuf::Colorspace;
-use gtk::{ComboBoxExt, ImageExt, WidgetExt};
+use gtk::prelude::{ComboBoxExt, ImageExt, WidgetExt};
 use image::GenericImageView;
 use rand::Rng;
 
@@ -129,12 +129,12 @@ pub fn change_avatar(context: &mut Context, hero_select: &gtk::ComboBoxText) {
     let pixels_row_stride = (avatar_buffer.width() * avatar_color_channels + 3) & !3;
     let pixels = avatar_buffer.clone().into_rgba8().as_raw().to_owned();
     let avatar_pixbuf: gdk_pixbuf::Pixbuf = gdk_pixbuf::Pixbuf::from_mut_slice(pixels, Colorspace::Rgb, true, 8, avatar_buffer.width() as i32, avatar_buffer.height() as i32, pixels_row_stride as i32);
-    let avatar: gtk::Image = find_child_by_name(&hero_select.get_parent().unwrap(), "optolith_avatar").expect("Error: Failed to find gtk::Image Widget.");
-    avatar.set_from_pixbuf(Some(&avatar_pixbuf));
+    let gtk_avatar = context.gtk_avatar.as_ref().unwrap();
+    gtk_avatar.set_from_pixbuf(Some(&avatar_pixbuf));
 }
 
 pub fn change_hero(context: &Rc<RefCell<Context>>, hero_select: &gtk::ComboBoxText) {
-    let hero_id = hero_select.get_active_id().expect("Unknown hero selected, this should not happen.");            
+    let hero_id = hero_select.active_id().expect("Unknown hero selected, this should not happen.");            
     context.borrow_mut().config.set_last_used_hero_id(hero_id.to_string());
     context.borrow_mut().heroes.set_active_hero(hero_id.to_string());
     

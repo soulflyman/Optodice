@@ -1,7 +1,7 @@
 //use glib::{Cast, IsA, Object};
 //use gtk::{Bin, BinExt, Container, ContainerExt, Widget, WidgetExt};
 
-use gtk::ContainerExt;
+use gtk::prelude::ContainerExt;
 
 use crate::{config::Config, difficulty::Difficulty, optolith::heroes::OptolithHeroes, optolith::attributes::OptolithAttributes, optolith::skills::OptolithSkills};
 #[derive(Debug, Clone)]
@@ -15,6 +15,7 @@ pub struct Context {
     pub(crate) gtk_main_box: Option<gtk::Box>,
     pub(crate) gtk_notebook: Option<gtk::Notebook>,
     pub(crate) combat_techniques: crate::optolith::combat_techniques::OptolithCombatTechniques,
+    pub(crate) gtk_avatar: Option<gtk::Image>,
 }
 impl Context {
     pub fn add_notebook(&mut self, notebook: gtk::Notebook) {
