@@ -13,9 +13,9 @@ jobs:
     - uses: actions/checkout@v2
     - name: Build
       run: cargo build --release --verbose
-    - name: Artifacts - Create collection folder
+    - name: Artifacts - Create temp artifacts folder
       run: mkdir artifacts
-    - name: Artifacts - Collect optodice
+    - name: Artifacts - Collect optodice binary
       run: mv target/release/optodice artifacts/
     - name: Artifacts - Collect assets
       run: mv assets artifacts/
@@ -105,13 +105,14 @@ jobs:
           unzip master.zip -d $GTK_THEME
 
           PKG_CONFIG_ALLOW_CROSS=1 PKG_CONFIG_PATH="$GTK_LIBRARY/lib/pkgconfig" RUSTFLAGS="-L $GTK_LIBRARY/lib" cargo build --target=x86_64-pc-windows-gnu --bin optodice --release
+      
+      - name: Strip binary
+        run: strip target/x86_64-pc-windows-gnu/release/optodice.exe
 
-          strip target/x86_64-pc-windows-gnu/release/optodice.exe
-
+      - name: Artifacts - collect binaries
+        run: |
           mkdir $GTK_APP
           cp target/x86_64-pc-windows-gnu/release/optodice.exe $GTK_APP
-          cp -r assets $GTK_APP
-          cp optolith-data $GTK_APP
           cp $GTK_LIBRARY/bin/*.dll $GTK_APP
           mkdir -p $GTK_APP/share/glib-2.0/schemas
           mkdir $GTK_APP/share/icons
@@ -120,6 +121,14 @@ jobs:
           mkdir $GTK_APP/lib
           cp -r $GTK_LIBRARY/lib/gdk-pixbuf-2.0 $GTK_APP/lib
 
+      - name: Artifacts - collect assets
+        run: cp -r assets $GTK_APP
+      
+      - name: Artifacts - collect optolith-data
+        run: cp -r optolith-data $GTK_APP
+          
+      - name: GTK - install custom theme
+        run: |
           mkdir -p $GTK_APP/share/themes
           mkdir -p $GTK_APP/share/gtk-3.0
           echo "[Settings]" > $GTK_APP/share/gtk-3.0/settings.ini
@@ -127,8 +136,7 @@ jobs:
           echo "gtk-font-name = Segoe UI 10" >> $GTK_APP/share/gtk-3.0/settings.ini
           echo "gtk-xft-rgba = rgb" >> $GTK_APP/share/gtk-3.0/settings.ini
           cp $GTK_THEME/AdMin-master/admin-gtk3-dark-osx $GTK_APP/share/themes -r -L
-
-          zip -r gtk_app.zip $GTK_APP
+          
         env:
           CARGO_INCREMENTAL: 0
           RUSTFLAGS: "-C debuginfo=0 -D warnings"
