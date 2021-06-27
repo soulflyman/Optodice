@@ -10,7 +10,7 @@ mod avatar;
 use gio::prelude::*;
 use glib::clone;
 use gtk::{Application, PackType, prelude::*};
-use std::{cell::RefCell, env, rc::Rc};
+use std::{cell::RefCell, rc::Rc};
 
 use crate::config::Config;
 use crate::context::Context;

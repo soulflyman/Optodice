@@ -7,7 +7,7 @@ use rand::Rng;
 
 use crate::{avatar::upload_avatar, checks::{attribute_check::AttributeCheck, battle_check::BattleCheck, results::check_result::{CheckResult, CheckResultStatus}, skill_check_factory::SkillCheckFactory, spell_check::SpellCheck}, context::Context, optolith::{spell::Spell, weapon::OptolithWeapon}, ui::builder::*, webhook::fire_webhook};
 
-use super::{clear_notebook, find_child_by_name};
+use super::{clear_notebook};
 
 
 pub fn role_parry_check(context: &mut Context, weapon: &OptolithWeapon, difficulty: i32) {
@@ -121,7 +121,7 @@ pub fn role_dice(dice_type: i32, context: &mut Context)
     fire_webhook(context, dice_role_result);
 }
 
-pub fn change_avatar(context: &mut Context, hero_select: &gtk::ComboBoxText) {
+pub fn change_avatar(context: &mut Context) {
     let avatar_raw = base64::decode(&context.heroes.active_hero().avatar().split(',').collect::<Vec<&str>>()[1]);
     let mut avatar_buffer = image::load_from_memory(&avatar_raw.unwrap()).unwrap();
     avatar_buffer = avatar_buffer.resize(100, 100, image::imageops::FilterType::Lanczos3);
@@ -139,7 +139,7 @@ pub fn change_hero(context: &Rc<RefCell<Context>>, hero_select: &gtk::ComboBoxTe
     context.borrow_mut().heroes.set_active_hero(hero_id.to_string());
     
     upload_avatar(&mut context.borrow_mut());
-    change_avatar(&mut context.borrow_mut(), &hero_select);
+    change_avatar(&mut context.borrow_mut());
     reload_hero_stats(context);
 }
 
