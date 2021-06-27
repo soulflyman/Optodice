@@ -110,7 +110,7 @@ jobs:
 
           mkdir $GTK_APP
           cp target/x86_64-pc-windows-gnu/release/optodice.exe $GTK_APP
-          cp assets $GTK_APP
+          cp -r assets $GTK_APP
           cp optolith-data $GTK_APP
           cp $GTK_LIBRARY/bin/*.dll $GTK_APP
           mkdir -p $GTK_APP/share/glib-2.0/schemas
