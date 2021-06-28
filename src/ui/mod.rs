@@ -40,7 +40,10 @@ pub fn clear_notebook(context: &mut Context) {
     }
     let new_notebook = gtk::Notebook::new();
     new_notebook.set_widget_name("hero_stats");
-    context.add_notebook(new_notebook);
+    new_notebook.set_halign(gtk::Align::Fill);
+    new_notebook.set_valign(gtk::Align::Fill);
+    new_notebook.set_vexpand(true);
+    context.set_notebook(new_notebook);
 }
 
 
