@@ -20,7 +20,6 @@ use crate::difficulty::Difficulty;
 use crate::ui::actions::change_hero;
 use crate::ui::actions::send_hero_status;
 use crate::ui::builder::build_hero_select;
-use crate::ui::builder::build_hero_status_box;
 use crate::ui::set_icon;
 use crate::ui::{dialog::*};
 
@@ -45,6 +44,7 @@ fn main() {
         gtk_main_box: None,
         gtk_notebook: None,
         gtk_avatar: None,
+        gtk_hero_status_box: None,
     }));
    
     //TODO use check_factories in button actions!
@@ -98,8 +98,11 @@ fn main() {
 
         main_box.add(&box_hero);
                
-        let hero_status_box = build_hero_status_box(&context);
-        main_box.add(&hero_status_box);
+        let hero_status_box_container = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+        //let hero_status_box = ui_add_hero_status_box(&context);
+        //hero_status_box_container.add(&hero_status_box);
+        main_box.add(&hero_status_box_container);
+        context.borrow_mut().gtk_hero_status_box = Some(hero_status_box_container);
         
         context.borrow_mut().gtk_window.as_ref().unwrap().set_title("Optodice");
         context.borrow_mut().gtk_window.as_ref().unwrap().add(&main_box);

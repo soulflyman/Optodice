@@ -335,7 +335,7 @@ pub fn ui_add_tab_magic(context: &Rc<RefCell<Context>>) {
     }
 }
 
-pub fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
+pub fn ui_add_hero_status_box(context: &Rc<RefCell<Context>>){
     let hero_status_box = gtk::Box::new(gtk::Orientation::Horizontal, 15);
     hero_status_box.set_margin_start(15);
     hero_status_box.set_margin_end(15);
@@ -344,7 +344,7 @@ pub fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
     health.set_alignment(0.5);
     health.set_value(0.0);
     health.set_widget_name("health_points");
-    health.connect_changed(clone!(@weak context => move |health| {
+    health.connect_changed(clone!(@strong context => move |health| {
         context.borrow_mut().heroes.active_hero().set_health(health.value_as_int());
     }));
     let health_label = gtk::Label::new(Some("LE"));
@@ -355,9 +355,9 @@ pub fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
         let asp = gtk::SpinButton::with_range(0.0, 1000.0, 1.0);
         asp.set_alignment(0.5);
         asp.set_value(0.0);
-        asp.set_widget_name("astral_points");
+        asp.set_widget_name("arcane_energy");
         asp.connect_changed(clone!(@weak context => move |asp| {
-            context.borrow_mut().heroes.active_hero().set_astral_points(asp.value_as_int());
+            context.borrow_mut().heroes.active_hero().set_arcane_energy(asp.value_as_int());
         }));
         let asp_label = gtk::Label::new(Some("AsP"));
         hero_status_box.add(&asp_label);
@@ -389,7 +389,7 @@ pub fn build_hero_status_box(context: &Rc<RefCell<Context>>) -> gtk::Box{
     }));
     hero_status_box.add(&config_button);
 
-    return hero_status_box;
+    context.borrow_mut().gtk_hero_status_box.as_ref().unwrap().add(&hero_status_box);
 }
 
 

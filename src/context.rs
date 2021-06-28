@@ -16,9 +16,10 @@ pub struct Context {
     pub(crate) gtk_notebook: Option<gtk::Notebook>,
     pub(crate) combat_techniques: crate::optolith::combat_techniques::OptolithCombatTechniques,
     pub(crate) gtk_avatar: Option<gtk::Image>,
+    pub(crate) gtk_hero_status_box: Option<gtk::Box>,
 }
 impl Context {
-    pub fn add_notebook(&mut self, notebook: gtk::Notebook) {
+    pub fn set_notebook(&mut self, notebook: gtk::Notebook) {
         self.gtk_main_box.as_ref().unwrap().add(&notebook);
         self.gtk_notebook = Some(notebook);
     }

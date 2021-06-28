@@ -8,7 +8,7 @@ pub struct OptolithHero {
     hero: JsonValue,
     health: i32,
     pain_level: i32,
-    astral_points: i32,
+    arcane_energy: i32,
 }
 
 const CRC: Crc<u32> = Crc::<u32>::new(&CRC_32_ISO_HDLC);   
@@ -19,7 +19,7 @@ impl OptolithHero {
             hero: hero_json.to_owned(),
             health: 0,
             pain_level: 0,
-            astral_points: 0,
+            arcane_energy: 0,
         }
     }
 
@@ -209,12 +209,12 @@ impl OptolithHero {
         return ((mu + ge) as f64 / 2.0).ceil() as i32;
     }
 
-    pub fn astral_points(&self) -> &i32 {
-        &self.astral_points
+    pub fn arcane_energy(&self) -> &i32 {
+        &self.arcane_energy
     }
 
-    pub fn set_astral_points(&mut self, astral_points: i32) {
-        self.astral_points = astral_points;
+    pub fn set_arcane_energy(&mut self, arcane_energy: i32) {
+        self.arcane_energy = arcane_energy;
     }
 
     pub fn set_pain_level(&mut self, pain_level: i32) {

@@ -1,7 +1,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use gdk_pixbuf::Colorspace;
-use gtk::prelude::{ComboBoxExt, ImageExt, WidgetExt};
+use gtk::prelude::{ComboBoxExt, ContainerExt, ImageExt, WidgetExt};
 use image::GenericImageView;
 use rand::Rng;
 
@@ -52,7 +52,7 @@ pub fn send_hero_status(context: &mut Context) {
     msg.push_str(format!("Lebensenergie: {:>2}\n", health).as_str());
 
     if context.heroes.active_hero().is_mage() {
-        let asp = context.heroes.active_hero().astral_points();
+        let asp = context.heroes.active_hero().arcane_energy();
         msg.push_str(format!("Astralpunkte: {:>2}", asp).as_str());    
     }
 
@@ -140,20 +140,29 @@ pub fn change_hero(context: &Rc<RefCell<Context>>, hero_select: &gtk::ComboBoxTe
     
     upload_avatar(&mut context.borrow_mut());
     change_avatar(&mut context.borrow_mut());
+    relaod_hero_status(context);
     reload_hero_stats(context);
 }
 
+fn relaod_hero_status(context: &Rc<RefCell<Context>>) {
+    let cx = &context.borrow_mut().clone();
+    let hero_status_container = cx.gtk_hero_status_box.as_ref().unwrap();
+    
+    for child in &hero_status_container.children() {
+        hero_status_container.remove(child);
+    }
+    
+    ui_add_hero_status_box(context);
+}
 
-pub fn reload_hero_stats(context: &Rc<RefCell<Context>>) {
-    clear_notebook(&mut context.borrow_mut());
-    //TODO reload hero status row (health, astral points, ...)
-    // for this to work, the hero status has to be wraped into another box and this has to be referenced in context struct like the notebook.
-    // maybee split this new box into two, so the config button will not be redrawn on character change
-    ui_add_tab_attributes(&context);
-    ui_add_tabs_skills(&context);
-    ui_add_tab_battle(&context);
-    ui_add_tab_magic(&context);
-    ui_add_tab_dice(&context);
+
+fn reload_hero_stats(context: &Rc<RefCell<Context>>) {
+    clear_notebook(&mut context.borrow_mut());  
+    ui_add_tab_attributes(context);
+    ui_add_tabs_skills(context);
+    ui_add_tab_battle(context);
+    ui_add_tab_magic(context);
+    ui_add_tab_dice(context);
 
     context.borrow_mut().gtk_main_box.as_ref().unwrap().show_all();
 }
