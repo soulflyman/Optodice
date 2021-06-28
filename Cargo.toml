@@ -1,6 +1,6 @@
 [package]
 name = "optodice"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["soulflyman <optodice@no-spam4.me>"]
 edition = "2018"
 
