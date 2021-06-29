@@ -46,9 +46,5 @@ impl Spells {
     pub fn by_id(&self, spell_id: &str) -> Spell {
         return self.by_id.get(spell_id).unwrap().clone();
     }
-
-    pub fn all(&self) -> Vec<Spell> {
-        return self.list.clone();
-    }
 }
 
