@@ -20,7 +20,7 @@ impl Spells {
         }
 
         let spells_yaml = std::fs::File::open("./optolith-data/Data/de-DE/Spells.yaml").unwrap();
-        let spells: Vec<Spell> = serde_yaml::from_reader(spells_yaml).unwrap();
+        let mut spells: Vec<Spell> = serde_yaml::from_reader(spells_yaml).unwrap();
         let mut by_id: HashMap<String, Spell> = HashMap::new();
 
         for mut spell in spells.clone() {
@@ -35,14 +35,20 @@ impl Spells {
             by_id.insert(spell.id(), spell);
         }
 
+        spells.sort();
+
         Spells {
             list: spells,
             by_id,
         }
     }
   
-    pub fn by_id(&self, spell_id: &String) -> Spell {
+    pub fn by_id(&self, spell_id: &str) -> Spell {
         return self.by_id.get(spell_id).unwrap().clone();
+    }
+
+    pub fn all(&self) -> Vec<Spell> {
+        return self.list.clone();
     }
 }
 

@@ -1,10 +1,10 @@
 
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+#[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq, PartialOrd, Eq, Ord)]
 #[serde(rename_all = "camelCase")]
 pub struct Spell {
-    id: String, //SPELL_1
     name: String, //"Adlerauge"
+    id: String, //SPELL_1    
     effect: String, // Das Talent *Sinnesschärfe* wird während der Wirkungsdauer um QS +3 des Zaubers erhöht.
     casting_time: String, //"2 Aktionen"
     casting_time_short: String, //"2 Akt"

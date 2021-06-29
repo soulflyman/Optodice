@@ -114,22 +114,23 @@ impl OptolithHero {
         return weapons;
     }
 
-    pub fn spells(&self) -> Vec<Spell> {        
-        let mut spells: Vec<Spell> = vec![];
-
+    pub fn spells(&self) -> Vec<Spell> {           
         if !self.hero.has_key("spells")  {
-            return spells;
+            return vec![]
         }
         
+        let mut spell_list: Vec<Spell> = vec![];
+
         let all_spells = Spells::new();
         for (spell_id,spell_points) in self.hero["spells"].entries() {
-            let mut spell = all_spells.by_id(&spell_id.to_string());
-            // todo remove let spell_points_i = spell_points.as_i32().unwrap_or_default();
+            let mut spell = all_spells.by_id(spell_id);
             spell.set_points(spell_points.as_i32().unwrap_or_default());
-            spells.push(spell);
+            spell_list.push(spell);
         }
         
-        return spells;
+        spell_list.sort();
+
+        return spell_list;
     }
 
     pub fn dodge_value(&self) -> i32 {
