@@ -11,6 +11,7 @@ json = "*"
 serde = "1.0"
 serde_derive = { version = "1.0", feature = "serde_derive" }
 serde_yaml = "*"
+serde_json = "*"
 gio = "0.14.0"
 glib = "0.14.0"
 gdk = "0.14.0"

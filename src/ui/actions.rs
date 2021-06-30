@@ -155,7 +155,6 @@ fn relaod_hero_status(context: &Rc<RefCell<Context>>) {
     ui_add_hero_status_box(context);
 }
 
-
 fn reload_hero_stats(context: &Rc<RefCell<Context>>) {
     clear_notebook(&mut context.borrow_mut());  
     ui_add_tab_attributes(context);
@@ -169,7 +168,7 @@ fn reload_hero_stats(context: &Rc<RefCell<Context>>) {
 
 pub fn condition_modification(context: &mut Context) -> i32 {
     let mut condition_mod = 0;
-    condition_mod += context.heroes.active_hero().pain_level();
+    condition_mod += context.heroes.active_hero().pain_level() as i32;
 
     return condition_mod * -1;
 }

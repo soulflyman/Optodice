@@ -1,10 +1,10 @@
 use std::{cell::RefCell, rc::Rc};
 
 use glib::clone;
-use gtk::{Adjustment, Align, EditableSignals, prelude::{ComboBoxExtManual, NotebookExtManual}};
+use gtk::{Adjustment, Align, EditableSignals, Inhibit, PackType, prelude::{ComboBoxExtManual, NotebookExtManual}};
 use gtk::prelude::{BoxExt, ButtonExt, ComboBoxExt, ComboBoxTextExt, ContainerExt, WidgetExt, EntryExt, LabelExt, ListBoxExt, SpinButtonExt};
 
-use crate::{context::Context, optolith::{spell::Spell, weapon::OptolithWeapon}, ui::{actions::*, get_check_difficulty, settings::display_config}};
+use crate::{context::Context, optolith::{spell::Spell, weapon::OptolithWeapon}, ui::{actions::*, get_check_difficulty}};
 
 use super::dialog::abort_app_with_message;
 
@@ -336,60 +336,150 @@ pub fn ui_add_tab_magic(context: &Rc<RefCell<Context>>) {
 }
 
 pub fn ui_add_hero_status_box(context: &Rc<RefCell<Context>>){
-    let hero_status_box = gtk::Box::new(gtk::Orientation::Horizontal, 15);
+    let hero_status_box = gtk::Box::new(gtk::Orientation::Vertical, 15);
+    hero_status_box.set_widget_name("hero_status_box");
     hero_status_box.set_margin_start(15);
     hero_status_box.set_margin_end(15);
+    context.borrow_mut().gtk_hero_status_box.as_ref().unwrap().add(&hero_status_box);
+
+    let hero_image_event_box = gtk::EventBox::new();
+    hero_image_event_box.set_widget_name("hero_iamge_event_box");
+    hero_image_event_box.add(context.borrow_mut().gtk_avatar.as_ref().unwrap());
+    hero_image_event_box.connect_button_press_event(clone!(@strong context => move |_,button_press_event| {
+        if button_press_event.button() != 1 {
+            return Inhibit::default();
+        }
+        send_hero_status(&mut context.borrow_mut());
+        Inhibit::default()
+    }));
+    context.borrow_mut().gtk_hero_status_box.as_ref().unwrap().add(&hero_image_event_box);
+    context.borrow_mut().gtk_hero_status_box.as_ref().unwrap().set_child_packing(&hero_image_event_box,true,true, 3, PackType::End);
+
+    let hero_status_row1 = gtk::Box::new(gtk::Orientation::Horizontal, 15);
+    hero_status_row1.set_widget_name("hero_status_row1");
+    hero_status_box.add(&hero_status_row1);
+
+    let money_row = build_money_row(context);
+    hero_status_box.add(&money_row);
+
+    let hero_status_row3 = gtk::Box::new(gtk::Orientation::Horizontal, 15);
+    hero_status_row3.set_widget_name("hero_status_row1");
+    hero_status_box.add(&hero_status_row3);
 
     let health = gtk::SpinButton::with_range(0.0, 1000.0, 1.0);
     health.set_alignment(0.5);
-    health.set_value(0.0);
+    let health_value = context.borrow_mut().heroes.active_hero().health();
+    health.set_value(health_value);
     health.set_widget_name("health_points");
     health.connect_changed(clone!(@strong context => move |health| {
-        context.borrow_mut().heroes.active_hero().set_health(health.value_as_int());
+        context.borrow_mut().heroes.active_hero().set_health(health.value());
     }));
     let health_label = gtk::Label::new(Some("LE"));
-    hero_status_box.add(&health_label);
-    hero_status_box.add(&health);
+    hero_status_row1.add(&health_label);
+    hero_status_row1.add(&health);
 
     if context.borrow_mut().heroes.active_hero().is_mage() {
-        let asp = gtk::SpinButton::with_range(0.0, 1000.0, 1.0);
-        asp.set_alignment(0.5);
-        asp.set_value(0.0);
-        asp.set_widget_name("arcane_energy");
-        asp.connect_changed(clone!(@weak context => move |asp| {
-            context.borrow_mut().heroes.active_hero().set_arcane_energy(asp.value_as_int());
+        let arcane_energy = gtk::SpinButton::with_range(0.0, 1000.0, 1.0);
+        arcane_energy.set_alignment(0.5);
+        let arcane_energy_value = context.borrow_mut().heroes.active_hero().arcane_energy();
+        arcane_energy.set_value(arcane_energy_value);
+        arcane_energy.set_widget_name("arcane_energy");
+        arcane_energy.connect_changed(clone!(@weak context => move |arcane_energy| {
+            context.borrow_mut().heroes.active_hero().set_arcane_energy(arcane_energy.value());
         }));
-        let asp_label = gtk::Label::new(Some("AsP"));
-        hero_status_box.add(&asp_label);
-        hero_status_box.add(&asp);
+        let arcane_energy_label = gtk::Label::new(Some("AsP"));
+        hero_status_row1.add(&arcane_energy_label);
+        hero_status_row1.add(&arcane_energy);
     }
 
     let pain = gtk::SpinButton::with_range(0.0, 4.0, 1.0);
     pain.set_alignment(0.5);
+    let pain_value = context.borrow_mut().heroes.active_hero().pain_level();
+    pain.set_value(pain_value);
     pain.set_widget_name("pain_level");
     pain.connect_changed(clone!(@weak context => move |pain| {
         context.borrow_mut().difficulty.pain_level = pain.value_as_int();
-        context.borrow_mut().heroes.active_hero().set_pain_level(pain.value_as_int());
+        context.borrow_mut().heroes.active_hero().set_pain_level(pain.value());
     }));
     let pain_label = gtk::Label::new(Some("Schmerz"));
-    hero_status_box.add(&pain_label);
-    hero_status_box.add(&pain);
+    hero_status_row1.add(&pain_label);
+    hero_status_row1.add(&pain);
+
+    
+
+    let fate_points = gtk::SpinButton::with_range(0.0, 9999.0, 1.0);
+    fate_points.set_alignment(0.5);
+    fate_points.set_value(0.0);
+    fate_points.set_widget_name("fait_points");
+    fate_points.connect_changed(clone!(@strong context => move |fate_points| {
+        context.borrow_mut().heroes.active_hero().set_fate_points(fate_points.value());
+    }));
+    let fate_points_label = gtk::Label::new(Some("Schips"));
+    hero_status_row3.add(&fate_points_label);
+    hero_status_row3.add(&fate_points);
 
     let ini_button_lable = format!("Ini. ({}) 🎲", context.borrow_mut().heroes.active_hero().ini());
     let ini_button = gtk::Button::with_label(&ini_button_lable);
     ini_button.connect_clicked(clone!(@weak context => move |_| {
         role_ini(&mut context.borrow_mut());
     }));
-    hero_status_box.add(&ini_button);
+    hero_status_row3.add(&ini_button);
+}
 
-    let config_button_label = String::from("⚙️");
-    let config_button = gtk::Button::with_label(&config_button_label);
-    config_button.connect_clicked(clone!(@weak context => move |_| {
-        display_config(&context);
+fn build_money_row(context: &Rc<RefCell<Context>>) -> gtk::Box {
+    let money_row = gtk::Box::new(gtk::Orientation::Horizontal, 15);
+    money_row.set_widget_name("hero_status_money_row");
+
+    let money_d = gtk::SpinButton::with_range(0.0, 9999.0, 1.0);
+    money_d.set_alignment(0.5);
+    let d = context.borrow_mut().heroes.active_hero().money_d();
+    money_d.set_value(d);
+    money_d.set_widget_name("money_d");
+    money_d.connect_changed(clone!(@strong context => move |money_d| {
+        context.borrow_mut().heroes.active_hero().set_money_d(money_d.value());
     }));
-    hero_status_box.add(&config_button);
+    let money_d_label = gtk::Label::new(Some("D"));
+    money_row.add(&money_d_label);
+    money_row.add(&money_d);
 
-    context.borrow_mut().gtk_hero_status_box.as_ref().unwrap().add(&hero_status_box);
+    let money_s = gtk::SpinButton::with_range(0.0, 9999.0, 1.0);
+    money_s.set_alignment(0.5);
+    let s = context.borrow_mut().heroes.active_hero().money_s();
+    money_s.set_value(s);
+    money_s.set_widget_name("money_s");
+    money_s.connect_changed(clone!(@strong context => move |money_s| {
+        context.borrow_mut().heroes.active_hero().set_money_s(money_s.value());
+    }));
+    let money_s_label = gtk::Label::new(Some("S"));
+    money_row.add(&money_s_label);
+    money_row.add(&money_s);
+
+
+    let money_h = gtk::SpinButton::with_range(0.0, 9999.0, 1.0);
+    money_h.set_alignment(0.5);
+    let h = context.borrow_mut().heroes.active_hero().money_h();
+    money_h.set_value(h);
+    money_h.set_widget_name("money_h");
+    money_h.connect_changed(clone!(@strong context => move |money_h| {
+        context.borrow_mut().heroes.active_hero().set_money_h(money_h.value());
+    }));
+    let money_h_label = gtk::Label::new(Some("H"));
+    money_row.add(&money_h_label);
+    money_row.add(&money_h);
+    
+    let money_k = gtk::SpinButton::with_range(0.0, 9999.0, 1.0);
+    money_k.set_alignment(0.5);
+    let k = context.borrow_mut().heroes.active_hero().money_k();
+    money_k.set_value(k);
+    money_k.set_widget_name("money_k");
+    money_k.connect_changed(clone!(@strong context => move |money_k| {
+        context.borrow_mut().heroes.active_hero().set_money_k(money_k.value());
+    }));
+    let money_k_label = gtk::Label::new(Some("K"));
+    money_row.add(&money_k_label);
+    money_row.add(&money_k);
+
+    return money_row;
 }
 
 

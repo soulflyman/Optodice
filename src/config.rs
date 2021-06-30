@@ -36,7 +36,7 @@ impl Config {
             fs::create_dir(&config_dir_path).expect("Error: Failed to create config dir.")
         }
         config_dir_path.push("config.toml");
-        dbg!(&config_dir_path);
+        
         return config_dir_path
     }
 

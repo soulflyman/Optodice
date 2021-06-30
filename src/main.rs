@@ -6,6 +6,7 @@ mod difficulty;
 mod ui;
 mod webhook;
 mod avatar;
+mod cache;
 
 use gio::prelude::*;
 use glib::clone;
@@ -18,10 +19,10 @@ use crate::optolith::{heroes::*, attributes::*, combat_techniques::*, skills::*}
 use crate::checks::{skill_check_factory::*, results::*};
 use crate::difficulty::Difficulty;
 use crate::ui::actions::change_hero;
-use crate::ui::actions::send_hero_status;
 use crate::ui::builder::build_hero_select;
 use crate::ui::set_icon;
-use crate::ui::{dialog::*};
+use crate::ui::settings::display_config;
+use crate::ui::dialog::*;
 
 #[macro_use] extern crate serde_derive;
 
@@ -80,27 +81,23 @@ fn main() {
         let box_hero = gtk::Box::new(gtk::Orientation::Horizontal, 0);
         box_hero.add(&cbt_hero_select);
         box_hero.set_child_packing(&cbt_hero_select,true,true, 0, PackType::Start);
+
+        let config_button_label = String::from("⚙️");
+        let config_button = gtk::Button::with_label(&config_button_label);
+        config_button.connect_clicked(clone!(@weak context => move |_| {
+            display_config(&context);
+        }));
+        box_hero.add(&config_button);
         
         context.borrow_mut().gtk_avatar = Some(gtk::Image::new());
         context.borrow_mut().gtk_avatar.as_ref().unwrap().set_halign(gtk::Align::End);
         context.borrow_mut().gtk_avatar.as_ref().unwrap().set_widget_name("optolith_avatar");
         
-        let hero_image_event_box = gtk::EventBox::new();
-        hero_image_event_box.add(context.borrow_mut().gtk_avatar.as_ref().unwrap());
-        hero_image_event_box.connect_button_press_event(clone!(@strong context => move |_,button_press_event| {
-            if button_press_event.button() != 1 {
-                return Inhibit::default();
-            }
-            send_hero_status(&mut context.borrow_mut());
-            Inhibit::default()
-        }));
-        box_hero.add(&hero_image_event_box);
+       
 
         main_box.add(&box_hero);
                
         let hero_status_box_container = gtk::Box::new(gtk::Orientation::Horizontal, 0);
-        //let hero_status_box = ui_add_hero_status_box(&context);
-        //hero_status_box_container.add(&hero_status_box);
         main_box.add(&hero_status_box_container);
         context.borrow_mut().gtk_hero_status_box = Some(hero_status_box_container);
         

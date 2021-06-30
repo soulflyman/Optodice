@@ -1,59 +1,81 @@
 use crc::{CRC_32_ISO_HDLC, Crc};
 use json::JsonValue;
 
-use crate::{display_error, optolith::{spell::Spell, spells::Spells, weapon::OptolithWeapon}};
+use crate::{cache::Cache, display_error, optolith::{spell::Spell, spells::Spells, weapon::OptolithWeapon}};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OptolithHero {
-    hero: JsonValue,
-    health: i32,
-    pain_level: i32,
-    arcane_energy: i32,
+    #[serde(skip)]
+    hero: Option<JsonValue>,
+    health: f64,
+    pain_level: f64,
+    arcane_energy: f64,
+    fate_points: f64,
+    money_d: f64,
+    money_s: f64,
+    money_h: f64,
+    money_k: f64,
 }
 
 const CRC: Crc<u32> = Crc::<u32>::new(&CRC_32_ISO_HDLC);   
 
 impl OptolithHero {
     pub fn new(hero_json: &JsonValue) -> OptolithHero {
-        OptolithHero {
-            hero: hero_json.to_owned(),
-            health: 0,
-            pain_level: 0,
-            arcane_energy: 0,
+        let hero_id = hero_json["id"].as_str().unwrap_or_default();
+
+        if Cache::exists(&hero_id) {
+            let hero_status: OptolithHero = Cache::read_object(&hero_id).unwrap();
+            return OptolithHero {
+                hero: Some(hero_json.clone()),
+                ..hero_status
+            };
         }
+
+        OptolithHero {
+            hero: Some(hero_json.to_owned()),
+            health: 0.0,
+            pain_level: 0.0,
+            arcane_energy: 0.0,
+            fate_points: 0.0,
+            money_d: 0.0,
+            money_s: 0.0,
+            money_h: 0.0,
+            money_k: 0.0,
+        }
+        
     }
 
     pub fn name(&self) -> String {
-        self.hero["name"].to_string()
+        self.json_hero()["name"].to_string()
     }
 
     pub fn id(&self) -> String {
-        self.hero["id"].to_string()
+        self.json_hero()["id"].to_string()
     }
 
     pub fn skill_points(&self, skill_id: &String) -> i32 {
         
-        if !self.hero.has_key("talents") {
+        if !self.json_hero().has_key("talents") {
             return 0;
         }
 
-        if !self.hero["talents"].has_key(skill_id.as_str()) {
+        if !self.json_hero()["talents"].has_key(skill_id.as_str()) {
             return 0;
         }
 
-        return self.hero["talents"][skill_id].as_i32().unwrap_or(0);
+        return self.json_hero()["talents"][skill_id].as_i32().unwrap_or(0);
     }
 
     pub fn attribute_value(&self, attribute_id: &String) -> i32 {
-        if !self.hero.has_key("attr") {
+        if !self.json_hero().has_key("attr") {
             return 8;
         }
 
-        if !self.hero["attr"].has_key("values") {
+        if !self.json_hero()["attr"].has_key("values") {
             return 8;
         }
 
-        for attr in self.hero["attr"]["values"].members() {
+        for attr in self.json_hero()["attr"]["values"].members() {
             if attr["id"].to_string() == attribute_id.to_owned() {
                 return attr["value"].as_i32().unwrap_or(8);
             }
@@ -62,8 +84,8 @@ impl OptolithHero {
     }
 
     pub fn avatar(&self) -> String {
-        if self.hero.has_key("avatar") {
-            return self.hero["avatar"].to_string();
+        if self.json_hero().has_key("avatar") {
+            return self.json_hero()["avatar"].to_string();
         }
 
         return String::default();
@@ -98,11 +120,11 @@ impl OptolithHero {
 
     pub fn weapons(&self) -> Vec<OptolithWeapon> {
         let mut weapons: Vec<OptolithWeapon> = vec![];
-        if !self.hero.has_key("belongings") || !self.hero["belongings"].has_key("items") {
+        if !self.json_hero().has_key("belongings") || !self.json_hero()["belongings"].has_key("items") {
             return weapons;
         }
 
-        for (_,b) in self.hero["belongings"]["items"].entries() {
+        for (_,b) in self.json_hero()["belongings"]["items"].entries() {
             if !b.has_key("combatTechnique") {
                 continue;
             }
@@ -115,14 +137,14 @@ impl OptolithHero {
     }
 
     pub fn spells(&self) -> Vec<Spell> {           
-        if !self.hero.has_key("spells")  {
+        if !self.json_hero().has_key("spells")  {
             return vec![]
         }
         
         let mut spell_list: Vec<Spell> = vec![];
 
         let all_spells = Spells::new();
-        for (spell_id,spell_points) in self.hero["spells"].entries() {
+        for (spell_id,spell_points) in self.json_hero()["spells"].entries() {
             let mut spell = all_spells.by_id(spell_id);
             spell.set_points(spell_points.as_i32().unwrap_or_default());
             spell_list.push(spell);
@@ -139,15 +161,15 @@ impl OptolithHero {
     }
 
     fn combat_technique_base_value(&self, combat_technique_id: &String) -> i32 {
-        if !self.hero.has_key("ct") {
+        if !self.json_hero().has_key("ct") {
             return 6;
         }
 
-        if !self.hero["ct"].has_key(combat_technique_id) {
+        if !self.json_hero()["ct"].has_key(combat_technique_id) {
             return 6;
         }
 
-        return self.hero["ct"][combat_technique_id].as_i32().unwrap_or(6);
+        return self.json_hero()["ct"][combat_technique_id].as_i32().unwrap_or(6);
     }
 
     pub fn attack_value(&self, weapon :&OptolithWeapon) -> i32 {
@@ -194,13 +216,14 @@ impl OptolithHero {
     }
 
     /// Get a reference to the optolith hero's health.
-    pub fn health(&self) -> &i32 {
-        &self.health
+    pub fn health(&self) -> f64 {
+        self.health
     }
 
     /// Set the optolith hero's health.
-    pub fn set_health(&mut self, health: i32) {
+    pub fn set_health(&mut self, health: f64) {
         self.health = health;
+        self.field_changed();
     }
 
     pub fn ini(&mut self) -> i32 {
@@ -210,23 +233,83 @@ impl OptolithHero {
         return ((mu + ge) as f64 / 2.0).ceil() as i32;
     }
 
-    pub fn arcane_energy(&self) -> &i32 {
-        &self.arcane_energy
+    pub fn arcane_energy(&self) -> f64 {
+        self.arcane_energy
     }
 
-    pub fn set_arcane_energy(&mut self, arcane_energy: i32) {
+    pub fn set_arcane_energy(&mut self, arcane_energy: f64) {
         self.arcane_energy = arcane_energy;
+        self.field_changed();
     }
 
-    pub fn set_pain_level(&mut self, pain_level: i32) {
+    pub fn set_pain_level(&mut self, pain_level: f64) {
         self.pain_level = pain_level;
+        self.field_changed();
     }
 
-    pub fn pain_level(&self) -> &i32 {
-        &self.pain_level
+    pub fn pain_level(&self) -> f64 {
+        self.pain_level
     }
 
     pub fn is_mage(&self) -> bool {
-        self.hero["activatable"].has_key("ADV_50")
+        //todo this check is not realy complete and to simple
+        self.json_hero()["activatable"].has_key("ADV_50")
+    }
+
+    /// Set the optolith hero's fate points.
+    pub fn set_fate_points(&mut self, fate_points: f64) {
+        self.fate_points = fate_points;
+        self.field_changed();
+    }
+
+    /// Set the optolith hero's money d.
+    pub fn set_money_d(&mut self, money_d: f64) {
+        self.money_d = money_d;
+        self.field_changed();
+    }
+
+    /// Set the optolith hero's money s.
+    pub fn set_money_s(&mut self, money_s: f64) {
+        self.money_s = money_s;
+        self.field_changed();
+    }
+
+    /// Set the optolith hero's money h.
+    pub fn set_money_h(&mut self, money_h: f64) {
+        self.money_h = money_h;
+        self.field_changed();
+    }
+
+    /// Set the optolith hero's money k.
+    pub fn set_money_k(&mut self, money_k: f64) {
+        self.money_k = money_k;
+        self.field_changed();
+    }
+
+    fn json_hero(&self) -> &JsonValue {
+        self.hero.as_ref().unwrap()
+    }
+    
+    fn field_changed(&self) {
+        let result = Cache::save_object(self, self.id().as_str());
+        if result.is_err() {
+            dbg!(&result.unwrap());
+        }
+    }
+
+    pub fn money_d(&self) -> f64 {
+        self.money_d
+    }
+
+    pub fn money_s(&self) -> f64 {
+        self.money_s
+    }
+
+    pub fn money_h(&self) -> f64 {
+        self.money_h
+    }
+
+    pub fn money_k(&self) -> f64 {
+        self.money_k
     }
 }

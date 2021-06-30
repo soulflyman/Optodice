@@ -83,11 +83,11 @@ To send the status of your character to Discord, just left click on the avater.
 - [x] Role single dice
 - [ ] Role custom checks
 - [x] Display avatar in Optodice
-- [x] keep track of health
-- [x] keep track of pain level
-- [ ] keep track of money
-- [ ] keep track of fate points
-- [x] keep track of arcane energy
+- [x] Keep track of health
+- [x] Keep track of pain level
+- [x] Keep track of money
+- [x] Keep track of fate points
+- [x] Keep track of arcane energy
 - [x] Support Windows
 - [x] Support Linux
 - [ ] Support MacOS (github action builds are compiling, still not testet)
@@ -96,10 +96,10 @@ To send the status of your character to Discord, just left click on the avater.
 - [ ] Option to autorole critical success/fails events
 - [ ] Option to autorole battle damage
 - [ ] Cumulative Group Checks Using Multiple Skills
-- [ ] Save character state when switching characters or restarting the application
+- [x] Save character state when switching characters or restarting the application
 - [x] Role checks on spells
-- [ ] support all kind of magic (at the moment not all types of magic are supported)
-- [ ] do a search over all rolleable checks
+- [ ] Support all kind of magic (at the moment not all types of magic are supported)
+- [ ] Do a search over all rolleable checks
 
 ---
 ## Screenshots
