@@ -66,7 +66,7 @@ impl Config {
         }
 
         let mut config_path = Path::new(system_config_dir_path.as_str()).to_path_buf();
-        config_path.push("Optodice");
+        config_path.push("optodice");
         return config_path;
     }
 
