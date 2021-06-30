@@ -16,7 +16,12 @@ pub fn build_skill_name_label(skill_name: &String) -> gtk::Label {
 }
 
 pub fn build_parry_check_button(context: &Rc<RefCell<Context>>, weapon: &OptolithWeapon) -> gtk::Button {
-    let btn_die = gtk::Button::with_label("🎲");
+    let btn_die = gtk::Button::new();
+    let btn_die_label: gtk::Label = gtk::Label::new(None);
+    btn_die_label.set_use_markup(true);
+    btn_die_label.set_markup("<span size='14000'>🎲</span>");
+    btn_die.add(&btn_die_label);
+    
     let widget_name = format!("parry_check_button#{}", weapon.id());
     let difficulty_widget_name = format!("parry_difficulty#{}", weapon.id());
     btn_die.set_widget_name(widget_name.as_str());
@@ -30,7 +35,12 @@ pub fn build_parry_check_button(context: &Rc<RefCell<Context>>, weapon: &Optolit
 }
 
 pub fn build_attack_check_button(context: &Rc<RefCell<Context>>, weapon: &OptolithWeapon) -> gtk::Button {
-    let btn_die = gtk::Button::with_label("🎲");
+    let btn_die = gtk::Button::new();
+    let btn_die_label: gtk::Label = gtk::Label::new(None);
+    btn_die_label.set_use_markup(true);
+    btn_die_label.set_markup("<span size='14000'>🎲</span>");
+    btn_die.add(&btn_die_label);
+    
     let widget_name = format!("attack_check_button#{}", weapon.id());
     let difficulty_widget_name = format!("attack_difficulty#{}", weapon.id());
     btn_die.set_widget_name(widget_name.as_str());
@@ -44,7 +54,12 @@ pub fn build_attack_check_button(context: &Rc<RefCell<Context>>, weapon: &Optoli
 }
 
 pub fn build_spell_check_button(context: &Rc<RefCell<Context>>, spell: &Spell) -> gtk::Button {
-    let btn_die = gtk::Button::with_label("🎲");
+    let btn_die = gtk::Button::new();
+    let btn_die_label: gtk::Label = gtk::Label::new(None);
+    btn_die_label.set_use_markup(true);
+    btn_die_label.set_markup("<span size='14000'>🎲</span>");
+    btn_die.add(&btn_die_label);
+
     let widget_name = format!("spell_button#{}", spell.id());
     let difficulty_widget_name = format!("spell_difficulty#{}", spell.id());
     btn_die.set_widget_name(widget_name.as_str());
@@ -58,7 +73,12 @@ pub fn build_spell_check_button(context: &Rc<RefCell<Context>>, spell: &Spell) -
 }
 
 pub fn build_dodge_check_button(context: &Rc<RefCell<Context>>, dodge_id: &str) -> gtk::Button {
-    let btn_die = gtk::Button::with_label("🎲");
+    let btn_die = gtk::Button::new();
+    let btn_die_label: gtk::Label = gtk::Label::new(None);
+    btn_die_label.set_use_markup(true);
+    btn_die_label.set_markup("<span size='14000'>🎲</span>");
+    btn_die.add(&btn_die_label);
+
     let widget_name = format!("dodge_check_button#{}", dodge_id);
     let difficulty_widget_name = format!("dodge_difficulty#{}", dodge_id);
     btn_die.set_widget_name(widget_name.as_str());
@@ -71,7 +91,12 @@ pub fn build_dodge_check_button(context: &Rc<RefCell<Context>>, dodge_id: &str) 
 }
 
 pub fn build_skill_check_button(context: &Rc<RefCell<Context>>, skill_id: &str) -> gtk::Button {
-    let btn_die = gtk::Button::with_label("🎲");
+    let btn_die = gtk::Button::new();
+    let btn_die_label: gtk::Label = gtk::Label::new(None);
+    btn_die_label.set_use_markup(true);
+    btn_die_label.set_markup("<span size='14000'>🎲</span>");
+    btn_die.add(&btn_die_label);  
+
     let widget_name = format!("skill_check_button#{}", skill_id);
     let difficulty_widget_name = format!("skill_difficulty#{}", skill_id);
     btn_die.set_widget_name(widget_name.as_str());
@@ -88,9 +113,9 @@ pub fn build_attribute_check_button(context: &Rc<RefCell<Context>>, attribute_id
     let btn_die = gtk::Button::new(); //::with_label("<span size='20'>big text</span>🎲");
     let btn_die_label: gtk::Label = gtk::Label::new(None);
     btn_die_label.set_use_markup(true);
-    // TODO check die size
     btn_die_label.set_markup("<span size='14000'>🎲</span>");
-    btn_die.add(&btn_die_label);    
+    btn_die.add(&btn_die_label);  
+
     let widget_name = format!("attribute_check_button#{}", attribute_id);
     let difficulty_widget_name = format!("attribute_difficulty#{}", attribute_id);
     btn_die.set_widget_name(widget_name.as_str());
