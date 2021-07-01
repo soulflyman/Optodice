@@ -15,7 +15,7 @@ pub struct SpellCheckResult {
 }
 
 impl SpellCheckResult {    
-    pub fn get_formated(&self) -> String {
+    pub fn format(&self) -> String {
         let mut difficulty_str :String = String::default();
         if self.difficulty > 0 {
             difficulty_str.push_str("+");
@@ -49,7 +49,7 @@ impl SpellCheckResult {
         };
 
         CheckResult {
-            message: self.get_formated(),    
+            message: self.format(),    
             status: status,
             critical: self.critical,
         }

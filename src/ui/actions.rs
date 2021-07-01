@@ -45,18 +45,18 @@ pub fn role_dodge_check(context: &mut Context, difficulty: i32) {
     fire_webhook(context, check_result.to_check_result());
 }
 
-pub fn send_hero_status(context: &mut Context) {
+pub fn send_character_status(context: &mut Context) {
     let mut msg = String::new();
     msg.push_str("**Zustand**\n");
-    let health = context.heroes.active_hero().health();
+    let health = context.characters.active().health();
     msg.push_str(format!("Lebensenergie: {:>2}\n", health).as_str());
 
-    if context.heroes.active_hero().is_mage() {
-        let asp = context.heroes.active_hero().arcane_energy();
+    if context.characters.active().is_mage() {
+        let asp = context.characters.active().arcane_energy();
         msg.push_str(format!("Astralpunkte: {:>2}", asp).as_str());    
     }
 
-    let pain_level = context.heroes.active_hero().pain_level();
+    let pain_level = context.characters.active().pain_level();
     msg.push_str(format!("Schmerz: {:>2}\n", pain_level).as_str());
     
     let discord_msg = CheckResult {
@@ -70,7 +70,7 @@ pub fn send_hero_status(context: &mut Context) {
 
 pub fn role_ini(context: &mut Context) 
 {   
-    let ini = context.heroes.active_hero().ini();
+    let ini = context.characters.active().ini();
     let modification = condition_modification(context);
     let mut rng = rand::thread_rng();
     let dice_value = rng.gen_range(1..7);
@@ -122,7 +122,7 @@ pub fn role_dice(dice_type: i32, context: &mut Context)
 }
 
 pub fn change_avatar(context: &mut Context) {
-    let avatar_raw = base64::decode(&context.heroes.active_hero().avatar().split(',').collect::<Vec<&str>>()[1]);
+    let avatar_raw = base64::decode(&context.characters.active().avatar().split(',').collect::<Vec<&str>>()[1]);
     let mut avatar_buffer = image::load_from_memory(&avatar_raw.unwrap()).unwrap();
     avatar_buffer = avatar_buffer.resize(100, 100, image::imageops::FilterType::Lanczos3);
     let avatar_color_channels = 4; //(RGBA)
@@ -133,29 +133,29 @@ pub fn change_avatar(context: &mut Context) {
     gtk_avatar.set_from_pixbuf(Some(&avatar_pixbuf));
 }
 
-pub fn change_hero(context: &Rc<RefCell<Context>>, hero_select: &gtk::ComboBoxText) {
-    let hero_id = hero_select.active_id().expect("Unknown hero selected, this should not happen.");            
-    context.borrow_mut().config.set_last_used_hero_id(hero_id.to_string());
-    context.borrow_mut().heroes.set_active_hero(hero_id.to_string());
+pub fn change_character(context: &Rc<RefCell<Context>>, character_select: &gtk::ComboBoxText) {
+    let character_id = character_select.active_id().expect("Unknown character selected, this should not happen.");            
+    context.borrow_mut().config.set_last_used_character_id(character_id.to_string());
+    context.borrow_mut().characters.set_active_character(character_id.to_string());
     
     upload_avatar(&mut context.borrow_mut());
     change_avatar(&mut context.borrow_mut());
-    relaod_hero_status(context);
-    reload_hero_stats(context);
+    relaod_character_status(context);
+    reload_character_stats(context);
 }
 
-fn relaod_hero_status(context: &Rc<RefCell<Context>>) {
+fn relaod_character_status(context: &Rc<RefCell<Context>>) {
     let cx = &context.borrow_mut().clone();
-    let hero_status_container = cx.gtk_hero_status_box.as_ref().unwrap();
+    let character_status_container = cx.gtk_character_status_box.as_ref().unwrap();
     
-    for child in &hero_status_container.children() {
-        hero_status_container.remove(child);
+    for child in &character_status_container.children() {
+        character_status_container.remove(child);
     }
     
-    ui_add_hero_status_box(context);
+    ui_add_character_status_box(context);
 }
 
-fn reload_hero_stats(context: &Rc<RefCell<Context>>) {
+fn reload_character_stats(context: &Rc<RefCell<Context>>) {
     clear_notebook(&mut context.borrow_mut());  
     ui_add_tab_attributes(context);
     ui_add_tabs_skills(context);
@@ -168,7 +168,7 @@ fn reload_hero_stats(context: &Rc<RefCell<Context>>) {
 
 pub fn condition_modification(context: &mut Context) -> i32 {
     let mut condition_mod = 0;
-    condition_mod += context.heroes.active_hero().pain_level() as i32;
+    condition_mod += context.characters.active().pain_level() as i32;
 
     return condition_mod * -1;
 }

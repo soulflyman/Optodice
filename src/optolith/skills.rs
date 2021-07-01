@@ -76,11 +76,11 @@ impl OptolithSkills {
 }
 
 impl Skill {
-    pub fn get_check(&self) -> Vec<String> {
+    pub fn check_list(&self) -> Vec<String> {
         return self.check.clone();
     }
 
-    pub fn get_name(&self) -> String {
+    pub fn name(&self) -> String {
         return self.name.clone();
     }
 }

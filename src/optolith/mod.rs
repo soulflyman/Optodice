@@ -1,5 +1,5 @@
-pub mod hero;
-pub mod heroes;
+pub mod character;
+pub mod characters;
 pub mod attributes;
 pub mod combat_technique;
 pub mod combat_techniques;

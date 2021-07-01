@@ -56,11 +56,11 @@ impl OptolithAttributes {
 }
 
 impl Attribute {
-    pub fn get_name(&self) -> String {
+    pub fn name(&self) -> String {
         return self.name.clone();
     }
 
-    pub fn get_abbr(&self) -> String {
+    pub fn abbr(&self) -> String {
         return self.name_abbr.clone();
     }
 }

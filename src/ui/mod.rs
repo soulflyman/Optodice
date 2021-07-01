@@ -17,7 +17,7 @@ pub fn set_icon(window: &gtk::Window) {
     }        
 }
 
-pub fn get_check_difficulty(button: &gtk::Button, difficulty_widget_name: &String) -> i32 {
+pub fn difficulty(button: &gtk::Button, difficulty_widget_name: &String) -> i32 {
     //let skill_id = get_skill_id(&button.clone().upcast::<gtk::Widget>());
     let parent_widget = button
         .parent()
@@ -39,7 +39,7 @@ pub fn clear_notebook(context: &mut Context) {
         context.gtk_main_box.as_ref().unwrap().remove(&old_notebook.unwrap())
     }
     let new_notebook = gtk::Notebook::new();
-    new_notebook.set_widget_name("hero_stats");
+    new_notebook.set_widget_name("character_stats");
     new_notebook.set_halign(gtk::Align::Fill);
     new_notebook.set_valign(gtk::Align::Fill);
     new_notebook.set_vexpand(true);

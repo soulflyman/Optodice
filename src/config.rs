@@ -4,7 +4,7 @@ use serde_derive::{Serialize, Deserialize};
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct Config {
     webhook_url: Option<String>,
-    last_used_hero_id: Option<String>,
+    last_used_hero_id: Option<String>, //todo move last_ues_hero_id into cache
     avatar_uploader_url: Option<String>,
     avatar_base_url: Option<String>,
     avatar_static_url: Option<String>,
@@ -79,8 +79,8 @@ impl Config {
         return self.webhook_url.clone().unwrap_or_default();        
     }
 
-    pub fn set_last_used_hero_id(&mut self, hero_id: String) {
-        self.last_used_hero_id = Some(hero_id);
+    pub fn set_last_used_character_id(&mut self, character_id: String) {
+        self.last_used_hero_id = Some(character_id);
         self.save();
     }
 
@@ -92,7 +92,7 @@ impl Config {
         self.avatar_base_url.is_some() && !self.avatar_base_url.as_ref().unwrap().is_empty() 
     }
 
-    pub fn last_used_hero_id(&self) -> String {
+    pub fn last_used_character_id(&self) -> String {
         return self.last_used_hero_id.clone().unwrap_or_default();
     }
 

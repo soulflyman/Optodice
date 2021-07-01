@@ -4,7 +4,7 @@ use glib::clone;
 use gtk::{Adjustment, Align, EditableSignals, Inhibit, PackType, prelude::{ComboBoxExtManual, NotebookExtManual}};
 use gtk::prelude::{BoxExt, ButtonExt, ComboBoxExt, ComboBoxTextExt, ContainerExt, WidgetExt, EntryExt, LabelExt, ListBoxExt, SpinButtonExt};
 
-use crate::{context::Context, optolith::{spell::Spell, weapon::OptolithWeapon}, ui::{actions::*, get_check_difficulty}};
+use crate::{context::Context, optolith::{spell::Spell, weapon::OptolithWeapon}, ui::{actions::*, difficulty}};
 
 use super::dialog::abort_app_with_message;
 
@@ -28,7 +28,7 @@ pub fn build_parry_check_button(context: &Rc<RefCell<Context>>, weapon: &Optolit
     let aweapon_tmp = weapon.clone();
     btn_die.connect_clicked(clone!(@weak context => move |but| {
         let condition_modification = condition_modification(&mut context.borrow_mut());
-        let difficulty = get_check_difficulty(&but, &difficulty_widget_name) + condition_modification;    
+        let difficulty = difficulty(&but, &difficulty_widget_name) + condition_modification;    
         role_parry_check(&mut context.borrow_mut(), &aweapon_tmp, difficulty);
     }));
     return btn_die;
@@ -47,7 +47,7 @@ pub fn build_attack_check_button(context: &Rc<RefCell<Context>>, weapon: &Optoli
     let weapon_tmp = weapon.clone();
     btn_die.connect_clicked(clone!(@weak context => move |but| {
         let condition_modification = condition_modification(&mut context.borrow_mut());
-        let difficulty = get_check_difficulty(&but, &difficulty_widget_name) + condition_modification;
+        let difficulty = difficulty(&but, &difficulty_widget_name) + condition_modification;
         role_attack_check(&mut context.borrow_mut(), &weapon_tmp, difficulty);
     }));
     return btn_die;
@@ -66,7 +66,7 @@ pub fn build_spell_check_button(context: &Rc<RefCell<Context>>, spell: &Spell) -
     let spell_tmp = spell.clone();
     btn_die.connect_clicked(clone!(@weak context => move |but| {
         let condition_modification = condition_modification(&mut context.borrow_mut());
-        let difficulty = get_check_difficulty(&but, &difficulty_widget_name) + condition_modification;
+        let difficulty = difficulty(&but, &difficulty_widget_name) + condition_modification;
         role_spell_check(&mut context.borrow_mut(), &spell_tmp, difficulty);
     }));
     return btn_die;
@@ -84,7 +84,7 @@ pub fn build_dodge_check_button(context: &Rc<RefCell<Context>>, dodge_id: &str) 
     btn_die.set_widget_name(widget_name.as_str());
     btn_die.connect_clicked(clone!(@weak context => move |but| {
         let condition_modification = condition_modification(&mut context.borrow_mut());
-        let difficulty = get_check_difficulty(&but, &difficulty_widget_name) + condition_modification;
+        let difficulty = difficulty(&but, &difficulty_widget_name) + condition_modification;
         role_dodge_check(&mut context.borrow_mut(), difficulty);
     }));
     return btn_die;
@@ -103,7 +103,7 @@ pub fn build_skill_check_button(context: &Rc<RefCell<Context>>, skill_id: &str) 
     let skill_id_tmp = skill_id.to_string();    
     btn_die.connect_clicked(clone!(@weak context => move |but| {
         let condition_modification = condition_modification(&mut context.borrow_mut());
-        let difficulty = get_check_difficulty(&but, &difficulty_widget_name) + condition_modification;
+        let difficulty = difficulty(&but, &difficulty_widget_name) + condition_modification;
         role_skill_check(&mut context.borrow_mut(), &skill_id_tmp, difficulty);
     }));
     return btn_die;
@@ -121,17 +121,15 @@ pub fn build_attribute_check_button(context: &Rc<RefCell<Context>>, attribute_id
     btn_die.set_widget_name(widget_name.as_str());
     let attribute_id_tmp = attribute_id.to_string();
     btn_die.connect_clicked(clone!(@weak context => move |but| {
-        //let hero_id = get_hero_id(&but);
-        //let attribute_id = get_skill_id(&but.clone().upcast::<gtk::Widget>());
         let condition_modification = condition_modification(&mut context.borrow_mut());
-        let difficulty = get_check_difficulty(&but, &difficulty_widget_name) + condition_modification;
+        let difficulty = difficulty(&but, &difficulty_widget_name) + condition_modification;
         role_attribute_check(&mut context.borrow_mut(), &attribute_id_tmp, difficulty);
     }));
     return btn_die;
 }
 
 pub fn build_skill_checks_label(skill_id: &String, context: &mut Context) -> gtk::Label {
-    let attribute_ids = context.skills.by_id(skill_id).get_check();
+    let attribute_ids = context.skills.by_id(skill_id).check_list();
     let check_name_abbr = context.attributes.name_abbrs(attribute_ids);
     
     let lbl_skill_test = gtk::Label::new(Some(check_name_abbr.join(" / ").as_str()));
@@ -225,27 +223,27 @@ pub fn build_default_dificulty_entry_field(widget_name: &str) -> gtk::Entry {
     return entry
 }
 
-pub fn build_hero_select(context: &mut Context) -> gtk::ComboBoxText {
-    let hero_list = context.heroes.simple_hero_list();
-    if hero_list.len() == 0 {
-        abort_app_with_message("We need more heroes!", "No heroes found in heroes.json");
+pub fn build_character_select(context: &mut Context) -> gtk::ComboBoxText {
+    let character_list = context.characters.simple_character_list();
+    if character_list.len() == 0 {
+        abort_app_with_message("We need more characters!", "No characters found in Optolith heroes.json");
     }
-    let hero_select = gtk::ComboBoxText::new();
-    hero_select.set_can_focus(false);
-    for hero in hero_list {
-        hero_select.append(Some(hero.id.as_str()), hero.name.as_str());
+    let character_select = gtk::ComboBoxText::new();
+    character_select.set_can_focus(false);
+    for character in character_list {
+        character_select.append(Some(character.id.as_str()), character.name.as_str());
     }
     
-    hero_select.set_widget_name("hero_select");
-    if context.heroes.active_hero_id().is_empty() {
-        hero_select.set_active(Some(0));
-        let active_hero = hero_select.active_id().unwrap().to_string();
-        context.heroes.set_active_hero(active_hero);
+    character_select.set_widget_name("character_select");
+    if context.characters.active_character_id().is_empty() {
+        character_select.set_active(Some(0));
+        let active_character = character_select.active_id().unwrap().to_string();
+        context.characters.set_active_character(active_character);
     } else {
-        hero_select.set_active_id(Some(context.heroes.active_hero_id().as_str()));
+        character_select.set_active_id(Some(context.characters.active_character_id().as_str()));
     }
     
-    return hero_select;
+    return character_select;
 }
 
 pub fn ui_add_dodge_to_tab(context: &Rc<RefCell<Context>>, tab: &gtk::ListBox) {
@@ -256,7 +254,7 @@ pub fn ui_add_dodge_to_tab(context: &Rc<RefCell<Context>>, tab: &gtk::ListBox) {
     row.add(&weapon_name);
     row.set_child_packing(&weapon_name, true, true, 0, gtk::PackType::Start);
     
-    let dodge_value = context.borrow_mut().heroes.active_hero().dodge_value();
+    let dodge_value = context.borrow_mut().characters.active().dodge_value();
 
     let at_value =  gtk::Label::new(Some(dodge_value.to_string().as_str()));  
     row.add(&at_value);
@@ -317,7 +315,7 @@ pub fn ui_add_tab_dice(context: &Rc<RefCell<Context>>) {
 }
 
 pub fn ui_add_tab_magic(context: &Rc<RefCell<Context>>) {
-    if !context.borrow_mut().heroes.active_hero().is_mage() {
+    if !context.borrow_mut().characters.active().is_mage() {
         return;
     }
     
@@ -331,7 +329,7 @@ pub fn ui_add_tab_magic(context: &Rc<RefCell<Context>>) {
 
     context.borrow_mut().gtk_notebook.as_ref().unwrap().append_page(&scroll, Some(&nb_tab_name));
 
-    let spells = context.borrow_mut().heroes.active_hero().spells();
+    let spells = context.borrow_mut().characters.active().spells();
     for spell in spells {
         let box_spell = gtk::Box::new(gtk::Orientation::Horizontal, 0);
 
@@ -360,75 +358,75 @@ pub fn ui_add_tab_magic(context: &Rc<RefCell<Context>>) {
     }
 }
 
-pub fn ui_add_hero_status_box(context: &Rc<RefCell<Context>>){
-    let hero_status_box = gtk::Box::new(gtk::Orientation::Vertical, 15);
-    hero_status_box.set_widget_name("hero_status_box");
-    hero_status_box.set_margin_start(15);
-    hero_status_box.set_margin_end(15);
-    context.borrow_mut().gtk_hero_status_box.as_ref().unwrap().add(&hero_status_box);
+pub fn ui_add_character_status_box(context: &Rc<RefCell<Context>>){
+    let character_status_box = gtk::Box::new(gtk::Orientation::Vertical, 15);
+    character_status_box.set_widget_name("character_status_box");
+    character_status_box.set_margin_start(15);
+    character_status_box.set_margin_end(15);
+    context.borrow_mut().gtk_character_status_box.as_ref().unwrap().add(&character_status_box);
 
-    let hero_image_event_box = gtk::EventBox::new();
-    hero_image_event_box.set_widget_name("hero_iamge_event_box");
-    hero_image_event_box.add(context.borrow_mut().gtk_avatar.as_ref().unwrap());
-    hero_image_event_box.connect_button_press_event(clone!(@strong context => move |_,button_press_event| {
+    let character_avatar_event_box = gtk::EventBox::new();
+    character_avatar_event_box.set_widget_name("character_avatar_event_box");
+    character_avatar_event_box.add(context.borrow_mut().gtk_avatar.as_ref().unwrap());
+    character_avatar_event_box.connect_button_press_event(clone!(@strong context => move |_,button_press_event| {
         if button_press_event.button() != 1 {
             return Inhibit::default();
         }
-        send_hero_status(&mut context.borrow_mut());
+        send_character_status(&mut context.borrow_mut());
         Inhibit::default()
     }));
-    context.borrow_mut().gtk_hero_status_box.as_ref().unwrap().add(&hero_image_event_box);
-    context.borrow_mut().gtk_hero_status_box.as_ref().unwrap().set_child_packing(&hero_image_event_box,true,true, 3, PackType::End);
+    context.borrow_mut().gtk_character_status_box.as_ref().unwrap().add(&character_avatar_event_box);
+    context.borrow_mut().gtk_character_status_box.as_ref().unwrap().set_child_packing(&character_avatar_event_box,true,true, 3, PackType::End);
 
-    let hero_status_row1 = gtk::Box::new(gtk::Orientation::Horizontal, 15);
-    hero_status_row1.set_widget_name("hero_status_row1");
-    hero_status_box.add(&hero_status_row1);
+    let character_status_row1 = gtk::Box::new(gtk::Orientation::Horizontal, 15);
+    character_status_row1.set_widget_name("character_status_row1");
+    character_status_box.add(&character_status_row1);
 
     let money_row = build_money_row(context);
-    hero_status_box.add(&money_row);
+    character_status_box.add(&money_row);
 
-    let hero_status_row3 = gtk::Box::new(gtk::Orientation::Horizontal, 15);
-    hero_status_row3.set_widget_name("hero_status_row1");
-    hero_status_box.add(&hero_status_row3);
+    let character_status_row3 = gtk::Box::new(gtk::Orientation::Horizontal, 15);
+    character_status_row3.set_widget_name("character_status_row1");
+    character_status_box.add(&character_status_row3);
 
     let health = gtk::SpinButton::with_range(0.0, 1000.0, 1.0);
     health.set_alignment(0.5);
-    let health_value = context.borrow_mut().heroes.active_hero().health();
+    let health_value = context.borrow_mut().characters.active().health();
     health.set_value(health_value);
     health.set_widget_name("health_points");
     health.connect_changed(clone!(@strong context => move |health| {
-        context.borrow_mut().heroes.active_hero().set_health(health.value());
+        context.borrow_mut().characters.active().set_health(health.value());
     }));
     let health_label = gtk::Label::new(Some("LE"));
-    hero_status_row1.add(&health_label);
-    hero_status_row1.add(&health);
+    character_status_row1.add(&health_label);
+    character_status_row1.add(&health);
 
-    if context.borrow_mut().heroes.active_hero().is_mage() {
+    if context.borrow_mut().characters.active().is_mage() {
         let arcane_energy = gtk::SpinButton::with_range(0.0, 1000.0, 1.0);
         arcane_energy.set_alignment(0.5);
-        let arcane_energy_value = context.borrow_mut().heroes.active_hero().arcane_energy();
+        let arcane_energy_value = context.borrow_mut().characters.active().arcane_energy();
         arcane_energy.set_value(arcane_energy_value);
         arcane_energy.set_widget_name("arcane_energy");
         arcane_energy.connect_changed(clone!(@weak context => move |arcane_energy| {
-            context.borrow_mut().heroes.active_hero().set_arcane_energy(arcane_energy.value());
+            context.borrow_mut().characters.active().set_arcane_energy(arcane_energy.value());
         }));
         let arcane_energy_label = gtk::Label::new(Some("AsP"));
-        hero_status_row1.add(&arcane_energy_label);
-        hero_status_row1.add(&arcane_energy);
+        character_status_row1.add(&arcane_energy_label);
+        character_status_row1.add(&arcane_energy);
     }
 
     let pain = gtk::SpinButton::with_range(0.0, 4.0, 1.0);
     pain.set_alignment(0.5);
-    let pain_value = context.borrow_mut().heroes.active_hero().pain_level();
+    let pain_value = context.borrow_mut().characters.active().pain_level();
     pain.set_value(pain_value);
     pain.set_widget_name("pain_level");
     pain.connect_changed(clone!(@weak context => move |pain| {
         context.borrow_mut().difficulty.pain_level = pain.value_as_int();
-        context.borrow_mut().heroes.active_hero().set_pain_level(pain.value());
+        context.borrow_mut().characters.active().set_pain_level(pain.value());
     }));
     let pain_label = gtk::Label::new(Some("Schmerz"));
-    hero_status_row1.add(&pain_label);
-    hero_status_row1.add(&pain);
+    character_status_row1.add(&pain_label);
+    character_status_row1.add(&pain);
 
     
 
@@ -437,31 +435,31 @@ pub fn ui_add_hero_status_box(context: &Rc<RefCell<Context>>){
     fate_points.set_value(0.0);
     fate_points.set_widget_name("fait_points");
     fate_points.connect_changed(clone!(@strong context => move |fate_points| {
-        context.borrow_mut().heroes.active_hero().set_fate_points(fate_points.value());
+        context.borrow_mut().characters.active().set_fate_points(fate_points.value());
     }));
     let fate_points_label = gtk::Label::new(Some("Schips"));
-    hero_status_row3.add(&fate_points_label);
-    hero_status_row3.add(&fate_points);
+    character_status_row3.add(&fate_points_label);
+    character_status_row3.add(&fate_points);
 
-    let ini_button_lable = format!("Ini. ({}) 🎲", context.borrow_mut().heroes.active_hero().ini());
+    let ini_button_lable = format!("Ini. ({}) 🎲", context.borrow_mut().characters.active().ini());
     let ini_button = gtk::Button::with_label(&ini_button_lable);
     ini_button.connect_clicked(clone!(@weak context => move |_| {
         role_ini(&mut context.borrow_mut());
     }));
-    hero_status_row3.add(&ini_button);
+    character_status_row3.add(&ini_button);
 }
 
 fn build_money_row(context: &Rc<RefCell<Context>>) -> gtk::Box {
     let money_row = gtk::Box::new(gtk::Orientation::Horizontal, 15);
-    money_row.set_widget_name("hero_status_money_row");
+    money_row.set_widget_name("character_status_money_row");
 
     let money_d = gtk::SpinButton::with_range(0.0, 9999.0, 1.0);
     money_d.set_alignment(0.5);
-    let d = context.borrow_mut().heroes.active_hero().money_d();
+    let d = context.borrow_mut().characters.active().money_d();
     money_d.set_value(d);
     money_d.set_widget_name("money_d");
     money_d.connect_changed(clone!(@strong context => move |money_d| {
-        context.borrow_mut().heroes.active_hero().set_money_d(money_d.value());
+        context.borrow_mut().characters.active().set_money_d(money_d.value());
     }));
     let money_d_label = gtk::Label::new(Some("D"));
     money_row.add(&money_d_label);
@@ -469,11 +467,11 @@ fn build_money_row(context: &Rc<RefCell<Context>>) -> gtk::Box {
 
     let money_s = gtk::SpinButton::with_range(0.0, 9999.0, 1.0);
     money_s.set_alignment(0.5);
-    let s = context.borrow_mut().heroes.active_hero().money_s();
+    let s = context.borrow_mut().characters.active().money_s();
     money_s.set_value(s);
     money_s.set_widget_name("money_s");
     money_s.connect_changed(clone!(@strong context => move |money_s| {
-        context.borrow_mut().heroes.active_hero().set_money_s(money_s.value());
+        context.borrow_mut().characters.active().set_money_s(money_s.value());
     }));
     let money_s_label = gtk::Label::new(Some("S"));
     money_row.add(&money_s_label);
@@ -482,11 +480,11 @@ fn build_money_row(context: &Rc<RefCell<Context>>) -> gtk::Box {
 
     let money_h = gtk::SpinButton::with_range(0.0, 9999.0, 1.0);
     money_h.set_alignment(0.5);
-    let h = context.borrow_mut().heroes.active_hero().money_h();
+    let h = context.borrow_mut().characters.active().money_h();
     money_h.set_value(h);
     money_h.set_widget_name("money_h");
     money_h.connect_changed(clone!(@strong context => move |money_h| {
-        context.borrow_mut().heroes.active_hero().set_money_h(money_h.value());
+        context.borrow_mut().characters.active().set_money_h(money_h.value());
     }));
     let money_h_label = gtk::Label::new(Some("H"));
     money_row.add(&money_h_label);
@@ -494,11 +492,11 @@ fn build_money_row(context: &Rc<RefCell<Context>>) -> gtk::Box {
     
     let money_k = gtk::SpinButton::with_range(0.0, 9999.0, 1.0);
     money_k.set_alignment(0.5);
-    let k = context.borrow_mut().heroes.active_hero().money_k();
+    let k = context.borrow_mut().characters.active().money_k();
     money_k.set_value(k);
     money_k.set_widget_name("money_k");
     money_k.connect_changed(clone!(@strong context => move |money_k| {
-        context.borrow_mut().heroes.active_hero().set_money_k(money_k.value());
+        context.borrow_mut().characters.active().set_money_k(money_k.value());
     }));
     let money_k_label = gtk::Label::new(Some("K"));
     money_row.add(&money_k_label);
@@ -531,7 +529,7 @@ pub fn ui_add_tabs_skills(context: &Rc<RefCell<Context>>) {
             let lbl_checks = build_skill_checks_label(&skill.id, &mut context.borrow_mut());
             box_skill.add(&lbl_checks);
             
-            let lbl_skill_points = gtk::Label::new(Some(context.borrow_mut().heroes.active_hero().skill_points(&skill.id).to_string().as_str()));
+            let lbl_skill_points = gtk::Label::new(Some(context.borrow_mut().characters.active().skill_points(&skill.id).to_string().as_str()));
             lbl_skill_points.set_halign(gtk::Align::End);
             lbl_skill_points.set_justify(gtk::Justification::Right);
             lbl_skill_points.set_size_request(30, -1);
@@ -564,7 +562,7 @@ pub fn ui_add_tab_attributes(context: &Rc<RefCell<Context>>) {
         box_attribute.add(&lbl_attribute_name);
         box_attribute.set_child_packing(&lbl_attribute_name, true, true, 0, gtk::PackType::Start);
         
-        let lbl_attribute_value = gtk::Label::new(Some(context.borrow_mut().heroes.active_hero().attribute_value(&attribute.id.to_string()).to_string().as_str()));
+        let lbl_attribute_value = gtk::Label::new(Some(context.borrow_mut().characters.active().attribute_value(&attribute.id.to_string()).to_string().as_str()));
         lbl_attribute_value.set_halign(gtk::Align::End);
         lbl_attribute_value.set_justify(gtk::Justification::Right);
         lbl_attribute_value.set_size_request(30, -1);
@@ -591,7 +589,7 @@ pub fn ui_add_tab_battle(context: &Rc<RefCell<Context>>) {
 
     ui_add_dodge_to_tab(context, &lbo_weapons);
 
-    let weapons = context.borrow_mut().heroes.active_hero().weapons();
+    let weapons = context.borrow_mut().characters.active().weapons();
     for weapon in weapons {
         let weapon_name = gtk::Label::new(Some(weapon.name()));
         weapon_name.set_halign(Align::Start);
@@ -600,7 +598,7 @@ pub fn ui_add_tab_battle(context: &Rc<RefCell<Context>>) {
         let row = gtk::Box::new(gtk::Orientation::Horizontal, 5);
         row.set_halign(Align::End);
         
-        let attack_value = context.borrow_mut().heroes.active_hero().attack_value(&weapon);
+        let attack_value = context.borrow_mut().characters.active().attack_value(&weapon);
 
         let at_label =  gtk::Label::new(Some("AT"));  
         row.add(&at_label);
@@ -617,7 +615,7 @@ pub fn ui_add_tab_battle(context: &Rc<RefCell<Context>>) {
             row.add(&slash);
 
             let ct_primary_attributes = context.borrow().combat_techniques.primary_attributes(weapon.combat_technique());
-            let parry_value = context.borrow_mut().heroes.active_hero().parry_value(&weapon, ct_primary_attributes);
+            let parry_value = context.borrow_mut().characters.active().parry_value(&weapon, ct_primary_attributes);
             let pa_label =  gtk::Label::new(Some("PA")); 
             row.add(&pa_label);
             let pa_value =  gtk::Label::new(Some(format!("{:>2}", parry_value).as_str())); 

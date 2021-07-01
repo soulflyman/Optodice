@@ -7,7 +7,7 @@ pub struct BattleCheck;
 impl BattleCheck { 
     pub fn dodge(context: &mut Context, difficulty: i32) -> BattleCheckResult {        
         
-        let dodge_value = context.heroes.active_hero().dodge_value();
+        let dodge_value = context.characters.active().dodge_value();
 
         let mut rng = rand::thread_rng();
         let dice_value = rng.gen_range(1..21);
@@ -39,7 +39,7 @@ impl BattleCheck {
     }
 
     pub fn attack(context: &mut Context, weapon: &OptolithWeapon, difficulty: i32) -> BattleCheckResult{
-        let ct_value = context.heroes.active_hero().attack_value(&weapon) + difficulty;
+        let ct_value = context.characters.active().attack_value(&weapon) + difficulty;
         
         let mut rng = rand::thread_rng();
         let dice_value = rng.gen_range(1..21);
@@ -71,7 +71,7 @@ impl BattleCheck {
 
     pub fn parry(context: &mut Context, weapon: &OptolithWeapon, difficulty: i32) -> BattleCheckResult {    
         let ct_primary_attributes = context.combat_techniques.primary_attributes(weapon.combat_technique());
-        let parry_value = context.heroes.active_hero().parry_value(&weapon, ct_primary_attributes) + difficulty;
+        let parry_value = context.characters.active().parry_value(&weapon, ct_primary_attributes) + difficulty;
                   
         let mut rng = rand::thread_rng();
         let dice_value = rng.gen_range(1..21);

@@ -16,7 +16,7 @@ impl SpellCheck {
         check_result.spell_name = spell.name().to_string();
 
         for attribute_id in spell.check().to_owned() {
-            let attribute_value = context.heroes.active_hero().attribute_value(&attribute_id);
+            let attribute_value = context.characters.active().attribute_value(&attribute_id);
             check_result.attribute_values.push(attribute_value);
             
             let attribute_name = context.attributes.by_id(&attribute_id).name_abbr;

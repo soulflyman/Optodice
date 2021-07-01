@@ -17,10 +17,10 @@ impl AttributeCheck {
         attribute_id: String,
     ) -> AttributeCheck {
         let attribute_check = AttributeCheck {
-            attribute_name: context.attributes.by_id(&attribute_id).get_name(),
+            attribute_name: context.attributes.by_id(&attribute_id).name(),
             attribute_id: attribute_id.clone(),
-            attribute_name_abbr: context.attributes.by_id(&attribute_id).get_abbr(),
-            attribute_value: context.heroes.active_hero().attribute_value(&attribute_id),
+            attribute_name_abbr: context.attributes.by_id(&attribute_id).abbr(),
+            attribute_value: context.characters.active().attribute_value(&attribute_id),
             ..AttributeCheck::default()
         };
 

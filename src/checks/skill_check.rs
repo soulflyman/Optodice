@@ -19,8 +19,8 @@ impl SkillCheck {
     ) -> SkillCheck {
         let mut skill_check = SkillCheck::default();
 
-        skill_check.skill_name = context.skills.by_id(&skill_id).get_name();
-        skill_check.attribute_keys = context.skills.by_id(&skill_id).get_check();
+        skill_check.skill_name = context.skills.by_id(&skill_id).name();
+        skill_check.attribute_keys = context.skills.by_id(&skill_id).check_list();
         
 
         for attrribute_id in skill_check.attribute_keys.iter() {
@@ -29,10 +29,10 @@ impl SkillCheck {
                 .push(context.attributes.by_id(attrribute_id).name_abbr);
             skill_check
                 .attribute_values
-                .push(context.heroes.active_hero().attribute_value(&attrribute_id));
+                .push(context.characters.active().attribute_value(&attrribute_id));
         }
 
-        skill_check.skill_points = context.heroes.active_hero().skill_points(&skill_id);
+        skill_check.skill_points = context.characters.active().skill_points(&skill_id);
 
         return skill_check;
     }

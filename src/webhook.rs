@@ -23,7 +23,7 @@ pub fn fire_webhook(context: &mut Context, die_result: CheckResult) {
         webhook.set_avatar_url(avatar_url.as_str());
     }    
 
-    webhook.set_username(context.heroes.active_hero().name().as_str());
+    webhook.set_username(context.characters.active().name().as_str());
     let webhook_result = webhook.fire();
     
     

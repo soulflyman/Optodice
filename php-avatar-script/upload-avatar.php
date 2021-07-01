@@ -25,7 +25,7 @@
     try {
         write_log("---", $debug);
         
-        $target_file = $_POST["hero_id"]."_".$_POST["checksum"].".png";
+        $target_file = $_POST["character_id"]."_".$_POST["checksum"].".png";
         if ( file_exists("./".$target_file) ) {
             write_log("Warning: Target file exists: ./".$target_file, $debug);
             return;

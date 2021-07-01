@@ -12,7 +12,7 @@ pub struct AttributeCheckResult {
 }
 
 impl AttributeCheckResult {    
-    pub fn get_formated(&self) -> String {
+    pub fn formated(&self) -> String {
         let mut difficulty_str :String = String::default();
         if self.difficulty > 0 {
             difficulty_str.push_str("+");
@@ -46,7 +46,7 @@ impl AttributeCheckResult {
         };
 
         CheckResult {
-            message: self.get_formated(),
+            message: self.formated(),
             critical: self.critical,
             status: status,
         }

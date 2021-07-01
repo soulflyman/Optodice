@@ -13,7 +13,7 @@ pub struct BattleCheckResult {
 }
 
 impl BattleCheckResult {    
-    pub fn get_formated(&self) -> String {
+    pub fn format(&self) -> String {
         let mut difficulty_str :String = String::default();
         if self.difficulty > 0 {
             difficulty_str.push_str("+");
@@ -47,7 +47,7 @@ impl BattleCheckResult {
         };
 
         CheckResult {
-            message: self.get_formated(),    
+            message: self.format(),    
             status: status,
             critical: self.critical,
         }
