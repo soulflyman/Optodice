@@ -1,37 +1,25 @@
-use std::{env::var, fs::{self, File, OpenOptions}, io::BufReader, path::{Path, PathBuf}};
+use std::{fs::{self, File, OpenOptions}, io::BufReader, path::PathBuf};
+use serde::{Serialize, Deserialize};
+
+use crate::APP_NAME;
+
+#[derive(Default, Serialize, Deserialize)]
+pub struct CachedAppData {
+    last_used_hero_id: String,
+    window_pos_x: i32,
+    window_pos_y: i32,
+    window_width: i32,
+    window_height: i32,
+    windows_is_maximized: bool,
+}
 
 pub struct Cache;
 
 impl Cache {
 
     pub fn cache_dir_path() -> PathBuf {
-        let mut cache_dir_path: String;
-        let macos_cache_dir_extras = "/Library/Caches";
-
-        if cfg!(unix) {
-            cache_dir_path = match var("XDG_CACHE_HOME"){
-                Ok(path) => path,
-                Err(_) => {
-                    let mut home_dir = var("HOME").expect("Error: System variable $HOME ist not set.");
-                    home_dir.push_str("/.cache");
-                    home_dir
-                }
-            }
-        } else if cfg!(windows) {
-            cache_dir_path = var("localappdata").expect("Error: Unable to find AppData directory.");           
-        } else if cfg!(macos) {
-            cache_dir_path = var("HOME").expect("Error: System variable $HOME ist not set.");
-            cache_dir_path.push_str(macos_cache_dir_extras);
-        } else {
-            panic!("Error: Unknow platform. Couldn't find config folder.");
-        };
-
-        if cache_dir_path.is_empty() || cache_dir_path == macos_cache_dir_extras.to_string() {
-            panic!("Error: Ups, system variable $XDG_CACHE_HOME (Linux), %localappdata% (Windows) or $HOME (Linux or MacOS) are not set or the.");
-        }
-
-        let mut app_cache_dir_path = Path::new(cache_dir_path.as_str()).to_path_buf();
-        app_cache_dir_path.push("optodice");
+        let mut app_cache_dir_path = dirs_next::cache_dir().expect("Error: Unable to find cache directory.");
+        app_cache_dir_path.push(APP_NAME);
         
         if !app_cache_dir_path.exists() {
             fs::create_dir(&app_cache_dir_path).expect("Error: Failed to create the cache directory.");
@@ -39,16 +27,6 @@ impl Cache {
         
         return app_cache_dir_path;
     }   
-
-    pub fn get_str(cache_id: &str) -> String {
-        let mut cache_file: PathBuf = Self::cache_dir_path();
-        cache_file.push(cache_id);
-        if cache_file.exists() {
-            return fs::read_to_string(cache_file).unwrap()
-        }
-        
-        String::default()
-    }
 
     pub fn read_object<'a, T>(cache_id: &'a str) -> Result<T, serde_json::Error> where T: for<'de> serde::Deserialize<'de> {
         let mut path = Self::cache_dir_path();
