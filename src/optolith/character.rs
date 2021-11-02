@@ -1,5 +1,6 @@
 use crc::{CRC_32_ISO_HDLC, Crc};
 use json::JsonValue;
+use serde::{Serialize, Deserialize};
 
 use crate::{cache::Cache, display_error, optolith::{spell::Spell, spells::Spells, weapon::OptolithWeapon}};
 

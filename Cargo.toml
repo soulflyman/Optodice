@@ -2,28 +2,28 @@
 name = "optodice"
 version = "0.2.1"
 authors = ["soulflyman <optodice@no-spam4.me>"]
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 json = "*"
-serde = "1.0"
-serde_derive = { version = "1.0", feature = "serde_derive" }
+serde = { version = "^1.0", features = ["derive"] }
 serde_yaml = "*"
-serde_json = "*"
-gio = "0.14.0"
-glib = "0.14.0"
-gdk = "0.14.0"
-gdk-pixbuf = "0.14.0"
+serde_json = "^1.0"
+gio = "^0.14.0"
+glib = "^0.14.0"
+gdk = "^0.14.0"
+gdk-pixbuf = "^0.14.0"
 discord-webhook = { version = "0.1.2-alpha", git = "https://github.com/soulflyman/discord-webhook", branch = "main" }
-toml = "*"
-#ftp = { version = "<version>", features = ["secure"] }
+toml = "^0.5.0"
 reqwest = { version = "0.11", features = ["blocking", "json"] }
 rand = "*"
 crc = "^2.0.0"
-image = "0.23.*"
-base64 = "0.13.0"
+image = "^0.23.0"
+base64 = "^0.13.0"
+dirs-next = "^2.0"
+fs_extra = "1.2.0"
 
 [dependencies.gtk]
 version = "0.14.0"

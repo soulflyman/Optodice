@@ -17,6 +17,9 @@ pub struct Context {
     pub(crate) combat_techniques: crate::optolith::combat_techniques::OptolithCombatTechniques,
     pub(crate) gtk_avatar: Option<gtk::Image>,
     pub(crate) gtk_character_status_box: Option<gtk::Box>,
+    pub(crate) gtk_window_allocation: Option<gtk::Allocation>,
+    pub(crate) gtk_window_is_maximaized: bool,
+    pub(crate) gtk_window_is_fullscreen: bool,
 }
 impl Context {
     pub fn set_notebook(&mut self, notebook: gtk::Notebook) {

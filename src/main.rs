@@ -24,16 +24,20 @@ use crate::ui::set_icon;
 use crate::ui::settings::display_config;
 use crate::ui::dialog::*;
 
-#[macro_use] extern crate serde_derive;
+//#[macro_use] extern crate serde_derive;
 
 #[derive(Debug, Clone)]
 pub struct CheckFactories {
     skills: SkillCheckFactory,    
 }
 
-fn main() {
+const APP_NAME: &str = "optodice";
 
+fn main() {
     //debug GTK ui: GTK_DEBUG=interactive cargo run
+
+    //TODO use winres to diplay version info and file icon in windows (https://docs.rs/winres/0.1.11/winres/)
+
     let context: Rc<RefCell<Context>> = Rc::new(RefCell::new(Context {
         config: Config::load(),
         characters: OptolithCharacters::new(),
@@ -46,8 +50,13 @@ fn main() {
         gtk_notebook: None,
         gtk_avatar: None,
         gtk_character_status_box: None,
+        gtk_window_allocation: None,
+        gtk_window_is_maximaized: false,
+        gtk_window_is_fullscreen: false,
     }));
    
+    
+
     //TODO use check_factories in button actions!
     //let check_factories = CheckFactories {
     //    skills: SkillCheckFactory::new(&context.borrow()),
@@ -67,8 +76,11 @@ fn main() {
     app.connect_activate(clone!(@weak context => move |app| {
         let main_window = gtk::WindowBuilder::new().build();
         set_icon(&main_window);        
+        main_window.connect_size_allocate(clone!(@weak context => move | _, alloc | {
+            window_size_changed(&context, alloc.to_owned());            
+        }));
         context.borrow_mut().gtk_window = Some(main_window);
-        
+                
         check_config(&mut context.borrow_mut());
         
         let main_box = gtk::Box::new(gtk::Orientation::Vertical, 10);
@@ -111,6 +123,8 @@ fn main() {
         change_character(&context, &cbt_character_select);
     }));
 
+  
+
     app.run();
 }
 
@@ -124,4 +138,13 @@ fn check_config(context: &mut Context) {
         context.config.set_avatar_uploader_url(request_avatar_uploader_url());
     }
 }
+
+fn window_size_changed(context: &Rc<RefCell<Context>>, alloc: gtk::Allocation) {    
+    if let Ok(mut cx) = context.try_borrow_mut() {
+        cx.gtk_window_allocation = Some(alloc.to_owned());
+        dbg!(&alloc);
+        dbg!(&cx.gtk_window_allocation);
+    }
+}
+
 

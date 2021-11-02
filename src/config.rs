@@ -1,5 +1,7 @@
-use std::{env::var, fs, path::{Path, PathBuf}};
-use serde_derive::{Serialize, Deserialize};
+use std::{fs, path::PathBuf};
+use serde::{Serialize, Deserialize};
+
+use crate::APP_NAME;
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct Config {
@@ -31,43 +33,15 @@ impl Config {
     }
 
     fn config_file_path() -> PathBuf {
-        let mut config_dir_path = Config::config_dir_path();
+        let mut config_dir_path = dirs_next::config_dir().expect("Error: Unable to find config directory.");
+        config_dir_path.push(APP_NAME);
+
         if !config_dir_path.exists() {
             fs::create_dir(&config_dir_path).expect("Error: Failed to create config dir.")
         }
         config_dir_path.push("config.toml");
         
         return config_dir_path
-    }
-
-    fn config_dir_path() -> PathBuf {
-        let mut system_config_dir_path: String;
-        let macos_config_dir_extras = "/Library/Application Support";
-        if cfg!(unix) {
-            system_config_dir_path = match var("XDG_CONFIG_HOME"){
-                Ok(path) => path,
-                Err(_) => {
-                    let mut home_dir = var("HOME").expect("Error: System variable $HOME ist not set.");
-                    home_dir.push_str("/.config");
-                    home_dir
-                }
-            }
-        } else if cfg!(windows) {
-            system_config_dir_path = var("appdata").expect("Error: Unable to find AppData directory.");           
-        } else if cfg!(macos) {
-            system_config_dir_path = var("HOME").expect("Error: System variable $HOME ist not set.");
-            system_config_dir_path.push_str(macos_config_dir_extras);
-        } else {
-            panic!("Error: Unknow platform. Couldn't find config folder.");
-        };
-
-        if system_config_dir_path.is_empty() || system_config_dir_path == macos_config_dir_extras.to_string() {
-            panic!("Error: Ups, system variable $XDG_CONFIG_HOME (Linux), %appdata% (Windows) or $HOME (Linux or MacOS) are not set or the.");
-        }
-
-        let mut config_path = Path::new(system_config_dir_path.as_str()).to_path_buf();
-        config_path.push("optodice");
-        return config_path;
     }
 
     pub fn set_webhook_url(&mut self, webhook_url: String) {
