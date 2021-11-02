@@ -10,11 +10,9 @@ fn main() {
         let source_dir = manifest_dir.join(src);
         let target_dir = out_dir.join(src);
         
-        println!("cargo:warning=copy {} -> {}", source_dir.to_str().unwrap(), target_dir.to_str().unwrap());
         let res = copy_dir(&source_dir, &target_dir);
         if res.is_err() {
-            println!("cargo:warning=copy failed");
-            eprintln!("{:#?}",res);
+            println!("cargo:warning=copy failed {} -> {}", source_dir.to_str().unwrap(), target_dir.to_str().unwrap());
         }
     }    
 }
