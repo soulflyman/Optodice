@@ -29,8 +29,8 @@ pub fn role_skill_check(context: &mut Context, skill_id: &String, difficulty: i3
 }
 
 pub fn role_attribute_check(context: &mut Context, attribute_id: &String, difficulty: i32) {
-    let mut skill_check = AttributeCheck::new(context, attribute_id.to_owned());
-    let check_result = skill_check.check(&difficulty);
+    let mut attribute_check = AttributeCheck::new(context, attribute_id.to_owned());
+    let check_result = attribute_check.check(&difficulty);
 
     fire_webhook(context, check_result.to_check_result());
 }
