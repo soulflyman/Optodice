@@ -39,11 +39,11 @@ impl BattleCheck {
     }
 
     pub fn attack(context: &mut Context, weapon: &OptolithWeapon, difficulty: i32) -> BattleCheckResult{
-        let ct_value = context.characters.active().attack_value(&weapon) + difficulty;
+        let attack_value = context.characters.active().attack_value(&weapon);
         
         let mut rng = rand::thread_rng();
         let dice_value = rng.gen_range(1..21);
-        let mut success = dice_value <= ct_value;
+        let mut success = dice_value <= (attack_value + difficulty);
         let mut critical = false;        
         
         if dice_value == 20 {
@@ -61,7 +61,7 @@ impl BattleCheck {
         BattleCheckResult {
             action_name: format!("{} Attacke", weapon.name()),
             action_name_abbr: "AT".to_string(),
-            action_value: ct_value,
+            action_value: attack_value,
             dice_value,
             difficulty,
             success,
@@ -71,11 +71,11 @@ impl BattleCheck {
 
     pub fn parry(context: &mut Context, weapon: &OptolithWeapon, difficulty: i32) -> BattleCheckResult {    
         let ct_primary_attributes = context.combat_techniques.primary_attributes(weapon.combat_technique());
-        let parry_value = context.characters.active().parry_value(&weapon, ct_primary_attributes) + difficulty;
+        let parry_value = context.characters.active().parry_value(&weapon, ct_primary_attributes);
                   
         let mut rng = rand::thread_rng();
         let dice_value = rng.gen_range(1..21);
-        let mut success = dice_value <= parry_value;
+        let mut success = dice_value <= (parry_value + difficulty);
         let mut critical = false;        
         
         if dice_value == 20 {
