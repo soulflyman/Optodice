@@ -75,6 +75,7 @@ fn main() {
     // https://gtk-rs.org/docs/gtk/struct.ComboBoxText.html#method.bind_property
     app.connect_activate(clone!(@weak context => move |app| {
         let main_window = gtk::WindowBuilder::new().build();
+        main_window.add_events(gdk::EventMask::KEY_RELEASE_MASK);
         set_icon(&main_window);        
         main_window.connect_size_allocate(clone!(@weak context => move | _, alloc | {
             window_size_changed(&context, alloc.to_owned());            
@@ -104,8 +105,6 @@ fn main() {
         context.borrow_mut().gtk_avatar = Some(gtk::Image::new());
         context.borrow_mut().gtk_avatar.as_ref().unwrap().set_halign(gtk::Align::End);
         context.borrow_mut().gtk_avatar.as_ref().unwrap().set_widget_name("optolith_avatar");
-        
-       
 
         main_box.add(&box_character);
                

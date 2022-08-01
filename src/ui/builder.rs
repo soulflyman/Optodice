@@ -394,6 +394,10 @@ pub fn ui_add_character_status_box(context: &Rc<RefCell<Context>>){
     let health_value = context.borrow_mut().characters.active().health();
     health.set_value(health_value);
     health.set_widget_name("health_points");
+    health.connect_key_release_event(clone!(@strong context => move |health, _event_key| {
+        context.borrow_mut().characters.active().set_health(health.value());
+        gtk::Inhibit(true)
+    }));
     health.connect_changed(clone!(@strong context => move |health| {
         context.borrow_mut().characters.active().set_health(health.value());
     }));
@@ -426,9 +430,7 @@ pub fn ui_add_character_status_box(context: &Rc<RefCell<Context>>){
     }));
     let pain_label = gtk::Label::new(Some("Schmerz"));
     character_status_row1.add(&pain_label);
-    character_status_row1.add(&pain);
-
-    
+    character_status_row1.add(&pain);    
 
     let fate_points = gtk::SpinButton::with_range(0.0, 9999.0, 1.0);
     fate_points.set_alignment(0.5);
