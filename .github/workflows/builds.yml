@@ -22,7 +22,7 @@ jobs:
     - name: Artifacts - Collect optolith-data
       run: mv optolith-data artifacts/
     - name: Store Linux Build
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: optodice-linux
         # Artifact name
@@ -59,13 +59,13 @@ jobs:
           RUSTFLAGS: "-C debuginfo=0"
 
       - name: Store MacOS Build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: optodice-macos
           path: target/release/optodice
 
   windows:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.01
     steps:
       - uses: actions/checkout@v2
 
@@ -74,7 +74,7 @@ jobs:
           toolchain: stable
           override: true
 
-      - uses: actions/cache@v2
+      - uses: actions/cache@v4
         with:
           path: |
             target
@@ -150,7 +150,7 @@ jobs:
           RUSTFLAGS: "-C debuginfo=0 -D warnings"
 
       - name: Store Windows Build
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: optodice-windows
           path: gtk_app/*
